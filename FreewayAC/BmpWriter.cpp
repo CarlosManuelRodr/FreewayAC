@@ -11,9 +11,9 @@ char* ToByte(void* ptr)
 
 bmp_uint16 SwitchEndianess16(bmp_uint16 data)
 {
-	bmp_uint16 temp;
-	bmp_uint16 out = 0x0000;
-	bmp_uint16 pos = 0x00FF;
+    bmp_uint16 temp;
+    bmp_uint16 out = 0x0000;
+    bmp_uint16 pos = 0x00FF;
 
     temp = data & pos;
     temp <<= 8;
@@ -29,9 +29,9 @@ bmp_uint16 SwitchEndianess16(bmp_uint16 data)
 
 bmp_uint32 SwitchEndianess32(bmp_uint32 data)
 {
-	bmp_uint32 temp;
-	bmp_uint32 out = 0x00000000;
-	bmp_uint32 pos = 0x000000FF;
+    bmp_uint32 temp;
+    bmp_uint32 out = 0x00000000;
+    bmp_uint32 pos = 0x000000FF;
 
     temp = data & pos;
     temp <<= 24;
@@ -54,9 +54,9 @@ bmp_uint32 SwitchEndianess32(bmp_uint32 data)
 
 BMPPixel::BMPPixel()
 {
-	r = 0;
-	g = 0;
-	b = 0;
+    r = 0;
+    g = 0;
+    b = 0;
 }
 BMPPixel::BMPPixel(char mR, char mG, char mB)
 {

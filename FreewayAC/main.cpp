@@ -6,7 +6,7 @@ using namespace std;
 
 /****************************
 *                           *
-*   Funciones de medicion   *
+*   Funciones de medici贸n   *
 *                           *
 ****************************/
 
@@ -93,7 +93,7 @@ void multiple_flow_vs_density(const CA_TYPE &type, const unsigned &size, const u
             ca->Step();
 
 
-        // Obtiene flujo en cada posicion.
+        // Obtiene flujo en cada posici贸n.
         vector<double> tmp_flow;
         tmp_flow.assign(size, 0.0);
         unsigned height = iterations;
@@ -161,7 +161,7 @@ void multiple_flow_vs_vmax(const CA_TYPE &type, const unsigned &size, const unsi
             ca->Step();
 
 
-        // Obtiene flujo en cada posicion.
+        // Obtiene flujo en cada posici贸n.
         vector<double> tmp_flow;
         tmp_flow.assign(size, 0.0);
         unsigned height = iterations;
@@ -222,7 +222,7 @@ void multiple_flow_vs_rand_prob(const CA_TYPE &type, const unsigned &size, const
             ca->Step();
 
 
-        // Obtiene flujo en cada posicion.
+        // Obtiene flujo en cada posici贸n.
         vector<double> tmp_flow;
         tmp_flow.assign(size, 0.0);
         unsigned height = iterations;
@@ -284,7 +284,7 @@ void multiple_flow_vs_smart_cars(const unsigned &size, const unsigned &iteration
             ca->Step();
 
 
-        // Obtiene flujo en cada posicion.
+        // Obtiene flujo en cada posici贸n.
         vector<double> tmp_flow;
         tmp_flow.assign(size, 0.0);
         unsigned height = iterations;
@@ -346,7 +346,7 @@ void multiple_flow_vs_new_car_prob(const unsigned &size, const unsigned &iterati
             ca->Step();
 
 
-        // Obtiene flujo en cada posicion.
+        // Obtiene flujo en cada posici贸n.
         vector<double> tmp_flow;
         tmp_flow.assign(size, 0.0);
         unsigned height = iterations;
@@ -368,7 +368,7 @@ void multiple_flow_vs_new_car_prob(const unsigned &size, const unsigned &iterati
         for (unsigned i=0; i<tmp_flow.size(); ++i)
             mean += tmp_flow[i];
         mean /= (double)tmp_flow.size();
-		mean /= s;
+        mean /= s;
 
         // Asigna valores.
         new_car_density.push_back(s);
@@ -391,7 +391,7 @@ void multiple_flow_vs_new_car_prob(const unsigned &size, const unsigned &iterati
 
 /****************************
 *                           *
-*   Parser de parametros    *
+*   Parser de argumentos    *
 *                           *
 ****************************/
 
@@ -445,7 +445,7 @@ const option::Descriptor usage[] =
     {CA_CIRCULAR,  0,"","ca_circular", Arg::None, "  \t--ca_circular  \tAutomata celular circular." },
     {CA_OPEN,  0,"","ca_open", Arg::None, "  \t--ca_open  \tAutomata celular con frontera abierta." },
     {CA_SMART,  0,"","ca_smart", Arg::None, "  \t--ca_smart  \tAutomata celular con autos inteligentes." },
-	{CA_STOP,  0,"","ca_stop", Arg::None, "  \t--ca_stop  \tAutomata celular con tope. La posicion del tope se especifica por stop_pos." },
+    {CA_STOP,  0,"","ca_stop", Arg::None, "  \t--ca_stop  \tAutomata celular con tope. La posicion del tope se especifica por stop_pos." },
     {NEW_CAR_PROB,  0,"","new_car_prob", Arg::Required, "  \t--new_car_prob  \tProbabilidad de que se aparezca nuevo auto en frontera abierta." },
     {SMART_DENSITY,  0,"","smart_density", Arg::Required, "  \t--smart_density  \tDensidad de autos inteligentes." },
     {DT,  0,"", "dt", Arg::Required, "  \t--dt=<arg>  \tTamagno del intervalo en medicion con rango." },
@@ -457,7 +457,7 @@ const option::Descriptor usage[] =
     {RAND_PROB_MAX,  0,"", "rand_max", Arg::Required, "  \t--rand_max=<arg>  \tProbabilidad de frenado maxima en medicion con rango." },
     {SMART_MIN,  0,"", "smart_min", Arg::Required, "  \t--smart_min=<arg>  \tDensidad minima de autos inteligentes." },
     {SMART_MAX,  0,"", "smart_max", Arg::Required, "  \t--smart_max=<arg>  \tDensidad maxima de autos inteligentes." },
-	{STOP_DENSITY,  0,"", "stop_density", Arg::Required, "  \t--stop_density=<arg>  \tDensidad de topes en ca_stop." },
+    {STOP_DENSITY,  0,"", "stop_density", Arg::Required, "  \t--stop_density=<arg>  \tDensidad de topes en ca_stop." },
     {NEW_CAR_MIN,  0,"", "new_car_min", Arg::Required, "  \t--new_car_min=<arg>  \tProbabilidad minima de nuevo auto en ac abierto." },
     {NEW_CAR_MAX,  0,"", "new_car_max", Arg::Required, "  \t--new_car_max=<arg>  \tProbabilidad maxima de nuevo auto en ac abierto." },
     {HELP,    0,"", "help", Arg::None,    "  \t--help  \tMuestra instrucciones." },
@@ -570,9 +570,9 @@ int main(int argc, char* argv[])
             ca_type = SMART_CA;
             break;
 
-			case CA_STOP:
-			ca_type = STOP_CA;
-			break;
+            case CA_STOP:
+            ca_type = STOP_CA;
+            break;
 
             case NEW_CAR_PROB:
             new_car_prob = aux_string_to_num<double>(opt.arg);
@@ -610,9 +610,9 @@ int main(int argc, char* argv[])
             smart_max = aux_string_to_num<double>(opt.arg);
             break;
 
-			case STOP_DENSITY:
-			stop_density = aux_string_to_num<double>(opt.arg);
-			break;
+            case STOP_DENSITY:
+            stop_density = aux_string_to_num<double>(opt.arg);
+            break;
 
             case RAND_PROB_MIN:
             rand_prob_min = aux_string_to_num<double>(opt.arg);
@@ -642,18 +642,18 @@ int main(int argc, char* argv[])
         return 1;
     }
     if (!(measure_ocupancy || measure_flow || flow_vs_density || flow_per_density || flow_vs_vmax 
-		  || flow_vs_rand_prob || flow_vs_smart_cars || flow_vs_new_car))
+          || flow_vs_rand_prob || flow_vs_smart_cars || flow_vs_new_car))
         plot_traffic = true;    // Opcion predeterminada.
     if (flow_vs_vmax && dt < 1)
         dt = 1.0;
 
-    double extra;	// Par醡etro extra en el constructor de CA.
+    double extra;    // Par谩metro extra en el constructor de CA.
     if (ca_type == OPEN_CA)
         extra = new_car_prob;
     if (ca_type == SMART_CA)
         extra = smart_density;
-	if (ca_type == STOP_CA)
-		extra = stop_density;
+    if (ca_type == STOP_CA)
+        extra = stop_density;
 
     // Realiza acciones.
     if (measure_ocupancy || measure_flow || plot_traffic)

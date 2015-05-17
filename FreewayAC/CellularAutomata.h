@@ -25,7 +25,7 @@ template <class N> bool aux_is_in(std::vector<N> v, const N find_val)
 }
 template <class N> int aux_find_pos(std::vector<N> v, const N find_val)
 {
-	typename std::vector<N>::iterator it = find(v.begin(), v.end(), find_val);
+    typename std::vector<N>::iterator it = find(v.begin(), v.end(), find_val);
     if (it != v.end())
         return distance(v.begin(), it);
     else
@@ -42,14 +42,14 @@ template <class N> N aux_string_to_num(const std::string& s)
 
 ////////////////////////////////////
 //                                //
-//        Aut�matas celulares     //
-//        de carril �nico.        //
+//        Autómatas celulares     //
+//        de carril único.        //
 //                                //
 ////////////////////////////////////
 
 /****************************
 *                           *
-*         AC B�sico         *
+*         AC Básico         *
 *                           *
 ****************************/
 
@@ -81,10 +81,10 @@ public:
     void Evolve(const unsigned &iter);
     unsigned GetSize();
     unsigned GetHistorySize();
-	unsigned CountCars();
-	int NextCarDist(const int &pos);
+    unsigned CountCars();
+    int NextCarDist(const int &pos);
     int &At(const unsigned &i, const CAS &ca = CA);
-	virtual void DrawHistory();
+    virtual void DrawHistory();
     virtual void DrawFlowHistory();
     virtual void Step();
     virtual int &At(const unsigned &i, const unsigned &j, const CAS &ca) = 0;
@@ -115,7 +115,7 @@ public:
 
 class OpenCA : public CellularAutomata
 {
-	int m_empty;
+    int m_empty;
     double m_new_car_prob;
 public:
     OpenCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const double &new_car_prob);
@@ -148,12 +148,12 @@ public:
 
 class StreetStopCA : public CircularCA
 {
-	std::vector<bool> m_stop_pos;
+    std::vector<bool> m_stop_pos;
 public:
     StreetStopCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const double &stop_density);
     void Step();
-	void DrawHistory();
-	int NextStopDist(const int &pos);
+    void DrawHistory();
+    int NextStopDist(const int &pos);
 };
 
 
@@ -170,22 +170,22 @@ void delete_ca();
 
 ////////////////////////////////////
 //                                //
-//      Aut�matas celulares       //
+//      Autómatas celulares       //
 //      de varios carriles.       //
 //                                //
 ////////////////////////////////////
 
 class CAElement
 {
-	std::vector<int> m_lane;
+    std::vector<int> m_lane;
 public:
-	CAElement(const int lanes, const int def_val = -1);
-	int &operator[](const unsigned &iter);
+    CAElement(const int lanes, const int def_val = -1);
+    int &operator[](const unsigned &iter);
 };
 
 /****************************
 *                           *
-*   AC B�sico Multicarril   *
+*   AC Básico Multicarril   *
 *                           *
 ****************************/
 
@@ -193,7 +193,7 @@ class CellularAutomataML
 {
 protected:
     int m_vmax;
-	unsigned m_lanes;
+    unsigned m_lanes;
     double m_rand_prob;
     unsigned m_size;
     std::vector<CAElement> m_ca, m_ca_temp, m_ca_flow_temp;    // Automata celular. -1 para casillas sin auto, y valores >= 0 indican velocidad del auto en esa casilla.
@@ -203,7 +203,7 @@ protected:
 
 public:
     CellularAutomataML(const unsigned &size, const unsigned &lanes, const double &density, 
-		               const int &vmax, const double &rand_prob);
+                       const int &vmax, const double &rand_prob);
     virtual ~CellularAutomataML();
     void Print();
     void DrawHistory();
@@ -228,7 +228,7 @@ class CircularCAML : public CellularAutomataML
 {
 public:
     CircularCAML(const unsigned size, const unsigned int lanes, const double density, 
-		         const int vmax, const double rand_prob);
+                 const int vmax, const double rand_prob);
     using CellularAutomataML::At;
     int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca);
     int NextCarDist(const int &pos, const unsigned &lane);
