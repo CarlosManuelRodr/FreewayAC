@@ -135,14 +135,16 @@ void CellularAutomata::Step()
             // Aceleracion.
             if ((m_ca[i] <= m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
                 m_ca[i]++;
-
-            // Frenado.
-            if (m_ca[i] > 0)
-            {
-                int nd = NextCarDist(i);
-                if (nd <= m_ca[i])
-                    m_ca[i] = nd - 1;
-            }
+			else
+			{
+				// Frenado.
+				if (m_ca[i] > 0)
+				{
+					int nd = NextCarDist(i);
+					if (nd <= m_ca[i])
+						m_ca[i] = nd - 1;
+				}
+			}
 
             // Aleatoriedad.
             if ((m_ca[i] > 0) && (m_drand() <= m_rand_prob))
@@ -156,8 +158,12 @@ void CellularAutomata::Step()
 }
 void CellularAutomata::Evolve(const unsigned &iter)
 {
+	unsigned cars = CountCars();
     for (unsigned i=0; i<iter; ++i)
         Step();
+
+	if (cars != CountCars())
+		cout << "Error: La cantidad de autos no se conserva." << endl;
 }
 unsigned CellularAutomata::GetSize()
 {
@@ -167,9 +173,26 @@ unsigned CellularAutomata::GetHistorySize()
 {
     return m_ca_history.size();
 }
+unsigned CellularAutomata::CountCars()
+{
+	unsigned count = 0;
+	for (unsigned i=0; i<m_ca.size(); i++)
+	{
+		if (m_ca[i] != -1)
+			count++;
+	}
+	return count;
+}
 int &CellularAutomata::At(const unsigned &i, const CAS &ca)
 {
     return At(i, 0, ca);
+}
+int CellularAutomata::NextCarDist(const int &pos)
+{
+    int dist = 1;
+    while ((At(pos+dist) == -1) && (dist < 2*(int)m_size))
+        dist++;
+    return dist;
 }
 
 
@@ -203,13 +226,6 @@ int &CircularCA::At(const unsigned &i, const unsigned &j, const CAS &ca)
         return m_ca[pos];
         break;
     };
-}
-int CircularCA::NextCarDist(const int &pos)
-{
-    unsigned dist = 1;
-    while (At(pos+dist) == -1)
-        dist++;
-    return dist;
 }
 void CircularCA::Move()
 {
@@ -249,10 +265,10 @@ int &OpenCA::At(const unsigned &i, const unsigned &j, const CAS &ca)
     if (i >= m_ca.size())
     {
         if ((ca == CA) || (ca == CA_TEMP) || (ca == CA_HISTORY))
-            empty = -1;
+            m_empty = -1;
         else
-            empty = 0;
-        return empty;
+            m_empty = 0;
+        return m_empty;
     }
     else
     {
@@ -275,13 +291,6 @@ int &OpenCA::At(const unsigned &i, const unsigned &j, const CAS &ca)
             break;
         };
     }
-}
-int OpenCA::NextCarDist(const int &pos)
-{
-    unsigned dist = 1;
-    while ((At(pos+dist) == -1) && ((pos+dist) < 2*m_size))
-        dist++;
-    return dist;
 }
 void OpenCA::Move()
 {
@@ -320,7 +329,7 @@ SmartCA::SmartCA(const unsigned &size, const double &density, const int &vmax, c
 {
     // Selecciona autos inteligentes.
     unsigned smart_car_number = (unsigned)(((double)size)*smart_density);
-    std::vector<int>::iterator it;
+    vector<int>::iterator it;
     for (unsigned i=0; i<smart_car_number; ++i)
     {
         unsigned pos;
@@ -328,8 +337,8 @@ SmartCA::SmartCA(const unsigned &size, const double &density, const int &vmax, c
         {
             pos = m_irand() % m_ca.size();
         }
-        while ((m_ca[pos] != -1) || aux_is_in<int>(smart_cars, pos));
-        smart_cars.push_back(pos);
+        while ((m_ca[pos] != -1) || aux_is_in<int>(m_smart_cars, pos));
+        m_smart_cars.push_back(pos);
     }
 }
 void SmartCA::Move()
@@ -341,9 +350,9 @@ void SmartCA::Move()
     {
         if (m_ca[i] != -1)
         {
-            int pos = aux_find_pos<int>(smart_cars, i);
+            int pos = aux_find_pos<int>(m_smart_cars, i);
             if (pos != -1)
-                smart_cars[pos] = (i+m_ca[i]) % m_size;
+                m_smart_cars[pos] = (i+m_ca[i]) % m_size;
 
             // Cambia las posiciones de los autos en AC.
             At(i+m_ca[i], CA_TEMP) = m_ca[i];
@@ -363,7 +372,7 @@ void SmartCA::Step()
     {
         if (m_ca[i] != -1)
         {
-            if (aux_is_in<int>(smart_cars, i))
+            if (aux_is_in<int>(m_smart_cars, i))
             {
                 // Auto inteligente.
                 int nc = i + NextCarDist(i);
@@ -399,6 +408,116 @@ void SmartCA::Step()
 
 /****************************
 *                           *
+*          AC Tope          *
+*                           *
+****************************/
+
+StreetStopCA::StreetStopCA(const unsigned &size, const double &density, const int &vmax, 
+	                       const double &rand_prob, const double &stop_density)
+						   : CircularCA(size, density, vmax, rand_prob)
+{
+	unsigned stops = (unsigned)(((double)size)*stop_density);
+	if (stops == 0)
+	{
+		stops = 1;
+		cout << "Densidad de topes invalida. Se usara 1 tope." << endl;
+	}
+	if (stops >= size)
+	{
+		stops = size - 2;
+		cout << "Densidad de topes invalida. Se usaran " << stops << " topes." << endl;
+	}
+
+	m_stop_pos.assign(size, false);
+	for (unsigned i=0; i<stops; ++i)
+    {
+        unsigned pos;
+        do
+        {
+            pos = m_irand() % m_ca.size();
+        }
+        while (m_stop_pos[pos] == true);
+        m_stop_pos[pos] = true;
+    }
+}
+void StreetStopCA::Step()
+{
+	// Iterar sobre AC hasta encotrar vehiculo.
+    for (unsigned i=0; i<m_ca.size(); ++i)
+    {
+        if (m_ca[i] != -1)
+        {
+			// Aceleracion.
+            if ((m_ca[i] <= m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
+                m_ca[i]++;
+			else
+			{
+				// Frenado.
+				if (m_ca[i] > 0)
+				{
+					int nd = NextCarDist(i);
+					if (nd <= m_ca[i])
+						m_ca[i] = nd - 1;
+				}
+			}
+
+            // Aleatoriedad.
+            if ((m_ca[i] > 0) && (m_drand() <= m_rand_prob))
+                m_ca[i]--;
+
+			// Tope.
+			if ((NextStopDist(i)-(int)i < 2*m_vmax) && (m_ca[i] > 1))
+				m_ca[i]--;
+        }
+    }
+
+    // Aplicar cambios.
+    Move();
+    m_ca_history.push_back(m_ca);
+}
+int StreetStopCA::NextStopDist(const int &pos)
+{
+	int dist = 1;
+	while ((m_stop_pos[(pos+dist) % m_size] == false)  && (dist < 2*(int)m_size))
+        dist++;
+    return dist;
+}
+void StreetStopCA::DrawHistory()
+{
+	    unsigned height = m_ca_history.size();
+		unsigned width = m_size;
+		BMPWriter writer("ca.bmp", width, height);
+		BMPPixel* bmpData = new BMPPixel[width];
+		for (int i=height-1; i>=0; i--)
+		{
+			for (unsigned j=0; j<width; ++j)
+			{
+				BMPPixel color;
+				if (m_stop_pos[j])
+				{
+					if (m_ca_history[i][j] == -1)
+						color = BMPPixel((char)0, (char)255, (char)0);
+					else
+						color = BMPPixel(0, (char)255, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
+				}
+				else
+				{
+					if (m_ca_history[i][j] == -1)
+						color = BMPPixel((char)255, (char)255, (char)255);
+					else
+						color = BMPPixel(0, 0, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
+				}
+				bmpData[j] = color;
+			}
+			writer.WriteLine(bmpData);
+		}
+		writer.CloseBMP();
+		delete[] bmpData;
+}
+
+
+/****************************
+*                           *
 *      Manejador de CA      *
 *                           *
 ****************************/
@@ -407,6 +526,7 @@ CellularAutomata* cellularautomata = NULL;
 CircularCA* circularca = NULL;
 OpenCA* openca = NULL;
 SmartCA* smartca = NULL;
+StreetStopCA* streetstopca = NULL;
 
 CellularAutomata* create_ca(CA_TYPE ct, const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const double &extra)
 {
@@ -422,6 +542,8 @@ CellularAutomata* create_ca(CA_TYPE ct, const unsigned &size, const double &dens
     case SMART_CA:
         cellularautomata = smartca = new SmartCA(size, density, vmax, rand_prob, extra);
         break;
+	case STOP_CA:
+		cellularautomata = streetstopca = new StreetStopCA(size, density, vmax, rand_prob, extra);
     };
     return cellularautomata;
 }
@@ -433,10 +555,13 @@ void delete_ca()
         delete openca;
     if (smartca != NULL)
         delete smartca;
+	if (streetstopca != NULL)
+		delete streetstopca;
 
     circularca = NULL;
     openca = NULL;
     smartca = NULL;
+	streetstopca = NULL;
     cellularautomata = NULL;
 }
 

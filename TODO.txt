@@ -1,0 +1,2 @@
+- Añadir seguridad contra malos argumentos.
+- Añadir tests.

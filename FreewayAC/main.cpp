@@ -416,8 +416,8 @@ struct Arg: public option::Arg
 
 enum  OptionIndex { UNKNOWN, SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, PLOT_TRAFFIC, MEASURE_OCUPANCY, MEASURE_FLOW, 
                     FLOW_VS_DENSITY, FLOW_PER_DENSITY, FLOW_VS_VMAX, FLOW_VS_RAND_PROB, FLOW_VS_SMART_CARS, FLOW_VS_NEW_CAR,
-                    CA_CIRCULAR, CA_OPEN, CA_SMART, NEW_CAR_PROB, SMART_DENSITY, DT, DMIN, DMAX, VMAX_MIN, VMAX_MAX, 
-                    RAND_PROB_MIN, SMART_MIN, SMART_MAX, NEW_CAR_MIN, NEW_CAR_MAX, RAND_PROB_MAX, HELP };
+                    CA_CIRCULAR, CA_OPEN, CA_SMART, CA_STOP, NEW_CAR_PROB, SMART_DENSITY, DT, DMIN, DMAX, VMAX_MIN, VMAX_MAX, 
+                    RAND_PROB_MIN, SMART_MIN, SMART_MAX, STOP_DENSITY, NEW_CAR_MIN, NEW_CAR_MAX, RAND_PROB_MAX, HELP };
 
 const option::Descriptor usage[] =
 {
@@ -439,12 +439,13 @@ const option::Descriptor usage[] =
     {FLOW_VS_RAND_PROB,  0,"","flow_vs_rand_prob", Arg::None, 
      "  \t--flow_vs_rand_prob  \tMide el flujo respecto a probabilidad de frenado en un rango especificado por rand_min, rand_max y dt." },
     {FLOW_VS_SMART_CARS,  0,"","flow_vs_smart_cars", Arg::None, 
-     "  \t--flow_vs_smart_cars  \tMide el flujo respecto a densidad de autos inteligentes en un rango especificado por smart_cars_min, smart_cars_max y dt." },
+     "  \t--flow_vs_smart_cars  \tMide el flujo respecto a densidad de autos inteligentes en un rango especificado por smart_min, smart_max y dt." },
     {FLOW_VS_NEW_CAR,  0,"","flow_vs_new_car", Arg::None, 
      "  \t--flow_vs_new_car  \tFlujo respecto a probabilidad de nuevo auto en ac abierto en un rango especificado por new_car_min, new_car_max y dt." },
     {CA_CIRCULAR,  0,"","ca_circular", Arg::None, "  \t--ca_circular  \tAutomata celular circular." },
     {CA_OPEN,  0,"","ca_open", Arg::None, "  \t--ca_open  \tAutomata celular con frontera abierta." },
     {CA_SMART,  0,"","ca_smart", Arg::None, "  \t--ca_smart  \tAutomata celular con autos inteligentes." },
+	{CA_STOP,  0,"","ca_stop", Arg::None, "  \t--ca_stop  \tAutomata celular con tope. La posicion del tope se especifica por stop_pos." },
     {NEW_CAR_PROB,  0,"","new_car_prob", Arg::Required, "  \t--new_car_prob  \tProbabilidad de que se aparezca nuevo auto en frontera abierta." },
     {SMART_DENSITY,  0,"","smart_density", Arg::Required, "  \t--smart_density  \tDensidad de autos inteligentes." },
     {DT,  0,"", "dt", Arg::Required, "  \t--dt=<arg>  \tTamagno del intervalo en medicion con rango." },
@@ -454,10 +455,11 @@ const option::Descriptor usage[] =
     {VMAX_MAX,  0,"", "vmax_max", Arg::Required, "  \t--vmax_max=<arg>  \tVmax maxima en medicion con rango." },
     {RAND_PROB_MIN,  0,"", "rand_min", Arg::Required, "  \t--rand_min=<arg>  \tProbabilidad de frenado minima en medicion con rango." },
     {RAND_PROB_MAX,  0,"", "rand_max", Arg::Required, "  \t--rand_max=<arg>  \tProbabilidad de frenado maxima en medicion con rango." },
-    {SMART_MIN,  0,"", "smart_min", Arg::Required, "  \t--smart_min=<arg>  \tDensidad de autos inteligentes minima." },
-    {SMART_MAX,  0,"", "smart_max", Arg::Required, "  \t--smart_max=<arg>  \tDensidad de autos inteligentes maxima." },
-    {NEW_CAR_MIN,  0,"", "new_car_min", Arg::Required, "  \t--new_car_min=<arg>  \tProbabilidad de nuevo auto en ac abierto minima minima." },
-    {NEW_CAR_MAX,  0,"", "new_car_max", Arg::Required, "  \t--new_car_max=<arg>  \tProbabilidad de nuevo auto en ac abierto maxima." },
+    {SMART_MIN,  0,"", "smart_min", Arg::Required, "  \t--smart_min=<arg>  \tDensidad minima de autos inteligentes." },
+    {SMART_MAX,  0,"", "smart_max", Arg::Required, "  \t--smart_max=<arg>  \tDensidad maxima de autos inteligentes." },
+	{STOP_DENSITY,  0,"", "stop_density", Arg::Required, "  \t--stop_density=<arg>  \tDensidad de topes en ca_stop." },
+    {NEW_CAR_MIN,  0,"", "new_car_min", Arg::Required, "  \t--new_car_min=<arg>  \tProbabilidad minima de nuevo auto en ac abierto." },
+    {NEW_CAR_MAX,  0,"", "new_car_max", Arg::Required, "  \t--new_car_max=<arg>  \tProbabilidad maxima de nuevo auto en ac abierto." },
     {HELP,    0,"", "help", Arg::None,    "  \t--help  \tMuestra instrucciones." },
     {0,0,0,0,0,0}
 };
@@ -469,12 +471,12 @@ int main(int argc, char* argv[])
     int vmax = 5, vmax_min = 0, vmax_max = 20;
     double density = 0.2, rand_prob = 0.2;
     double dt = 0.1, dmin = 0.0, dmax = 1.0, rand_prob_min = 0.0, rand_prob_max = 1.0;
-    double smart_min = 0.0, smart_max = 0.7, new_car_min = 0.0, new_car_max = 1.0;
+    double smart_min = 0.0, smart_max = 0.7, new_car_min = 0.0, new_car_max = 1.0, stop_density = 0.1;
     bool measure_ocupancy = false, measure_flow = false, flow_vs_density = false;
     bool plot_traffic = false, flow_vs_vmax = false, flow_vs_rand_prob = false, flow_vs_smart_cars = false;
     bool flow_per_density = false, flow_vs_new_car = false;
     CA_TYPE ca_type = CIRCULAR_CA;
-    double new_car_prob, smart_density;
+    double new_car_prob = 0.1, smart_density = 0.1;
 
     // Ejecuta parser de argumentos.
     argc -= (argc>0); argv += (argc>0);
@@ -568,6 +570,10 @@ int main(int argc, char* argv[])
             ca_type = SMART_CA;
             break;
 
+			case CA_STOP:
+			ca_type = STOP_CA;
+			break;
+
             case NEW_CAR_PROB:
             new_car_prob = aux_string_to_num<double>(opt.arg);
             break;
@@ -604,6 +610,10 @@ int main(int argc, char* argv[])
             smart_max = aux_string_to_num<double>(opt.arg);
             break;
 
+			case STOP_DENSITY:
+			stop_density = aux_string_to_num<double>(opt.arg);
+			break;
+
             case RAND_PROB_MIN:
             rand_prob_min = aux_string_to_num<double>(opt.arg);
             break;
@@ -637,11 +647,13 @@ int main(int argc, char* argv[])
     if (flow_vs_vmax && dt < 1)
         dt = 1.0;
 
-    double extra;
+    double extra;	// Parámetro extra en el constructor de CA.
     if (ca_type == OPEN_CA)
         extra = new_car_prob;
     if (ca_type == SMART_CA)
         extra = smart_density;
+	if (ca_type == STOP_CA)
+		extra = stop_density;
 
     // Realiza acciones.
     if (measure_ocupancy || measure_flow || plot_traffic)

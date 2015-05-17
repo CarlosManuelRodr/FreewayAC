@@ -60,7 +60,7 @@ enum CAS
 
 enum CA_TYPE
 {
-    CIRCULAR_CA, OPEN_CA, SMART_CA
+    CIRCULAR_CA, OPEN_CA, SMART_CA, STOP_CA
 };
 
 class CellularAutomata
@@ -77,15 +77,16 @@ protected:
 public:
     CellularAutomata(const unsigned &size, const double &density, const int &vmax, const double &rand_prob);
     void Print();
-    void DrawHistory();
-    void DrawFlowHistory();
     void Evolve(const unsigned &iter);
     unsigned GetSize();
     unsigned GetHistorySize();
+	unsigned CountCars();
+	int NextCarDist(const int &pos);
     int &At(const unsigned &i, const CAS &ca = CA);
+	virtual void DrawHistory();
+    virtual void DrawFlowHistory();
     virtual void Step();
     virtual int &At(const unsigned &i, const unsigned &j, const CAS &ca) = 0;
-    virtual int NextCarDist(const int &pos) = 0;
     virtual void Move() = 0;
 };
 
@@ -101,7 +102,6 @@ public:
     CircularCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob);
     using CellularAutomata::At;
     int &At(const unsigned &i, const unsigned &j, const CAS &ca);
-    int NextCarDist(const int &pos);
     virtual void Move();
 };
 
@@ -114,13 +114,12 @@ public:
 
 class OpenCA : public CellularAutomata
 {
-    int empty;
+    int m_empty;
     double m_new_car_prob;
 public:
     OpenCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const double &new_car_prob);
     using CellularAutomata::At;
     int &At(const unsigned &i, const unsigned &j, const CAS &ca);
-    int NextCarDist(const int &pos);
     void Move();
 };
 
@@ -133,11 +132,27 @@ public:
 
 class SmartCA : public CircularCA
 {
-    std::vector<int> smart_cars;
+    std::vector<int> m_smart_cars;
 public:
     SmartCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const double &smart_density);
     void Move();
     void Step();
+};
+
+/****************************
+*                           *
+*          AC Tope          *
+*                           *
+****************************/
+
+class StreetStopCA : public CircularCA
+{
+	std::vector<bool> m_stop_pos;
+public:
+    StreetStopCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const double &stop_density);
+    void Step();
+	void DrawHistory();
+	int NextStopDist(const int &pos);
 };
 
 
