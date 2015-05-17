@@ -49,3 +49,13 @@ bin/
 dist/
 build/
 .buildozer/
+/Debug/
+/Release/
+/ipch/
+/FreewayAC/Debug/
+/FreewayAC/Release/
+
+#  Application files #
+######################
+*.bmp
+*.csv

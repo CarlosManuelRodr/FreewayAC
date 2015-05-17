@@ -27,15 +27,15 @@ void aux_progress_bar(double progress)
 
 ////////////////////////////////////
 //                                //
-//        Autómatas celulares     //
-//        de carril único.        //
+//        Autï¿½matas celulares     //
+//        de carril ï¿½nico.        //
 //                                //
 ////////////////////////////////////
 
 
 /****************************
 *                           *
-*         AC Básico         *
+*         AC Bï¿½sico         *
 *                           *
 ****************************/
 
@@ -69,6 +69,7 @@ CellularAutomata::CellularAutomata(const unsigned &size, const double &density, 
     }
     m_ca_history.push_back(m_ca);
 }
+CellularAutomata::~CellularAutomata() {}
 void CellularAutomata::Print()
 {
     // Imprime valores del automata celular en la terminal.
@@ -259,6 +260,7 @@ OpenCA::OpenCA(const unsigned &size, const double &density, const int &vmax, con
     : CellularAutomata(size, density, vmax, rand_prob)
 {
     m_new_car_prob = new_car_prob;
+    m_empty = -1;
 }
 int &OpenCA::At(const unsigned &i, const unsigned &j, const CAS &ca)
 {
@@ -267,7 +269,7 @@ int &OpenCA::At(const unsigned &i, const unsigned &j, const CAS &ca)
         if ((ca == CA) || (ca == CA_TEMP) || (ca == CA_HISTORY))
             m_empty = -1;
         else
-            m_empty = 0;
+        	m_empty = 0;
         return m_empty;
     }
     else
@@ -312,7 +314,7 @@ void OpenCA::Move()
     m_ca_flow_history.push_back(m_ca_flow_temp);
     m_ca.assign(m_ca_temp.begin(), m_ca_temp.end());
     
-    // Añade coche con probabilidad aleatoria.
+    // Aï¿½ade coche con probabilidad aleatoria.
     if (m_drand() < m_new_car_prob)
         m_ca[0] = 1;
 }
@@ -377,7 +379,7 @@ void SmartCA::Step()
                 // Auto inteligente.
                 int nc = i + NextCarDist(i);
                 nc %= m_size;
-                if ((m_ca[i] <= m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)) || (m_ca[nc] <= m_vmax) && (NextCarDist(nc) > (m_ca[nc] + 1)))
+                if (((m_ca[i] <= m_vmax) && (NextCarDist(i) > (m_ca[i] + 1))) || ((m_ca[nc] <= m_vmax) && (NextCarDist(nc) > (m_ca[nc] + 1))))
                     m_ca[i]++;
             }
             else
@@ -568,14 +570,14 @@ void delete_ca()
 
 ////////////////////////////////////
 //                                //
-//      Autómatas celulares       //
+//      Autï¿½matas celulares       //
 //      de varios carriles.       //
 //                                //
 ////////////////////////////////////
 
 /****************************
 *                           *
-*       AC Básico ML        *
+*       AC Bï¿½sico ML        *
 *                           *
 ****************************/
 
@@ -622,6 +624,7 @@ CellularAutomataML::CellularAutomataML(const unsigned &size, const unsigned &lan
     }
     m_ca_history.push_back(m_ca);
 }
+CellularAutomataML::~CellularAutomataML() {}
 void CellularAutomataML::Print()
 {
     // Imprime valores del automata celular en la terminal.
@@ -736,7 +739,7 @@ void CellularAutomataML::Step()
 						bool left = false, right = false;
 						for (int k=(int)j-1; k<=(int)j+1 && k<(int)m_lanes; k++)
 						{
-							if (k<0 || k==j || At(i, k) != -1) continue;
+							if (k<0 || (unsigned)k==j || At(i, k) != -1) continue;
 
 							// Busca auto anterior y verifica si puede cambiarse sin chocar.
 							int v, s = 0;
@@ -749,7 +752,7 @@ void CellularAutomataML::Step()
 									if ((At(i, k) <= m_vmax) && (NextCarDist(i, k) > (At(i, k) + 1)))
 									{
 										// Marca carril como disponible.
-										if (k == j-1) left = true;
+										if ((unsigned)k == j-1) left = true;
 										else right = true;
 									}
 									break;
@@ -760,16 +763,16 @@ void CellularAutomataML::Step()
 								if ((At(i, k) <= m_vmax) && (NextCarDist(i, k) > (At(i, k) + 1)))
 								{
 									// Marca carril como disponible.
-									if (k == j-1) left = true;
+									if ((unsigned)k == j-1) left = true;
 									else right = true;
 								}
 							}
 						}
 
-						// Si el carril está disponible adelenta.
+						// Si el carril estï¿½ disponible adelenta.
 						if (left || right)
 						{
-							// Si ambos están disponibles apaga uno al azar.
+							// Si ambos estï¿½n disponibles apaga uno al azar.
 							if (left && right)
 							{
 								int select = m_irand() % 2;
@@ -796,7 +799,7 @@ void CellularAutomataML::Step()
     {
 		for (unsigned j=0; j<m_lanes; ++j)
 		{
-			// Encuentra vehículo.
+			// Encuentra vehï¿½culo.
 			if (At(i, j) != -1)
 			{
 				// Aceleracion.
