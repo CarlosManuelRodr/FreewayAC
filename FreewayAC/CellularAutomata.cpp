@@ -353,7 +353,7 @@ void OpenCA::Move()
     m_ca_flow_history.push_back(m_ca_flow_temp);
     m_ca.assign(m_ca_temp.begin(), m_ca_temp.end());
     
-    // A�ade coche con probabilidad aleatoria.
+    // Añade coche con probabilidad aleatoria.
     if (m_drand() < m_new_car_prob)
         m_ca[0] = 1;
 }
@@ -380,10 +380,13 @@ SmartCA::SmartCA(const unsigned &size, const double &density, const int &vmax, c
     unsigned smart_car_number = (unsigned)(((double)size)*l_smart_density);
     vector<int> smart_car_positions;
     for (unsigned i=0; i<m_size; ++i)
-        smart_car_positions.push_back(i);
+	{
+		if (m_ca[i] != -1)
+			smart_car_positions.push_back(i);
+	}
 
     random_shuffle(smart_car_positions.begin(), smart_car_positions.end(), aux_random);
-    for (unsigned i=0; i<smart_car_number; ++i)
+	for (unsigned i=0; i<smart_car_positions.size() && i<smart_car_number; ++i)
         m_smart_cars.push_back(smart_car_positions[i]);
 }
 void SmartCA::Move()
