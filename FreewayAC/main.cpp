@@ -519,17 +519,59 @@ const option::Descriptor usage[] =
     {DMAX,  0,"", "dmax", Arg::Required, "  \t--dmax=<arg>  \tDensidad maxima en medicion con rango." },
     {VMAX_MIN,  0,"", "vmax_min", Arg::Required, "  \t--vmax_min=<arg>  \tVmax minima en medicion con rango." },
     {VMAX_MAX,  0,"", "vmax_max", Arg::Required, "  \t--vmax_max=<arg>  \tVmax maxima en medicion con rango." },
-    {RAND_PROB_MIN,  0,"", "rand_min", Arg::Required, "  \t--rand_min=<arg>  \tProbabilidad de frenado minima en medicion con rango." },
-    {RAND_PROB_MAX,  0,"", "rand_max", Arg::Required, "  \t--rand_max=<arg>  \tProbabilidad de frenado maxima en medicion con rango." },
+    {RAND_PROB_MIN,  0,"", "rand_prob_min", Arg::Required, "  \t--rand_prob_min=<arg>  \tProbabilidad de frenado minima en medicion con rango." },
+    {RAND_PROB_MAX,  0,"", "rand_prob_max", Arg::Required, "  \t--rand_prob_max=<arg>  \tProbabilidad de frenado maxima en medicion con rango." },
     {SMART_MIN,  0,"", "smart_min", Arg::Required, "  \t--smart_min=<arg>  \tDensidad minima de autos inteligentes." },
     {SMART_MAX,  0,"", "smart_max", Arg::Required, "  \t--smart_max=<arg>  \tDensidad maxima de autos inteligentes." },
     {STOP_DENSITY_MIN,  0,"", "stop_density_min", Arg::Required, "  \t--stop_density_min=<arg>  \tDensidad minima de topes." },
     {STOP_DENSITY_MAX,  0,"", "stop_density_max", Arg::Required, "  \t--stop_density_max=<arg>  \tDensidad maxima de topes." },
     {NEW_CAR_MIN,  0,"", "new_car_min", Arg::Required, "  \t--new_car_min=<arg>  \tProbabilidad minima de nuevo auto en ac abierto." },
     {NEW_CAR_MAX,  0,"", "new_car_max", Arg::Required, "  \t--new_car_max=<arg>  \tProbabilidad maxima de nuevo auto en ac abierto." },
-    {HELP,    0,"", "help", Arg::None,    "  \t--help  \tMuestra instrucciones." },
+    {HELP,    0,"", "help", Arg::None,    "  \t--help  \tMuestra instrucciones detalladas de cada experimento." },
     {0,0,0,0,0,0}
 };
+
+void describe_experiments()
+{
+    const char *text = "A continuacion se enumera la lista de experimentos disponibles y sus parametros.\n"
+                       "Todas las opciones se representan en mayusculas.\n\n"
+                       "=== Experimentos de parametro fijo ===\n"
+                       "PLOT_TRAFFIC         -> Descripcion: Evoluciona automata celular y grafica su representacion.\n"
+                       "                        Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB.\n"
+                       "MEASURE_OCUPANCY     -> Descripcion: Mide la ocupacion de cada casilla del automata celular.\n"
+                       "                        Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB.\n"
+                       "MEASURE_FLOW         -> Descripcion: Mide el flujo de cada casilla del automata celular.\n"
+                       "                        Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB.\n"
+                       "\n=== Experimentos de parametro variable ===\n"
+                       "FLOW_VS_DENSITY      -> Descripcion: Mide el flujo de autos promedio respecto a los valores\n"
+                       "                                     de densidad de autos especificados en un rango.\n"
+                       "                        Parametros relevantes: SIZE, ITERATIONS, VMAX, RAND_PROB, DMIN, DMAX, DT.\n"
+                       "FLOW_PER_DENSITY     -> Descripcion: Mide el flujo de autos promedio sobre densidad respecto\n"
+                       "                                     a los valores de densidad de autos especificados en un rango.\n"
+                       "                        Parametros relevantes: SIZE, ITERATIONS, VMAX, RAND_PROB, DMIN, DMAX, DT.\n"
+                       "FLOW_VS_VMAX         -> Descripcion: Mide el flujo de autos promedio respecto a los valores de\n"
+                       "                                     velocidad maxima especificados en un rango.\n"
+                       "                        Parametros relevantes: SIZE, ITERATIONS, DENSITY, RAND_PROB, VMAX_MIN, VMAX_MAX, DT.\n"
+                       "FLOW_VS_RAND_PROB    -> Descripcion: Mide el flujo de autos promedio respecto a los valores de\n"
+                       "                                     probabilidad de descenso de velocidad especificados en un rango.\n"
+                       "                        Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB_MIN,\n"
+                       "                                               RAND_PROB_MAX, DT.\n"
+                       "FLOW_VS_SMART_CARS   -> Descripcion: Mide el flujo de autos promedio respecto a los valores\n"
+                       "                                     de densidad de autos inteligentes especificados en un rango.\n"
+                       "                        Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, \n"
+                       "                                               SMART_MIN, SMART_MAX, DT.\n"
+                       "FLOW_VS_STOP_DENSITY -> Descripcion: Mide el flujo de autos promedio respecto a los valores\n"
+                       "                                     densidad de topes especificados en un rango. Se usa el\n"
+                       "                                     automata celular CA_STOP.\n"
+                       "                        Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB,\n"
+                       "                                               STOP_DENSITY_MIN, STOP_DENSITY_MAX, DT.\n"
+                       "FLOW_VS_NEW_CAR      -> Descripcion: Mide el flujo de autos promedio respecto a los valores\n"
+                       "                                     de probabilidad de aparicion de nuevo auto especificados\n"
+                       "                                     en un rango. Se usa el automata celular CA_OPEN.\n"
+                       "                        Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB,\n"
+                       "                                               NEW_CAR_MIN, NEW_CAR_MAX, DT.\n";
+    cout << text << endl;
+}
 
 
 int main(int argc, char* argv[])
@@ -558,6 +600,8 @@ int main(int argc, char* argv[])
 
     if (options[HELP] || argc == 0)
     {
+        if (options[HELP])
+            describe_experiments();
         option::printUsage(cout, usage);
         return 0;
     }

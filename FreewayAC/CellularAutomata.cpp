@@ -9,6 +9,21 @@ using namespace std;
 *                           *
 ****************************/
 
+MTRand m_drand;            // Generador de aleatorios (flotantes) entre 0 y 1.
+MTRand_int32 m_irand;      // Generador de enteros aleatorios.
+
+void aux_random_seed()
+{
+    // Asigna semilla a numeros aleatorios.
+    unsigned seed = static_cast<unsigned int>(time(NULL));
+    m_drand.seed(seed);
+    m_irand.seed(seed);
+    srand(seed);
+}
+int aux_random(int i)
+{
+    return m_irand() % i;
+}
 void aux_progress_bar(double progress)
 {
     int barWidth = 35;
@@ -73,21 +88,17 @@ CellularAutomata::CellularAutomata(const unsigned &size, const double &density, 
     unsigned vehicles = (unsigned)(((double)size)*l_density);
 
     // Asigna semilla a numeros aleatorios.
-    unsigned seed = static_cast<unsigned int>(time(NULL));
-    m_drand.seed(seed);
-    m_irand.seed(seed);
+    aux_random_seed();
 
     // Coloca autos al azar.
+    vector<unsigned> car_positions;
+    for (unsigned i=0; i<m_size; ++i)
+        car_positions.push_back(i);
+
+    random_shuffle(car_positions.begin(), car_positions.end(), aux_random);
     for (unsigned i=0; i<vehicles; ++i)
-    {
-        unsigned pos;
-        do
-        {
-            pos = m_irand() % m_ca.size();
-        }
-        while (m_ca[pos] != -1);
-        m_ca[pos] = 1;
-    }
+        m_ca[car_positions[i]] = 1;
+
     m_ca_history.push_back(m_ca);
 }
 CellularAutomata::~CellularAutomata() {}
@@ -367,17 +378,13 @@ SmartCA::SmartCA(const unsigned &size, const double &density, const int &vmax, c
 
     // Selecciona autos inteligentes.
     unsigned smart_car_number = (unsigned)(((double)size)*l_smart_density);
-    vector<int>::iterator it;
+    vector<int> smart_car_positions;
+    for (unsigned i=0; i<m_size; ++i)
+        smart_car_positions.push_back(i);
+
+    random_shuffle(smart_car_positions.begin(), smart_car_positions.end(), aux_random);
     for (unsigned i=0; i<smart_car_number; ++i)
-    {
-        unsigned pos;
-        do
-        {
-            pos = m_irand() % m_ca.size();
-        }
-        while ((m_ca[pos] != -1) || aux_is_in<int>(m_smart_cars, pos));
-        m_smart_cars.push_back(pos);
-    }
+        m_smart_cars.push_back(smart_car_positions[i]);
 }
 void SmartCA::Move()
 {
@@ -461,16 +468,14 @@ StreetStopCA::StreetStopCA(const unsigned &size, const double &density, const in
         cout << "Densidad de topes invalida. Se usaran " << stops << " topes." << endl;
     }
 
+    // Coloca topes.
+    vector<unsigned> stop_positions;
+    for (unsigned i=0; i<m_size; ++i)
+        stop_positions.push_back(i);
+
+    random_shuffle(stop_positions.begin(), stop_positions.end(), aux_random);
     for (unsigned i=0; i<stops; ++i)
-    {
-        unsigned pos;
-        do
-        {
-            pos = m_irand() % m_ca.size();
-        }
-        while (aux_is_in(m_stop_pos,pos));
-        m_stop_pos.push_back(pos);
-    }
+        m_stop_pos.push_back(stop_positions[i]);
 }
 void StreetStopCA::Step()
 {
