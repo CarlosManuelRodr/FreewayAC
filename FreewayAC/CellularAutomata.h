@@ -148,7 +148,7 @@ public:
 
 class StreetStopCA : public CircularCA
 {
-    std::vector<bool> m_stop_pos;
+    std::vector<unsigned> m_stop_pos;
 public:
     StreetStopCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const double &stop_density);
     void Step();

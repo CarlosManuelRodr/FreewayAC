@@ -47,16 +47,6 @@
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1659875683.1513670250" name="FreewayAC.vcxproj" rcbsApplicability="disable" resourcePath="FreewayAC/FreewayAC.vcxproj" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1659875683.1683118281" name="FreewayAC.vcxproj.user" rcbsApplicability="disable" resourcePath="FreewayAC/FreewayAC.vcxproj.user" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1659875683.1656221577" name="FreewayAC.sln" rcbsApplicability="disable" resourcePath="FreewayAC.sln" toolsToInvoke=""/>
-					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.1659875683.1935245669" name="/" resourcePath="Resultados">
-						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.1506813745" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug" unusedChildren="">
-							<tool id="cdt.managedbuild.tool.gnu.archiver.base.639729367" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.399523381"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1078713571" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.591639521"/>
-							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.392210244" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.61018701"/>
-							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1428457438" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1507448104"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.2127828483" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1838270600"/>
-							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.1985578776" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug.739121474"/>
-						</toolChain>
-					</folderInfo>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1659875683.826526143" name="README.md" rcbsApplicability="disable" resourcePath="README.md" toolsToInvoke=""/>
 					<sourceEntries>
 						<entry excluding="Resultados|TODO.txt|README.md|FreewayAC.sln|FreewayAC/FreewayAC.vcxproj.user|FreewayAC/FreewayAC.vcxproj.filters|FreewayAC/FreewayAC.vcxproj" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>

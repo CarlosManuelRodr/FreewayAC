@@ -376,13 +376,75 @@ void multiple_flow_vs_new_car_prob(const unsigned &size, const unsigned &iterati
     }
 
     // Escribe a CSV.
-    ofstream file("flow_vs_smart_new_density.csv", ofstream::out);
+    ofstream file("flow_vs_new_density.csv", ofstream::out);
     for (unsigned i = 0; i < flow.size(); ++i)
     {
         if (i - flow.size() != 0)
             file << new_car_density[i] << ", " << flow[i] << endl;
         else
             file << new_car_density[i] << ", " << flow[i];
+    }
+    file.close();
+    delete_ca();
+}
+void multiple_flow_vs_stop_density(const unsigned &size, const unsigned &iterations, const int &vmax,
+                                   const double &density, const double &rand_prob, const double &stop_density_min,
+                                   const double &stop_density_max, const double &dt)
+{
+    vector<double> stop_density;
+    vector<double> flow;
+    CellularAutomata* ca;
+
+    for (double d=stop_density_min; d<=stop_density_max; d+=dt)
+    {
+        // Reporta progreso.
+        if (d + dt > stop_density_max)
+            aux_progress_bar(1.0);
+        else
+            aux_progress_bar(d/stop_density_max);
+
+        // Evoluciona el sistema.
+        ca = create_ca(STOP_CA, size, density, vmax, rand_prob, d);
+        for (unsigned i=0; i<iterations; ++i)
+            ca->Step();
+
+
+        // Obtiene flujo en cada posición.
+        vector<double> tmp_flow;
+        tmp_flow.assign(size, 0.0);
+        unsigned height = iterations;
+        unsigned width = size;
+
+        for (unsigned i=0; i<width; ++i)
+        {
+            int sum = 0;
+            for (unsigned j=0; j<height; ++j)
+            {
+                if ((ca->At(i, j, CA_FLOW_HISTORY) != 0) && (ca->At(i+1, j, CA_FLOW_HISTORY) != 0))
+                    sum++;
+            }
+            tmp_flow[i] = (double)sum/(double)height;
+        }
+
+        // Obtiene el promedio de todos los flujos.
+        double mean = 0;
+        for (unsigned i=0; i<tmp_flow.size(); ++i)
+            mean += tmp_flow[i];
+        mean /= (double)tmp_flow.size();
+
+        // Asigna valores.
+        stop_density.push_back(d);
+        flow.push_back(mean);
+    }
+
+    // Escribe a CSV.
+    ofstream file("flow_vs_stop_density.csv", ofstream::out);
+    for (unsigned i = 0; i < flow.size(); ++i)
+    {
+        if (i - flow.size() != 0)
+            file << stop_density[i] << ", " << flow[i] << endl;
+        else
+            file << stop_density[i] << ", " << flow[i];
     }
     file.close();
     delete_ca();
@@ -415,9 +477,10 @@ struct Arg: public option::Arg
 };
 
 enum  OptionIndex { UNKNOWN, SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, PLOT_TRAFFIC, MEASURE_OCUPANCY, MEASURE_FLOW, 
-                    FLOW_VS_DENSITY, FLOW_PER_DENSITY, FLOW_VS_VMAX, FLOW_VS_RAND_PROB, FLOW_VS_SMART_CARS, FLOW_VS_NEW_CAR,
-                    CA_CIRCULAR, CA_OPEN, CA_SMART, CA_STOP, NEW_CAR_PROB, SMART_DENSITY, DT, DMIN, DMAX, VMAX_MIN, VMAX_MAX, 
-                    RAND_PROB_MIN, SMART_MIN, SMART_MAX, STOP_DENSITY, NEW_CAR_MIN, NEW_CAR_MAX, RAND_PROB_MAX, HELP };
+                    FLOW_VS_DENSITY, FLOW_PER_DENSITY, FLOW_VS_VMAX, FLOW_VS_RAND_PROB, FLOW_VS_SMART_CARS, FLOW_VS_STOP_DENSITY,
+                    FLOW_VS_NEW_CAR, CA_CIRCULAR, CA_OPEN, CA_SMART, CA_STOP, NEW_CAR_PROB, SMART_DENSITY, STOP_DENSITY, DT,
+                    DMIN, DMAX, VMAX_MIN, VMAX_MAX, RAND_PROB_MIN, SMART_MIN, SMART_MAX, STOP_DENSITY_MIN, STOP_DENSITY_MAX,
+                    NEW_CAR_MIN, NEW_CAR_MAX, RAND_PROB_MAX, HELP };
 
 const option::Descriptor usage[] =
 {
@@ -440,6 +503,8 @@ const option::Descriptor usage[] =
      "  \t--flow_vs_rand_prob  \tMide el flujo respecto a probabilidad de frenado en un rango especificado por rand_min, rand_max y dt." },
     {FLOW_VS_SMART_CARS,  0,"","flow_vs_smart_cars", Arg::None, 
      "  \t--flow_vs_smart_cars  \tMide el flujo respecto a densidad de autos inteligentes en un rango especificado por smart_min, smart_max y dt." },
+    {FLOW_VS_STOP_DENSITY,  0,"","flow_vs_stop_density", Arg::None,
+          "  \t--flow_vs_stop_density  \tMide el flujo respecto a densidad de topes en un rango especificado por stop_density_min, stop_density_max y dt." },
     {FLOW_VS_NEW_CAR,  0,"","flow_vs_new_car", Arg::None, 
      "  \t--flow_vs_new_car  \tFlujo respecto a probabilidad de nuevo auto en ac abierto en un rango especificado por new_car_min, new_car_max y dt." },
     {CA_CIRCULAR,  0,"","ca_circular", Arg::None, "  \t--ca_circular  \tAutomata celular circular." },
@@ -448,6 +513,7 @@ const option::Descriptor usage[] =
     {CA_STOP,  0,"","ca_stop", Arg::None, "  \t--ca_stop  \tAutomata celular con tope. La posicion del tope se especifica por stop_pos." },
     {NEW_CAR_PROB,  0,"","new_car_prob", Arg::Required, "  \t--new_car_prob  \tProbabilidad de que se aparezca nuevo auto en frontera abierta." },
     {SMART_DENSITY,  0,"","smart_density", Arg::Required, "  \t--smart_density  \tDensidad de autos inteligentes." },
+    {STOP_DENSITY,  0,"", "stop_density", Arg::Required, "  \t--stop_density=<arg>  \tDensidad de topes en ca_stop." },
     {DT,  0,"", "dt", Arg::Required, "  \t--dt=<arg>  \tTamagno del intervalo en medicion con rango." },
     {DMIN,  0,"", "dmin", Arg::Required, "  \t--dmin=<arg>  \tDensidad minima en medicion con rango." },
     {DMAX,  0,"", "dmax", Arg::Required, "  \t--dmax=<arg>  \tDensidad maxima en medicion con rango." },
@@ -457,7 +523,8 @@ const option::Descriptor usage[] =
     {RAND_PROB_MAX,  0,"", "rand_max", Arg::Required, "  \t--rand_max=<arg>  \tProbabilidad de frenado maxima en medicion con rango." },
     {SMART_MIN,  0,"", "smart_min", Arg::Required, "  \t--smart_min=<arg>  \tDensidad minima de autos inteligentes." },
     {SMART_MAX,  0,"", "smart_max", Arg::Required, "  \t--smart_max=<arg>  \tDensidad maxima de autos inteligentes." },
-    {STOP_DENSITY,  0,"", "stop_density", Arg::Required, "  \t--stop_density=<arg>  \tDensidad de topes en ca_stop." },
+    {STOP_DENSITY_MIN,  0,"", "stop_density_min", Arg::Required, "  \t--stop_density_min=<arg>  \tDensidad minima de topes." },
+    {STOP_DENSITY_MAX,  0,"", "stop_density_max", Arg::Required, "  \t--stop_density_max=<arg>  \tDensidad maxima de topes." },
     {NEW_CAR_MIN,  0,"", "new_car_min", Arg::Required, "  \t--new_car_min=<arg>  \tProbabilidad minima de nuevo auto en ac abierto." },
     {NEW_CAR_MAX,  0,"", "new_car_max", Arg::Required, "  \t--new_car_max=<arg>  \tProbabilidad maxima de nuevo auto en ac abierto." },
     {HELP,    0,"", "help", Arg::None,    "  \t--help  \tMuestra instrucciones." },
@@ -471,12 +538,13 @@ int main(int argc, char* argv[])
     int vmax = 5, vmax_min = 0, vmax_max = 20;
     double density = 0.2, rand_prob = 0.2;
     double dt = 0.1, dmin = 0.0, dmax = 1.0, rand_prob_min = 0.0, rand_prob_max = 1.0;
-    double smart_min = 0.0, smart_max = 0.7, new_car_min = 0.0, new_car_max = 1.0, stop_density = 0.1;
+    double smart_min = 0.0, smart_max = 0.7, new_car_min = 0.0, new_car_max = 1.0, stop_density_min = 0.0;
+    double stop_density_max = 0.1;
     bool measure_ocupancy = false, measure_flow = false, flow_vs_density = false;
     bool plot_traffic = false, flow_vs_vmax = false, flow_vs_rand_prob = false, flow_vs_smart_cars = false;
-    bool flow_per_density = false, flow_vs_new_car = false;
+    bool flow_vs_stop_density = false, flow_per_density = false, flow_vs_new_car = false;
     CA_TYPE ca_type = CIRCULAR_CA;
-    double new_car_prob = 0.1, smart_density = 0.1;
+    double new_car_prob = 0.1, smart_density = 0.1, stop_density = 0.1;
 
     // Ejecuta parser de argumentos.
     argc -= (argc>0); argv += (argc>0);
@@ -554,6 +622,10 @@ int main(int argc, char* argv[])
             flow_vs_smart_cars = true;
             break;
 
+            case FLOW_VS_STOP_DENSITY:
+            flow_vs_stop_density = true;
+            break;
+
             case FLOW_VS_NEW_CAR:
             flow_vs_new_car = true;
             break;
@@ -580,6 +652,10 @@ int main(int argc, char* argv[])
 
             case SMART_DENSITY:
             smart_density = aux_string_to_num<double>(opt.arg);
+            break;
+
+            case STOP_DENSITY:
+            stop_density = aux_string_to_num<double>(opt.arg);
             break;
 
             case DT:
@@ -610,8 +686,12 @@ int main(int argc, char* argv[])
             smart_max = aux_string_to_num<double>(opt.arg);
             break;
 
-            case STOP_DENSITY:
-            stop_density = aux_string_to_num<double>(opt.arg);
+            case STOP_DENSITY_MIN:
+            stop_density_min = aux_string_to_num<double>(opt.arg);
+            break;
+
+            case STOP_DENSITY_MAX:
+            stop_density_max = aux_string_to_num<double>(opt.arg);
             break;
 
             case RAND_PROB_MIN:
@@ -636,13 +716,14 @@ int main(int argc, char* argv[])
     delete[] buffer;
 
     // Verifica opciones.
-    if ((measure_ocupancy || measure_flow) && (flow_vs_density || flow_vs_vmax || flow_vs_rand_prob || flow_vs_smart_cars || flow_vs_new_car))
+    if ((measure_ocupancy || measure_flow) && (flow_vs_density || flow_vs_vmax || flow_vs_rand_prob ||
+         flow_vs_smart_cars || flow_vs_stop_density || flow_vs_new_car))
     {
         cout << "Opciones incompatibles." << endl;
         return 1;
     }
     if (!(measure_ocupancy || measure_flow || flow_vs_density || flow_per_density || flow_vs_vmax 
-          || flow_vs_rand_prob || flow_vs_smart_cars || flow_vs_new_car))
+          || flow_vs_rand_prob || flow_vs_smart_cars || flow_vs_new_car || flow_vs_stop_density))
         plot_traffic = true;    // Opcion predeterminada.
     if (flow_vs_vmax && dt < 1)
         dt = 1.0;
@@ -705,6 +786,11 @@ int main(int argc, char* argv[])
         {
             cout << "Midiendo flujo vs densidad de autos inteligentes." << endl;
             multiple_flow_vs_smart_cars(size, iterations, vmax, density, rand_prob, smart_min, smart_max, dt);
+        }
+        if (flow_vs_stop_density)
+        {
+            cout << "Midiendo flujo vs densidad de topes." << endl;
+            multiple_flow_vs_stop_density(size, iterations, vmax, density, rand_prob, stop_density_min, stop_density_max, dt);
         }
         if (flow_vs_new_car)
         {

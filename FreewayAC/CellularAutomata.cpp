@@ -1,4 +1,6 @@
 #include "CellularAutomata.h"
+#include <limits>
+#include <algorithm>
 using namespace std;
 
 /****************************
@@ -453,18 +455,12 @@ StreetStopCA::StreetStopCA(const unsigned &size, const double &density, const in
                            : CircularCA(size, density, vmax, rand_prob)
 {
     unsigned stops = (unsigned)(((double)size)*stop_density);
-    if (stops == 0)
-    {
-        stops = 1;
-        cout << "Densidad de topes invalida. Se usara 1 tope." << endl;
-    }
     if (stops >= size)
     {
         stops = size - 2;
         cout << "Densidad de topes invalida. Se usaran " << stops << " topes." << endl;
     }
 
-    m_stop_pos.assign(size, false);
     for (unsigned i=0; i<stops; ++i)
     {
         unsigned pos;
@@ -472,8 +468,8 @@ StreetStopCA::StreetStopCA(const unsigned &size, const double &density, const in
         {
             pos = m_irand() % m_ca.size();
         }
-        while (m_stop_pos[pos] == true);
-        m_stop_pos[pos] = true;
+        while (aux_is_in(m_stop_pos,pos));
+        m_stop_pos.push_back(pos);
     }
 }
 void StreetStopCA::Step()
@@ -502,7 +498,7 @@ void StreetStopCA::Step()
                 m_ca[i]--;
 
             // Tope.
-            if ((NextStopDist(i)-(int)i < 2*m_vmax) && (m_ca[i] > 1))
+            if ((NextStopDist(i) < 2*m_vmax) && (m_ca[i] > 1))
                 m_ca[i]--;
         }
     }
@@ -513,10 +509,21 @@ void StreetStopCA::Step()
 }
 int StreetStopCA::NextStopDist(const int &pos)
 {
-    int dist = 1;
-    while ((m_stop_pos[(pos+dist) % m_size] == false)  && (dist < 2*(int)m_size))
-        dist++;
-    return dist;
+    if (m_stop_pos.size() != 0)
+    {
+        vector<unsigned> dist;
+        for (unsigned i=0; i<m_stop_pos.size(); ++i)
+        {
+            int tmp_dist = pos - m_stop_pos[i];
+            if (tmp_dist < 0)
+                dist.push_back(abs(tmp_dist));
+            else
+                dist.push_back(m_size - abs(tmp_dist));
+        }
+        return *min_element(dist.begin(), dist.end());
+    }
+    else
+        return numeric_limits<int>::max();
 }
 void StreetStopCA::DrawHistory()
 {
@@ -529,7 +536,7 @@ void StreetStopCA::DrawHistory()
             for (unsigned j=0; j<width; ++j)
             {
                 BMPPixel color;
-                if (m_stop_pos[j])
+                if (aux_is_in(m_stop_pos, j))
                 {
                     if (m_ca_history[i][j] == -1)
                         color = BMPPixel((char)0, (char)255, (char)0);
