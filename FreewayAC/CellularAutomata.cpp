@@ -18,7 +18,6 @@ void aux_random_seed()
     unsigned seed = static_cast<unsigned int>(time(NULL));
     m_drand.seed(seed);
     m_irand.seed(seed);
-    srand(seed);
 }
 int aux_random(int i)
 {
@@ -579,10 +578,10 @@ OpenCA* openca = NULL;
 SmartCA* smartca = NULL;
 StreetStopCA* streetstopca = NULL;
 
-CellularAutomata* create_ca(CA_TYPE ct, const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const double &extra)
+CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const double &extra)
 {
     delete_ca();
-    switch(ct)
+    switch(ca)
     {
     case CIRCULAR_CA:
         cellularautomata = circularca = new CircularCA(size, density, vmax, rand_prob);

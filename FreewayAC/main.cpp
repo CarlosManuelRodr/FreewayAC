@@ -1,4 +1,5 @@
 #include <sstream>
+#include <string>
 #include "CellularAutomata.h"
 #include "optionparser.h"
 using namespace std;
@@ -10,7 +11,12 @@ using namespace std;
 *                           *
 ****************************/
 
-void single_measure_ocupancy(CellularAutomata *ca)
+/**
+* @brief Mide la ocupación en todas las casillas de AC.
+* @param ca Puntero al AC sobre el cual se desea medir la ocupación.
+* @param out_file_name Nombre opcional para el archivo de salida.
+*/
+void single_measure_ocupancy(CellularAutomata *ca, string out_file_name = "")
 {
     vector<double> ocupancy;
     ocupancy.assign(ca->GetSize(), 0.0);
@@ -29,7 +35,9 @@ void single_measure_ocupancy(CellularAutomata *ca)
     }
 
     // Escribe a CSV.
-    ofstream file("ocupancy.csv", ofstream::out);
+    if (out_file_name.empty())
+        out_file_name = "ocupancy.csv";
+    ofstream file(out_file_name.c_str(), ofstream::out);
     for (unsigned i = 0; i < ocupancy.size(); ++i)
     {
         if (i - ocupancy.size() != 0)
@@ -40,7 +48,13 @@ void single_measure_ocupancy(CellularAutomata *ca)
 
     file.close();
 }
-void single_measure_flow(CellularAutomata *ca)
+
+/**
+* @brief Mide el flujo en todas las casillas de AC.
+* @param ca Puntero al AC sobre el cual se desea medir la ocupación.
+* @param out_file_name Nombre opcional para el archivo de salida.
+*/
+void single_measure_flow(CellularAutomata *ca, string out_file_name = "")
 {
     vector<double> flow;
     flow.assign(ca->GetSize(), 0.0);
@@ -59,7 +73,9 @@ void single_measure_flow(CellularAutomata *ca)
     }
 
     // Escribe a CSV.
-    ofstream file("flow.csv", ofstream::out);
+    if (out_file_name.empty())
+        out_file_name = "flow.csv";
+    ofstream file(out_file_name.c_str(), ofstream::out);
     for (unsigned i = 0; i < flow.size(); ++i)
     {
         if (i - flow.size() != 0)
@@ -71,9 +87,23 @@ void single_measure_flow(CellularAutomata *ca)
     file.close();
 }
 
+/**
+* @brief Mide el flujo promedio de todas las casillas respecto a densidad de autos.
+* @param type Tipo de AC.
+* @param size Tamaño de AC.
+* @param iterations Número de iteraciones para evolucionar AC.
+* @param vmax Velocidad máxima de autos.
+* @param density_min Densidad mínima.
+* @param density_max Densidad máxima.
+* @param dt Intervalo entre densidades.
+* @param rand_prob Probabilidad de descenso de velocidad.
+* @param extra Parámetro extra que puede requerir el AC según el tipo.
+* @param per_density Realizar el experimento midiendo el flujo/densidad en vez de flujo.
+* @param out_file_name Nombre opcional para el archivo de salida.
+*/
 void multiple_flow_vs_density(const CA_TYPE &type, const unsigned &size, const unsigned &iterations, const int &vmax, 
                               const double &density_min, const double &density_max, const double &dt, const double &rand_prob, 
-                              const double &extra, const bool &per_density = false)
+                              const double &extra, const bool &per_density = false, string out_file_name = "")
 {
     vector<double> density;
     vector<double> flow;
@@ -123,13 +153,15 @@ void multiple_flow_vs_density(const CA_TYPE &type, const unsigned &size, const u
     }
 
     // Escribe a CSV.
-    string filename;
-    if (per_density)
-        filename = "flow_per_density.csv";
-    else
-        filename = "flow_vs_density.csv";
+    if (out_file_name.empty())
+    {
+        if (per_density)
+            out_file_name = "flow_per_density.csv";
+        else
+            out_file_name = "flow_vs_density.csv";
+    }
 
-    ofstream file(filename.c_str(), ofstream::out);
+    ofstream file(out_file_name.c_str(), ofstream::out);
     for (unsigned i = 0; i < flow.size(); ++i)
     {
         if (i - flow.size() != 0)
@@ -140,8 +172,23 @@ void multiple_flow_vs_density(const CA_TYPE &type, const unsigned &size, const u
     file.close();
     delete_ca();
 }
-void multiple_flow_vs_vmax(const CA_TYPE &type, const unsigned &size, const unsigned &iterations, const int &vmax_min, const int &vmax_max, 
-                           const int &dt, const double &density, const double &rand_prob, const double &extra)
+
+/**
+* @brief Mide el flujo promedio de todas las casillas respecto a velocidad máxima autos.
+* @param type Tipo de AC.
+* @param size Tamaño de AC.
+* @param iterations Número de iteraciones para evolucionar AC.
+* @param vmax_min Velocidad máxima de autos mínima.
+* @param vmax_max Velocidad máxima de autos máxima.
+* @param dt Intervalo entre valores a recorrer.
+* @param density Densidad de autos.
+* @param rand_prob Probabilidad de descenso de velocidad.
+* @param extra Parámetro extra que puede requerir el AC según el tipo.
+* @param out_file_name Nombre opcional para el archivo de salida.
+*/
+void multiple_flow_vs_vmax(const CA_TYPE &type, const unsigned &size, const unsigned &iterations, const int &vmax_min,
+                           const int &vmax_max, const int &dt, const double &density, const double &rand_prob,
+                           const double &extra, string out_file_name = "")
 {
     vector<double> vmax;
     vector<double> flow;
@@ -190,7 +237,9 @@ void multiple_flow_vs_vmax(const CA_TYPE &type, const unsigned &size, const unsi
     }
 
     // Escribe a CSV.
-    ofstream file("flow_vs_vmax.csv", ofstream::out);
+    if (out_file_name.empty())
+        out_file_name = "flow_vs_vmax.csv";
+    ofstream file(out_file_name.c_str(), ofstream::out);
     for (unsigned i = 0; i < flow.size(); ++i)
     {
         if (i - flow.size() != 0)
@@ -201,8 +250,23 @@ void multiple_flow_vs_vmax(const CA_TYPE &type, const unsigned &size, const unsi
     file.close();
     delete_ca();
 }
-void multiple_flow_vs_rand_prob(const CA_TYPE &type, const unsigned &size, const unsigned &iterations, const int &vmax, const double &density, 
-                                const double &rand_prob_min, const double &rand_prob_max, const double &dt, const double &extra)
+
+/**
+* @brief Mide el flujo promedio de todas las casillas respecto a velocidad máxima autos.
+* @param type Tipo de AC.
+* @param size Tamaño de AC.
+* @param iterations Número de iteraciones para evolucionar AC.
+* @param vmax Velocidad máxima de autos.
+* @param density Densidad de autos.
+* @param rand_prob_min Probabilidad de descenso de velocidad mínima.
+* @param rand_prob_max Probabilidad de descenso de velocidad máxima.
+* @param dt Intervalo entre valores a recorrer.
+* @param extra Parámetro extra que puede requerir el AC según el tipo.
+* @param out_file_name Nombre opcional para el archivo de salida.
+*/
+void multiple_flow_vs_rand_prob(const CA_TYPE &type, const unsigned &size, const unsigned &iterations, const int &vmax,
+                                const double &density, const double &rand_prob_min, const double &rand_prob_max,
+                                const double &dt, const double &extra, string out_file_name = "")
 {
     vector<double> rand_prob;
     vector<double> flow;
@@ -251,7 +315,9 @@ void multiple_flow_vs_rand_prob(const CA_TYPE &type, const unsigned &size, const
     }
 
     // Escribe a CSV.
-    ofstream file("flow_vs_rand_prob.csv", ofstream::out);
+    if (out_file_name.empty())
+        out_file_name = "flow_vs_rand_prob.csv";
+    ofstream file(out_file_name.c_str(), ofstream::out);
     for (unsigned i = 0; i < flow.size(); ++i)
     {
         if (i - flow.size() != 0)
@@ -262,9 +328,22 @@ void multiple_flow_vs_rand_prob(const CA_TYPE &type, const unsigned &size, const
     file.close();
     delete_ca();
 }
+
+/**
+* @brief Mide el flujo promedio de todas las casillas respecto a densidad de autos inteligentes.
+* @param size Tamaño de AC.
+* @param iterations Número de iteraciones para evolucionar AC.
+* @param vmax Velocidad máxima de autos.
+* @param density Densidad de autos.
+* @param rand_prob Probabilidad de descenso de velocidad.
+* @param smart_car_density_min Densidad de autos inteligentes mínima.
+* @param smart_car_density_max Densidad de autos inteligentes máxima.
+* @param dt Intervalo entre valores a recorrer.
+* @param out_file_name Nombre opcional para el archivo de salida.
+*/
 void multiple_flow_vs_smart_cars(const unsigned &size, const unsigned &iterations, const int &vmax, const double &density, 
-                                 const double &rand_prob, const double &smart_car_density_min, const double &smart_car_density_max, 
-                                 const double &dt)
+                                 const double &rand_prob, const double &smart_car_density_min, const double &smart_car_density_max,
+                                 const double &dt, string out_file_name = "")
 {
     vector<double> smart_car_density;
     vector<double> flow;
@@ -313,7 +392,9 @@ void multiple_flow_vs_smart_cars(const unsigned &size, const unsigned &iteration
     }
 
     // Escribe a CSV.
-    ofstream file("flow_vs_smart_car_density.csv", ofstream::out);
+    if (out_file_name.empty())
+        out_file_name = "flow_vs_smart_car_density.csv";
+    ofstream file(out_file_name.c_str(), ofstream::out);
     for (unsigned i = 0; i < flow.size(); ++i)
     {
         if (i - flow.size() != 0)
@@ -324,21 +405,34 @@ void multiple_flow_vs_smart_cars(const unsigned &size, const unsigned &iteration
     file.close();
     delete_ca();
 }
+
+/**
+* @brief Mide el flujo promedio de todas las casillas respecto a probabilidad de aparición de nuevo auto.
+* @param size Tamaño de AC.
+* @param iterations Número de iteraciones para evolucionar AC.
+* @param vmax Velocidad máxima de autos.
+* @param density Densidad de autos.
+* @param rand_prob Probabilidad de descenso de velocidad.
+* @param new_car_prob_min Probabilidad de nuevo auto mínima.
+* @param new_car_prob_max Probabilidad de nuevo auto máxima.
+* @param dt Intervalo entre valores a recorrer.
+* @param out_file_name Nombre opcional para el archivo de salida.
+*/
 void multiple_flow_vs_new_car_prob(const unsigned &size, const unsigned &iterations, const int &vmax, const double &density, 
-                                   const double &rand_prob, const double &new_car_density_min, const double &new_car_density_max, 
-                                   const double &dt)
+                                   const double &rand_prob, const double &new_car_prob_min, const double &new_car_prob_max,
+                                   const double &dt, string out_file_name = "")
 {
     vector<double> new_car_density;
     vector<double> flow;
     CellularAutomata* ca;
 
-    for (double s=new_car_density_min; s<=new_car_density_max; s+=dt)
+    for (double s=new_car_prob_min; s<=new_car_prob_max; s+=dt)
     {
         // Reporta progreso.
-        if (s + dt > new_car_density_max)
+        if (s + dt > new_car_prob_max)
             aux_progress_bar(1.0);
         else
-            aux_progress_bar(s/new_car_density_max);
+            aux_progress_bar(s/new_car_prob_max);
 
         // Evoluciona el sistema.
         ca = create_ca(OPEN_CA, size, density, vmax, rand_prob, s);
@@ -376,7 +470,9 @@ void multiple_flow_vs_new_car_prob(const unsigned &size, const unsigned &iterati
     }
 
     // Escribe a CSV.
-    ofstream file("flow_vs_new_density.csv", ofstream::out);
+    if (out_file_name.empty())
+        out_file_name = "flow_vs_new_density.csv";
+    ofstream file(out_file_name.c_str(), ofstream::out);
     for (unsigned i = 0; i < flow.size(); ++i)
     {
         if (i - flow.size() != 0)
@@ -387,9 +483,22 @@ void multiple_flow_vs_new_car_prob(const unsigned &size, const unsigned &iterati
     file.close();
     delete_ca();
 }
+
+/**
+* @brief Mide el flujo promedio de todas las casillas respecto a probabilidad de topes.
+* @param size Tamaño de AC.
+* @param iterations Número de iteraciones para evolucionar AC.
+* @param vmax Velocidad máxima de autos.
+* @param density Densidad de autos.
+* @param rand_prob Probabilidad de descenso de velocidad.
+* @param stop_density_min Densidad de topes mínima.
+* @param stop_density_max Densidad de topes máxima.
+* @param dt Intervalo entre valores a recorrer.
+* @param out_file_name Nombre opcional para el archivo de salida.
+*/
 void multiple_flow_vs_stop_density(const unsigned &size, const unsigned &iterations, const int &vmax,
                                    const double &density, const double &rand_prob, const double &stop_density_min,
-                                   const double &stop_density_max, const double &dt)
+                                   const double &stop_density_max, const double &dt, string out_file_name = "")
 {
     vector<double> stop_density;
     vector<double> flow;
@@ -438,7 +547,9 @@ void multiple_flow_vs_stop_density(const unsigned &size, const unsigned &iterati
     }
 
     // Escribe a CSV.
-    ofstream file("flow_vs_stop_density.csv", ofstream::out);
+    if (out_file_name.empty())
+        out_file_name = "flow_vs_stop_density.csv";
+    ofstream file(out_file_name.c_str(), ofstream::out);
     for (unsigned i = 0; i < flow.size(); ++i)
     {
         if (i - flow.size() != 0)
@@ -480,7 +591,7 @@ enum  OptionIndex { UNKNOWN, SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, PLOT_TR
                     FLOW_VS_DENSITY, FLOW_PER_DENSITY, FLOW_VS_VMAX, FLOW_VS_RAND_PROB, FLOW_VS_SMART_CARS, FLOW_VS_STOP_DENSITY,
                     FLOW_VS_NEW_CAR, CA_CIRCULAR, CA_OPEN, CA_SMART, CA_STOP, NEW_CAR_PROB, SMART_DENSITY, STOP_DENSITY, DT,
                     DMIN, DMAX, VMAX_MIN, VMAX_MAX, RAND_PROB_MIN, SMART_MIN, SMART_MAX, STOP_DENSITY_MIN, STOP_DENSITY_MAX,
-                    NEW_CAR_MIN, NEW_CAR_MAX, RAND_PROB_MAX, HELP };
+                    NEW_CAR_MIN, NEW_CAR_MAX, RAND_PROB_MAX, OUT_FILE_NAME, HELP };
 
 const option::Descriptor usage[] =
 {
@@ -528,6 +639,7 @@ const option::Descriptor usage[] =
     {NEW_CAR_MIN,  0,"", "new_car_min", Arg::Required, "  \t--new_car_min=<arg>  \tProbabilidad minima de nuevo auto en ac abierto." },
     {NEW_CAR_MAX,  0,"", "new_car_max", Arg::Required, "  \t--new_car_max=<arg>  \tProbabilidad maxima de nuevo auto en ac abierto." },
     {HELP,    0,"", "help", Arg::None,    "  \t--help  \tMuestra instrucciones detalladas de cada experimento." },
+    {OUT_FILE_NAME,  0,"", "out_file_name", Arg::Required, "  \t--out_file_name=<arg>  \tCambia el nombre del archivo de salida al especificado." },
     {0,0,0,0,0,0}
 };
 
@@ -587,6 +699,7 @@ int main(int argc, char* argv[])
     bool flow_vs_stop_density = false, flow_per_density = false, flow_vs_new_car = false;
     CA_TYPE ca_type = CIRCULAR_CA;
     double new_car_prob = 0.1, smart_density = 0.1, stop_density = 0.1;
+    string out_file_name = "";
 
     // Ejecuta parser de argumentos.
     argc -= (argc>0); argv += (argc>0);
@@ -753,6 +866,10 @@ int main(int argc, char* argv[])
             case NEW_CAR_MAX:
             new_car_max = aux_string_to_num<double>(opt.arg);
             break;
+
+            case OUT_FILE_NAME:
+            out_file_name = opt.arg;
+            break;
         }
     }
 
@@ -795,12 +912,12 @@ int main(int argc, char* argv[])
         if (measure_ocupancy)
         {
             cout << "Midiendo ocupacion." << endl;
-            single_measure_ocupancy(ca);
+            single_measure_ocupancy(ca, out_file_name);
         }
         if (measure_flow)
         {
             cout << "Midiendo flujo." << endl;
-            single_measure_flow(ca);
+            single_measure_flow(ca, out_file_name);
         }
         delete_ca();
     }
@@ -809,37 +926,37 @@ int main(int argc, char* argv[])
         if (flow_vs_density)
         {
             cout << "Midiendo flujo vs densidad." << endl;
-            multiple_flow_vs_density(ca_type, size, iterations, vmax, dmin, dmax, dt, rand_prob, extra, false);
+            multiple_flow_vs_density(ca_type, size, iterations, vmax, dmin, dmax, dt, rand_prob, extra, false, out_file_name);
         }
         if (flow_per_density)
         {
             cout << "Midiendo flujo/densidad vs densidad." << endl;
-            multiple_flow_vs_density(ca_type, size, iterations, vmax, dmin, dmax, dt, rand_prob, extra, true);
+            multiple_flow_vs_density(ca_type, size, iterations, vmax, dmin, dmax, dt, rand_prob, extra, true, out_file_name);
         }
         if (flow_vs_vmax)
         {
             cout << "Midiendo flujo vs vmax." << endl;
-            multiple_flow_vs_vmax(ca_type, size, iterations, vmax_min, vmax_max, (int)dt, density, rand_prob, extra);
+            multiple_flow_vs_vmax(ca_type, size, iterations, vmax_min, vmax_max, (int)dt, density, rand_prob, extra, out_file_name);
         }
         if (flow_vs_rand_prob)
         {
             cout << "Midiendo flujo vs rand_prob." << endl;
-            multiple_flow_vs_rand_prob(ca_type, size, iterations, vmax, density, rand_prob_min, rand_prob_max, dt, extra);
+            multiple_flow_vs_rand_prob(ca_type, size, iterations, vmax, density, rand_prob_min, rand_prob_max, dt, extra, out_file_name);
         }
         if (flow_vs_smart_cars)
         {
             cout << "Midiendo flujo vs densidad de autos inteligentes." << endl;
-            multiple_flow_vs_smart_cars(size, iterations, vmax, density, rand_prob, smart_min, smart_max, dt);
+            multiple_flow_vs_smart_cars(size, iterations, vmax, density, rand_prob, smart_min, smart_max, dt, out_file_name);
         }
         if (flow_vs_stop_density)
         {
             cout << "Midiendo flujo vs densidad de topes." << endl;
-            multiple_flow_vs_stop_density(size, iterations, vmax, density, rand_prob, stop_density_min, stop_density_max, dt);
+            multiple_flow_vs_stop_density(size, iterations, vmax, density, rand_prob, stop_density_min, stop_density_max, dt, out_file_name);
         }
         if (flow_vs_new_car)
         {
             cout << "Midiendo flujo vs probabilidad de nuevo auto." << endl;
-            multiple_flow_vs_new_car_prob(size, iterations, vmax, density, rand_prob, new_car_min, new_car_max, dt);
+            multiple_flow_vs_new_car_prob(size, iterations, vmax, density, rand_prob, new_car_min, new_car_max, dt, out_file_name);
         }
     }
     cout << "Hecho." << endl;

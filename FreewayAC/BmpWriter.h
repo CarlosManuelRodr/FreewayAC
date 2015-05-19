@@ -1,3 +1,10 @@
+/**
+* @file BmpWriter.h
+* @brief Escritor de archivos BMP simple.
+* @author Carlos Manuel Rodriguez Martinez
+* @date 7/18/2012
+*/
+
 #pragma once
 #ifndef __bmpWriter
 #define __bmpWriter
@@ -8,6 +15,10 @@ typedef short unsigned int bmp_uint16;
 typedef unsigned int bmp_uint32;
 typedef int bmp_int32;
 
+/**
+* @struct BMPHeader
+* @brief Encabezado del archivo BMP.
+*/
 struct BMPHeader
 {
     bmp_uint16 identifier;
@@ -17,6 +28,10 @@ struct BMPHeader
     bmp_uint32 bitmapData;
 };
 
+/**
+* @struct DIBHeader
+* @brief Otro encabezado usado por los archivos BMP que contiene parámetros.
+*/
 struct DIBHeader
 {
     bmp_uint32 headerSize;
@@ -32,6 +47,10 @@ struct DIBHeader
     bmp_uint32 nImpColors;
 };
 
+/**
+* @struct BMPPixel
+* @brief Pixel simple RGB.
+*/
 class BMPPixel
 {
 public:
@@ -41,6 +60,10 @@ public:
     bool operator==(const BMPPixel &other);
 };
 
+/**
+* @class BMPWriter
+* @brief Clase para escribir archivos de mapas de bits de gran tamaño.
+*/
 class BMPWriter
 {
     BMPHeader* m_bmpHdr;
@@ -53,8 +76,15 @@ class BMPWriter
     unsigned int m_indexHeight;
 
 public:
+    ///@brief Constructor.
+    ///@param filepath Ruta del archivo a guardar.
+    ///@param width Tamaño horizontal de la imagen.
+    ///@param height Tamaño vertical de la imagen.
     BMPWriter(const char* filepath, unsigned int width, unsigned int height);
     ~BMPWriter();
+
+    ///@brief Writes BMP line.
+    ///@param Array de pixeles a escribir. Las líneas se escriben de abajo a arriba.
     void WriteLine(BMPPixel* data);
     void CloseBMP();
 };
