@@ -58,6 +58,7 @@ void aux_progress_bar(double progress)
 CellularAutomata::CellularAutomata(const unsigned &size, const double &density, const int &vmax, const double &rand_prob)
 {
     // Inicializa variables.
+    m_test = false;
     m_size = size;
     m_vmax = vmax;
     m_rand_prob = rand_prob;
@@ -98,6 +99,20 @@ CellularAutomata::CellularAutomata(const unsigned &size, const double &density, 
     for (unsigned i=0; i<vehicles; ++i)
         m_ca[car_positions[i]] = 1;
 
+    m_ca_history.push_back(m_ca);
+}
+CellularAutomata::CellularAutomata(const vector<int> &ca, const vector<bool> &rand_values, const int &vmax)
+{
+    // Inicializa variables.
+    m_test = true;
+    m_ca = ca;
+    m_rand_values = rand_values;
+    m_size = m_ca.size();
+    m_vmax = vmax;
+    m_rand_prob = 0;
+    m_ca_temp.assign(m_size, -1);
+    m_ca_history.clear();
+    m_ca_flow_history.clear();
     m_ca_history.push_back(m_ca);
 }
 CellularAutomata::~CellularAutomata() {}
@@ -179,7 +194,7 @@ void CellularAutomata::Step()
             }
 
             // Aleatoriedad.
-            if ((m_ca[i] > 0) && (m_drand() <= m_rand_prob))
+            if ((m_ca[i] > 0) && Randomization())
                 m_ca[i]--;
         }
     }
@@ -215,6 +230,27 @@ unsigned CellularAutomata::CountCars()
     }
     return count;
 }
+bool CellularAutomata::Randomization()
+{
+    if (m_test)
+    {
+        if (m_rand_values.size() != 0)
+        {
+            int ret = m_rand_values[0];
+            m_rand_values.erase(m_rand_values.begin());
+            return ret;
+        }
+        else
+            return false;
+    }
+    else
+    {
+        if (m_drand() <= m_rand_prob)
+            return true;
+        else
+            return false;
+    }
+}
 int &CellularAutomata::At(const unsigned &i, const CAS &ca)
 {
     return At(i, 0, ca);
@@ -236,6 +272,8 @@ int CellularAutomata::NextCarDist(const int &pos)
 
 CircularCA::CircularCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob) 
     : CellularAutomata(size, density, vmax, rand_prob) {}
+CircularCA::CircularCA(const vector<int> &ca, const vector<bool> &rand_values, const int &vmax)
+    : CellularAutomata(ca, rand_values, vmax) {}
 int &CircularCA::At(const unsigned &i, const unsigned &j, const CAS &ca)
 {
     // Devuelve elemento de AC suponiendo una pista ciclica.
@@ -434,7 +472,7 @@ void SmartCA::Step()
                     m_ca[i]++;
 
                 // Aleatoriedad.
-                if ((m_ca[i] > 0) && (m_drand() <= m_rand_prob))
+                if ((m_ca[i] > 0) && Randomization())
                     m_ca[i]--;
             }
 
@@ -501,7 +539,7 @@ void StreetStopCA::Step()
             }
 
             // Aleatoriedad.
-            if ((m_ca[i] > 0) && (m_drand() <= m_rand_prob))
+            if ((m_ca[i] > 0) && Randomization())
                 m_ca[i]--;
 
             // Tope.

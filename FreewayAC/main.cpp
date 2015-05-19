@@ -561,6 +561,32 @@ void multiple_flow_vs_stop_density(const unsigned &size, const unsigned &iterati
     delete_ca();
 }
 
+void perform_test()
+{
+    const int init[] = {1, -1, -1, 1, -1, 1, 1, -1, -1, 1, -1, -1, -1, 1, -1, -1, 1, -1, -1, -1};
+    const int rand_val[] = {false, false, false, false, true, false, true, true, false, false, true,
+                            false, false, false, false, true, false, false, true, false, false};
+    const int end[] = {-1, 2, -1, 1, 0, -1, -1, 1, -1, 1, -1,-1, -1, -1, -1, 3, -1, -1, 2, -1};
+    vector<int> init_vec(init, init + sizeof(init) / sizeof(init[0]));
+    vector<bool> rand_val_vec(rand_val, rand_val + sizeof(rand_val) / sizeof(rand_val[0]));
+
+    CircularCA ca(init_vec, rand_val_vec, 5);
+    ca.Evolve(1);
+
+    bool match = true;
+    for (unsigned i=0; i<init_vec.size(); i++)
+    {
+        if (ca.At(i) != end[i])
+            match = false;
+    }
+
+    if (match)
+        cout << "Correcto!" << endl;
+    else
+        cout << "Incorrecto." << endl;
+    ca.Print();
+}
+
 
 /****************************
 *                           *
@@ -591,7 +617,7 @@ enum  OptionIndex { UNKNOWN, SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, PLOT_TR
                     FLOW_VS_DENSITY, FLOW_PER_DENSITY, FLOW_VS_VMAX, FLOW_VS_RAND_PROB, FLOW_VS_SMART_CARS, FLOW_VS_STOP_DENSITY,
                     FLOW_VS_NEW_CAR, CA_CIRCULAR, CA_OPEN, CA_SMART, CA_STOP, NEW_CAR_PROB, SMART_DENSITY, STOP_DENSITY, DT,
                     DMIN, DMAX, VMAX_MIN, VMAX_MAX, RAND_PROB_MIN, SMART_MIN, SMART_MAX, STOP_DENSITY_MIN, STOP_DENSITY_MAX,
-                    NEW_CAR_MIN, NEW_CAR_MAX, RAND_PROB_MAX, OUT_FILE_NAME, HELP };
+                    NEW_CAR_MIN, NEW_CAR_MAX, RAND_PROB_MAX, OUT_FILE_NAME, TEST, HELP };
 
 const option::Descriptor usage[] =
 {
@@ -638,8 +664,9 @@ const option::Descriptor usage[] =
     {STOP_DENSITY_MAX,  0,"", "stop_density_max", Arg::Required, "  \t--stop_density_max=<arg>  \tDensidad maxima de topes." },
     {NEW_CAR_MIN,  0,"", "new_car_min", Arg::Required, "  \t--new_car_min=<arg>  \tProbabilidad minima de nuevo auto en ac abierto." },
     {NEW_CAR_MAX,  0,"", "new_car_max", Arg::Required, "  \t--new_car_max=<arg>  \tProbabilidad maxima de nuevo auto en ac abierto." },
-    {HELP,    0,"", "help", Arg::None,    "  \t--help  \tMuestra instrucciones detalladas de cada experimento." },
     {OUT_FILE_NAME,  0,"", "out_file_name", Arg::Required, "  \t--out_file_name=<arg>  \tCambia el nombre del archivo de salida al especificado." },
+    {TEST,    0,"", "test", Arg::None,    "  \t--test  \tRealiza pruebas para garantizar la fiabilidad de resultados." },
+    {HELP,    0,"", "help", Arg::None,    "  \t--help  \tMuestra instrucciones detalladas de cada experimento." },
     {0,0,0,0,0,0}
 };
 
@@ -696,7 +723,7 @@ int main(int argc, char* argv[])
     double stop_density_max = 0.1;
     bool measure_ocupancy = false, measure_flow = false, flow_vs_density = false;
     bool plot_traffic = false, flow_vs_vmax = false, flow_vs_rand_prob = false, flow_vs_smart_cars = false;
-    bool flow_vs_stop_density = false, flow_per_density = false, flow_vs_new_car = false;
+    bool flow_vs_stop_density = false, flow_per_density = false, flow_vs_new_car = false, test = false;
     CA_TYPE ca_type = CIRCULAR_CA;
     double new_car_prob = 0.1, smart_density = 0.1, stop_density = 0.1;
     string out_file_name = "";
@@ -870,6 +897,10 @@ int main(int argc, char* argv[])
             case OUT_FILE_NAME:
             out_file_name = opt.arg;
             break;
+
+            case TEST:
+            test = true;
+            break;
         }
     }
 
@@ -884,7 +915,7 @@ int main(int argc, char* argv[])
         return 1;
     }
     if (!(measure_ocupancy || measure_flow || flow_vs_density || flow_per_density || flow_vs_vmax 
-          || flow_vs_rand_prob || flow_vs_smart_cars || flow_vs_new_car || flow_vs_stop_density))
+          || flow_vs_rand_prob || flow_vs_smart_cars || flow_vs_new_car || flow_vs_stop_density || test))
         plot_traffic = true;    // Opcion predeterminada.
     if (flow_vs_vmax && dt < 1)
         dt = 1.0;
@@ -898,6 +929,11 @@ int main(int argc, char* argv[])
         extra = stop_density;
 
     // Realiza acciones.
+    if (test)
+    {
+        cout << "Realizando tests." << endl;
+        perform_test();
+    }
     if (measure_ocupancy || measure_flow || plot_traffic)
     {
         cout << "Evolucionando automata." << endl;

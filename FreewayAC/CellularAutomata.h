@@ -126,12 +126,14 @@ enum CA_TYPE
 class CellularAutomata
 {
 protected:
+    bool m_test;                 ///< Modo de prueba.
     int m_vmax;                  ///< Valor máximo de la velocidad.
     double m_rand_prob;          ///< Valor de la probabilidad de descenso de velocidad.
     unsigned m_size;             ///< Tamaño del autómata celular
     std::vector<int> m_ca;       ///< Automata celular. -1 para casillas sin auto, y valores >= 0 indican velocidad del auto en esa casilla.
     std::vector<int> m_ca_temp, m_ca_flow_temp;                         ///< Variable temporal para operaciones con AC.
     std::vector< std::vector<int> > m_ca_history, m_ca_flow_history;    ///< Lista con valores históricos de AC.
+    std::vector<bool> m_rand_values;                                    ///< Lista con valores aleatorios para usar en modo de prueba.
     MTRand m_drand;              ///< Generador de aleatorios (flotantes) entre 0 y 1.
     MTRand_int32 m_irand;        ///< Generador de enteros aleatorios.
 
@@ -142,6 +144,13 @@ public:
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
     CellularAutomata(const unsigned &size, const double &density, const int &vmax, const double &rand_prob);
+
+    ///@brief Constructor.
+    ///@param ca Lista con valores de AC.
+    ///@param rand_values Valores aleatorios en cada paso.
+    ///@param density Densidad de autos.
+    ///@param vmax Velocidad máxima de los autos.
+    CellularAutomata(const std::vector<int> &ca, const std::vector<bool> &rand_values, const int &vmax);
     virtual ~CellularAutomata();
 
     ///@brief Evoluciona (itera) el AC.
@@ -167,6 +176,7 @@ public:
     unsigned GetSize();             ///< Devuelve tamaño del AC.
     unsigned GetHistorySize();      ///< Devuelve tamaño de la lista histórica de evolución del AC.
     unsigned CountCars();           ///< Cuenta la cantidad de autos en AC.
+    bool Randomization();           ///< Devuelve valores verdaderos con probabilidad m_rand_prob. Si se usa en prueba usa valores de lista.
     virtual void DrawHistory();     ///< Dibuja mapa histórico del AC en formato BMP.
     virtual void DrawFlowHistory(); ///< Dibuja mapa histórico del flujo de AC en formato BMP.
     virtual void Step();            ///< Aplica reglas de evolución temporal del AC.
@@ -192,6 +202,13 @@ public:
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
     CircularCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob);
+
+    ///@brief Constructor.
+    ///@param ca Lista con valores de AC.
+    ///@param rand_values Valores aleatorios en cada paso.
+    ///@param density Densidad de autos.
+    ///@param vmax Velocidad máxima de los autos.
+    CircularCA(const std::vector<int> &ca, const std::vector<bool> &rand_values, const int &vmax);
 
     ///@brief Devuelve elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
