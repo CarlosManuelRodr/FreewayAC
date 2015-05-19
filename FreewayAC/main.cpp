@@ -564,14 +564,16 @@ void multiple_flow_vs_stop_density(const unsigned &size, const unsigned &iterati
 void perform_test()
 {
     const int init[] = {1, -1, -1, 1, -1, 1, 1, -1, -1, 1, -1, -1, -1, 1, -1, -1, 1, -1, -1, -1};
-    const int rand_val[] = {false, false, false, false, true, false, true, true, false, false, true,
-                            false, false, false, false, true, false, false, true, false, false};
-    const int end[] = {-1, 2, -1, 1, 0, -1, -1, 1, -1, 1, -1,-1, -1, -1, -1, 3, -1, -1, 2, -1};
+    const bool rand_val[] = {false, false, false, false, true, false, true, 
+							 true, false, false, true, false, false, false, 
+							 false, true, false, false, true, false, false};
+    const int end[] = {-1, 2, -1, 1, 0, -1, -1, 1, -1, 1, -1,-1, -1, -1, 2, -1, -1, -1, 2, -1};
     vector<int> init_vec(init, init + sizeof(init) / sizeof(init[0]));
     vector<bool> rand_val_vec(rand_val, rand_val + sizeof(rand_val) / sizeof(rand_val[0]));
 
+	cout << "Comprobando automata celular circular... ";
     CircularCA ca(init_vec, rand_val_vec, 5);
-    ca.Evolve(1);
+    ca.Evolve(3);
 
     bool match = true;
     for (unsigned i=0; i<init_vec.size(); i++)
@@ -583,8 +585,10 @@ void perform_test()
     if (match)
         cout << "Correcto!" << endl;
     else
-        cout << "Incorrecto." << endl;
-    ca.Print();
+	{
+        cout << "Incorrecto. Log:" << endl;
+		ca.PrintHistory();
+	}
 }
 
 

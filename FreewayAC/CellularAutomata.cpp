@@ -128,6 +128,30 @@ void CellularAutomata::Print()
     }
     cout << endl;
 }
+void CellularAutomata::PrintHistory()
+{
+	for (unsigned i=0; i<m_ca_history.size(); i++)
+	{
+		for (unsigned j=0; j<m_size; j++)
+		{
+			if (j != m_size -1)
+			{
+				if (m_ca_history[i][j] == -1)
+					cout << " , ";
+				else
+					cout << m_ca_history[i][j] << ", ";
+			}
+			else
+			{
+				if (m_ca_history[i][j] == -1)
+					cout << " ";
+				else
+					cout << m_ca_history[i][j];
+			}
+		}
+		cout << endl;
+	}
+}
 void CellularAutomata::DrawHistory()
 {
     unsigned height = m_ca_history.size();
@@ -194,7 +218,8 @@ void CellularAutomata::Step()
             }
 
             // Aleatoriedad.
-            if ((m_ca[i] > 0) && Randomization())
+			bool rnd = Randomization();
+            if ((m_ca[i] > 0) && rnd)
                 m_ca[i]--;
         }
     }
@@ -236,8 +261,8 @@ bool CellularAutomata::Randomization()
     {
         if (m_rand_values.size() != 0)
         {
-            int ret = m_rand_values[0];
-            m_rand_values.erase(m_rand_values.begin());
+            bool ret = m_rand_values[0];
+			m_rand_values.erase(m_rand_values.begin());
             return ret;
         }
         else

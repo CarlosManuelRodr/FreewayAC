@@ -177,6 +177,7 @@ public:
     unsigned GetHistorySize();      ///< Devuelve tamaño de la lista histórica de evolución del AC.
     unsigned CountCars();           ///< Cuenta la cantidad de autos en AC.
     bool Randomization();           ///< Devuelve valores verdaderos con probabilidad m_rand_prob. Si se usa en prueba usa valores de lista.
+	void PrintHistory();			///< Escribe los valores históricos del AC en la terminal.
     virtual void DrawHistory();     ///< Dibuja mapa histórico del AC en formato BMP.
     virtual void DrawFlowHistory(); ///< Dibuja mapa histórico del flujo de AC en formato BMP.
     virtual void Step();            ///< Aplica reglas de evolución temporal del AC.

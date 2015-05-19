@@ -1,2 +1,1 @@
-- Añadir tests.
-- Hacer estricta la convencion de nombres.
+﻿- Hacer estricta la convencion de nombres.
