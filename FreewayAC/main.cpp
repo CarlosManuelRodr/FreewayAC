@@ -561,24 +561,29 @@ void multiple_flow_vs_stop_density(const unsigned &size, const unsigned &iterati
     delete_ca();
 }
 
+/**
+* @brief Realiza tests para verificar la corrección de los algoritmos.
+*/
 void perform_test()
 {
     const int init[] = {1, -1, -1, 1, -1, 1, 1, -1, -1, 1, -1, -1, -1, 1, -1, -1, 1, -1, -1, -1};
-    const bool rand_val[] = {false, false, false, false, true, false, true, 
-							 true, false, false, true, false, false, false, 
-							 false, true, false, false, true, false, false};
-    const int end[] = {-1, 2, -1, 1, 0, -1, -1, 1, -1, 1, -1,-1, -1, -1, 2, -1, -1, -1, 2, -1};
+
+	// Circular.
+    const bool rand_val_circ[] = {false, false, false, false, true, false, true, 
+							      true, false, false, true, false, false, false, 
+							      false, true, false, false, true, false, false};
+    const int end_circ[] = {-1, 2, -1, 1, 0, -1, -1, 1, -1, 1, -1,-1, -1, -1, 2, -1, -1, -1, 2, -1};
     vector<int> init_vec(init, init + sizeof(init) / sizeof(init[0]));
-    vector<bool> rand_val_vec(rand_val, rand_val + sizeof(rand_val) / sizeof(rand_val[0]));
+    vector<bool> rand_val_circ_vec(rand_val_circ, rand_val_circ + sizeof(rand_val_circ) / sizeof(rand_val_circ[0]));
 
 	cout << "Comprobando automata celular circular... ";
-    CircularCA ca(init_vec, rand_val_vec, 5);
-    ca.Evolve(3);
+    CircularCA circ_ca(init_vec, rand_val_circ_vec, 5);
+    circ_ca.Evolve(3);
 
     bool match = true;
     for (unsigned i=0; i<init_vec.size(); i++)
     {
-        if (ca.At(i) != end[i])
+		if (circ_ca.At(i) != end_circ[i])
             match = false;
     }
 
@@ -587,7 +592,33 @@ void perform_test()
     else
 	{
         cout << "Incorrecto. Log:" << endl;
-		ca.PrintHistory();
+		circ_ca.PrintHistory();
+	}
+
+	// Abierto.
+	const bool rand_val_open[] = {false, false, false, false, true, false, true, false,
+							      true, false, false, true, false, false, false, true,
+								  false, true, false, false, true, false, false, false};
+	const int end_open[] = {-1, 1, 0, -1, -1, 1, -1, 1, 0, -1, -1,-1, -1, -1, -1, 3, -1, -1, 2, -1};
+    vector<bool> rand_val_open_vec(rand_val_open, rand_val_open + sizeof(rand_val_open) / sizeof(rand_val_open[0]));
+
+	cout << "Comprobando automata celular abierto... ";
+    OpenCA open_ca(init_vec, rand_val_open_vec, 5);
+    open_ca.Evolve(3);
+
+	match = true;
+    for (unsigned i=0; i<init_vec.size(); i++)
+    {
+        if (open_ca.At(i) != end_open[i])
+            match = false;
+    }
+
+    if (match)
+        cout << "Correcto!" << endl;
+    else
+	{
+        cout << "Incorrecto. Log:" << endl;
+		open_ca.PrintHistory();
 	}
 }
 

@@ -27,18 +27,18 @@ void aux_progress_bar(double progress)
 {
     int barWidth = 35;
 
-    std::cout << "[";
+    cout << "[";
     int pos = (int)(barWidth * progress);
     for (int i = 0; i < barWidth; ++i)
     {
-        if (i < pos) std::cout << "=";
-        else if (i == pos) std::cout << ">";
-        else std::cout << " ";
+        if (i < pos) cout << "=";
+        else if (i == pos) cout << ">";
+        else cout << " ";
     }
-    std::cout << "] " << int(progress * 100.0) << " %\r";
-    std::cout.flush();
+    cout << "] " << int(progress * 100.0) << " %\r";
+    cout.flush();
     if (progress == 1.0)
-        std::cout << std::endl;
+        cout << endl;
 }
 
 ////////////////////////////////////
@@ -70,7 +70,7 @@ CellularAutomata::CellularAutomata(const unsigned &size, const double &density, 
 
     // Verifica argumentos.
     double l_density = density;
-    if (l_density <= 0.0 || l_density >= 1.0)
+    if (l_density < 0.0 || l_density > 1.0)
     {
         l_density = 0.1;
         cout << "Densidad invalida. Cambiando a density=" << l_density << "." << endl;
@@ -80,7 +80,7 @@ CellularAutomata::CellularAutomata(const unsigned &size, const double &density, 
         m_vmax = 1;
         cout << "Velocidad limite invalida. Cambiando a vmax=" << m_vmax << "." << endl;
     }
-    if (m_rand_prob < 0.0 || m_rand_prob >= 1.0)
+    if (m_rand_prob < 0.0 || m_rand_prob > 1.0)
     {
         m_rand_prob = 0.0;
         cout << "Probabilidad de frenado invalida. Cambiando a rand_prob=" << m_rand_prob << "." << endl;
@@ -255,8 +255,14 @@ unsigned CellularAutomata::CountCars()
     }
     return count;
 }
-bool CellularAutomata::Randomization()
+bool CellularAutomata::Randomization(const double &prob)
 {
+	double l_prob;
+	if (prob < 0)
+		l_prob = m_rand_prob;
+	else
+		l_prob = prob;
+
     if (m_test)
     {
         if (m_rand_values.size() != 0)
@@ -270,7 +276,7 @@ bool CellularAutomata::Randomization()
     }
     else
     {
-        if (m_drand() <= m_rand_prob)
+        if (m_drand() <= l_prob)
             return true;
         else
             return false;
@@ -363,6 +369,12 @@ OpenCA::OpenCA(const unsigned &size, const double &density, const int &vmax, con
         cout << "Probabilidad de nuevo auto invalida. Cambiando a new_car_prob=" << m_new_car_prob << "." << endl;
     }
 }
+OpenCA::OpenCA(const vector<int> &ca, const vector<bool> &rand_values, const int &vmax)
+	: CellularAutomata(ca, rand_values, vmax)
+{
+	m_new_car_prob = -1.0;
+	m_empty = -1;
+}
 int &OpenCA::At(const unsigned &i, const unsigned &j, const CAS &ca)
 {
     if (i >= m_ca.size())
@@ -416,7 +428,7 @@ void OpenCA::Move()
     m_ca.assign(m_ca_temp.begin(), m_ca_temp.end());
     
     // Añade coche con probabilidad aleatoria.
-    if (m_drand() < m_new_car_prob)
+    if (Randomization(m_new_car_prob))
         m_ca[0] = 1;
 }
 

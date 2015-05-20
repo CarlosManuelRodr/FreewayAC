@@ -161,6 +161,10 @@ public:
     ///@param pos Posición desde dónde iniciar la búsqueda.
     int NextCarDist(const int &pos);
 
+	///@brief Devuelve valores verdaderos con probabilidad prob. Si se usa en prueba usa valores de lista.
+	///@param prob Probabilidad de obtener valor verdadero. Por defecto se utiliza m_rand_prob.
+	bool Randomization(const double &prob = -1.0);
+
     ///@brief Devuelve elemento del AC considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
     ///@param ca Tipo de AC.
@@ -176,7 +180,6 @@ public:
     unsigned GetSize();             ///< Devuelve tamaño del AC.
     unsigned GetHistorySize();      ///< Devuelve tamaño de la lista histórica de evolución del AC.
     unsigned CountCars();           ///< Cuenta la cantidad de autos en AC.
-    bool Randomization();           ///< Devuelve valores verdaderos con probabilidad m_rand_prob. Si se usa en prueba usa valores de lista.
 	void PrintHistory();			///< Escribe los valores históricos del AC en la terminal.
     virtual void DrawHistory();     ///< Dibuja mapa histórico del AC en formato BMP.
     virtual void DrawFlowHistory(); ///< Dibuja mapa histórico del flujo de AC en formato BMP.
@@ -244,12 +247,19 @@ public:
     ///@param rand_prob Probabilidad de descenso de velocidad.
     ///@param new_car_prob Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
     OpenCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const double &new_car_prob);
-    using CellularAutomata::At;
+
+	///@brief Constructor.
+    ///@param ca Lista con valores de AC.
+    ///@param rand_values Valores aleatorios en cada paso.
+    ///@param density Densidad de autos.
+    ///@param vmax Velocidad máxima de los autos.
+    OpenCA(const std::vector<int> &ca, const std::vector<bool> &rand_values, const int &vmax);
 
     ///@brief Devuelve elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
     ///@param j Posición temporal del AC.
     ///@param ca Tipo de autómata celular.
+	using CellularAutomata::At;
     int &At(const unsigned &i, const unsigned &j, const CAS &ca);
 
     void Move();    ///< Mueve los autos con condiciones de frontera abiertas.
