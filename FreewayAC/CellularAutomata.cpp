@@ -19,7 +19,7 @@ void aux_random_seed()
     m_drand.seed(seed);
     m_irand.seed(seed);
 }
-int aux_random(int i)
+int aux_random(int &i)
 {
     return m_irand() % i;
 }
@@ -645,6 +645,164 @@ void StreetStopCA::DrawHistory()
         delete[] bmpData;
 }
 
+/****************************
+*                           *
+*        AC Semáforo        *
+*                           *
+****************************/
+
+SemaphoreCA::SemaphoreCA(const unsigned &size, const double &density, const int &vmax, 
+                         const double &rand_prob, const double &semaphore_density, 
+						 const bool &random_semaphores)
+                       : CircularCA(size, density, vmax, rand_prob)
+{
+	m_semaphore_init = 100;
+	m_semaphore_open = 50;
+    unsigned semaphores = (unsigned)(((double)size)*semaphore_density);
+    if (semaphores >= size)
+    {
+        semaphores = size - 2;
+        cout << "Densidad de topes invalida. Se usaran " << semaphores << " topes." << endl;
+    }
+
+    // Coloca semáforo.
+	if (random_semaphores)
+	{
+		vector<unsigned> semaphore_positions;
+		for (unsigned i=0; i<m_size; ++i)
+			semaphore_positions.push_back(i);
+
+		random_shuffle(semaphore_positions.begin(), semaphore_positions.end(), aux_random);
+		for (unsigned i=0; i<semaphores; ++i)
+		{
+			m_semaphore_pos.push_back(semaphore_positions[i]);
+			m_semaphore_value.push_back(aux_random(m_semaphore_init));
+		}
+	}
+	else
+	{
+		if (semaphores != 0)
+		{
+			int semaphore_dt = size/semaphores;
+			for (unsigned i=0; i<size; i += semaphore_dt)
+			{
+				m_semaphore_pos.push_back(i);
+				m_semaphore_value.push_back(aux_random(m_semaphore_init));
+			}
+		}
+	}
+	m_semaphore_val_hist.push_back(m_semaphore_value);
+}
+void SemaphoreCA::Step()
+{
+    // Iterar sobre AC hasta encotrar vehiculo.
+    for (unsigned i=0; i<m_ca.size(); ++i)
+    {
+        if (m_ca[i] != -1)
+        {
+            // Aceleracion.
+            if ((m_ca[i] <= m_vmax) && ((NextCarDist(i) > (m_ca[i] + 1)) && (NextSemaphoreDist(i) > (m_ca[i] + 1))))
+                m_ca[i]++;
+            else
+            {
+                // Frenado.
+                if (m_ca[i] > 0)
+                {
+                    int ncd = NextCarDist(i);
+					int nsd = NextSemaphoreDist(i);
+					int nd = (ncd < nsd) ? ncd : nsd;
+                    if (nd <= m_ca[i])
+                        m_ca[i] = nd - 1;
+                }
+            }
+
+            // Aleatoriedad.
+            if ((m_ca[i] > 0) && Randomization())
+                m_ca[i]--;
+        }
+    }
+
+	// Itera semáforos.
+	for (unsigned i=0; i<m_semaphore_value.size(); i++)
+	{
+		m_semaphore_value[i]--;
+		if (m_semaphore_value[i] < 0)
+			m_semaphore_value[i] = m_semaphore_init;
+	}
+	m_semaphore_val_hist.push_back(m_semaphore_value);
+
+    // Aplicar cambios.
+    Move();
+    m_ca_history.push_back(m_ca);
+}
+int SemaphoreCA::NextSemaphoreDist(const int &pos)
+{
+	if (!m_semaphore_pos.empty())
+    {
+        vector<unsigned> dist;
+        for (unsigned i=0; i<m_semaphore_pos.size(); ++i)
+        {
+			if (m_semaphore_value[i] >= m_semaphore_open)
+			{
+				int tmp_dist = pos - m_semaphore_pos[i];
+				if (tmp_dist < 0)
+					dist.push_back(abs(tmp_dist));
+				else
+					dist.push_back(m_size - abs(tmp_dist));
+			}
+        }
+		if (!dist.empty())
+			return *min_element(dist.begin(), dist.end());
+		else 
+			return numeric_limits<int>::max();
+    }
+    else
+        return numeric_limits<int>::max();
+}
+void SemaphoreCA::DrawHistory()
+{
+        unsigned height = m_ca_history.size();
+        unsigned width = m_size;
+        BMPWriter writer("ca.bmp", width, height);
+        BMPPixel* bmpData = new BMPPixel[width];
+        for (int i=height-1; i>=0; i--)
+        {
+            for (unsigned j=0; j<width; ++j)
+            {
+                BMPPixel color;
+				int s_pos = aux_find_pos(m_semaphore_pos, j);
+                if (s_pos != -1)
+                {
+					if (m_semaphore_val_hist[i][s_pos] < m_semaphore_open)
+					{
+						if (m_ca_history[i][j] == -1)
+							color = BMPPixel((char)0, (char)255, (char)0);
+						else
+							color = BMPPixel((char)0, (char)255, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
+					}
+					else
+					{
+						if (m_ca_history[i][j] == -1)
+							color = BMPPixel((char)255, (char)0, (char)0);
+						else
+							color = BMPPixel((char)255, (char)0, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
+					}
+                }
+                else
+                {
+                    if (m_ca_history[i][j] == -1)
+                        color = BMPPixel((char)255, (char)255, (char)255);
+                    else
+                        color = BMPPixel((char)0, (char)0, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
+                }
+                bmpData[j] = color;
+            }
+            writer.WriteLine(bmpData);
+        }
+        writer.CloseBMP();
+        delete[] bmpData;
+}
+
 
 /****************************
 *                           *
@@ -657,8 +815,10 @@ CircularCA* circularca = NULL;
 OpenCA* openca = NULL;
 SmartCA* smartca = NULL;
 StreetStopCA* streetstopca = NULL;
+SemaphoreCA* semaphoreca = NULL;
 
-CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const double &extra)
+CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax, 
+	                        const double &rand_prob, const double &extra1, const bool &extra2)
 {
     delete_ca();
     switch(ca)
@@ -667,13 +827,17 @@ CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &dens
         cellularautomata = circularca = new CircularCA(size, density, vmax, rand_prob);
         break;
     case OPEN_CA:
-        cellularautomata = openca = new OpenCA(size, density, vmax, rand_prob, extra);
+        cellularautomata = openca = new OpenCA(size, density, vmax, rand_prob, extra1);
         break;
     case SMART_CA:
-        cellularautomata = smartca = new SmartCA(size, density, vmax, rand_prob, extra);
+        cellularautomata = smartca = new SmartCA(size, density, vmax, rand_prob, extra1);
         break;
     case STOP_CA:
-        cellularautomata = streetstopca = new StreetStopCA(size, density, vmax, rand_prob, extra);
+        cellularautomata = streetstopca = new StreetStopCA(size, density, vmax, rand_prob, extra1);
+		break;
+	case SEMAPHORE_CA:
+		cellularautomata = semaphoreca = new SemaphoreCA(size, density, vmax, rand_prob, extra1, extra2);
+		break;
     };
     return cellularautomata;
 }
@@ -687,12 +851,15 @@ void delete_ca()
         delete smartca;
     if (streetstopca != NULL)
         delete streetstopca;
+	if (semaphoreca != NULL)
+		delete semaphoreca;
 
     circularca = NULL;
     openca = NULL;
     smartca = NULL;
     streetstopca = NULL;
     cellularautomata = NULL;
+	semaphoreca = NULL;
 }
 
 

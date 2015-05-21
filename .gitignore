@@ -57,8 +57,6 @@ build/
 
 #  Application files #
 ######################
-*.bmp
-*.csv
 /Release/
 /Debug/
 /Release/

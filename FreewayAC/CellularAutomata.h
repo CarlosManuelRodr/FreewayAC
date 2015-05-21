@@ -39,7 +39,7 @@ void aux_random_seed();
 * @brief Devuelve número aleatorio entre 0 y i-1.
 * @param i Límite de número aleatorio.
 */
-int aux_random(int i);
+int aux_random(int &i);
 
 /**
 * @brief Informa si find_val está dentro de v.
@@ -113,7 +113,7 @@ enum CAS
 */
 enum CA_TYPE
 {
-    CIRCULAR_CA, OPEN_CA, SMART_CA, STOP_CA
+    CIRCULAR_CA, OPEN_CA, SMART_CA, STOP_CA, SEMAPHORE_CA
 };
 
 /**
@@ -326,6 +326,41 @@ public:
     void DrawHistory(); ///< Dibuja mapa histórico del AC en formato BMP marcando los topes de verde.
 };
 
+/****************************
+*                           *
+*        AC Semáforo        *
+*                           *
+****************************/
+
+/**
+ * @class SemaphoreCA
+ * @brief AC con semáforos y condiciones de frontera periódicas.
+ */
+class SemaphoreCA : public CircularCA
+{
+    std::vector<unsigned> m_semaphore_pos;                ///< Lista con posiciones de los semáforos.
+	std::vector<int> m_semaphore_value;                   ///< Valor inicial del tiempo del semáforo.
+	std::vector< std::vector<int> > m_semaphore_val_hist; ///< Valores historicos de valores de semaforo.
+	int m_semaphore_init;	                              ///< Valor del contador de semáforo con el cual comienza.
+	int m_semaphore_open;                                 ///< Valor del contador del semáforo en el cual se abre.
+public:
+    ///@brief Constructor.
+    ///@param size Tamaño del AC.
+    ///@param density Densidad de autos.
+    ///@param vmax Velocidad máxima de los autos.
+    ///@param rand_prob Probabilidad de descenso de velocidad.
+    ///@param semaphore_density Densidad de semaforos respecto a tamaño total del AC.
+	///@param 
+    SemaphoreCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob,
+		        const double &semaphore_density, const bool &random_semaphores = false);
+
+    ///@brief Devuelve la distancia al semáforo más próximo desde la posición pos.
+    ///@param pos Posición desde dónde iniciar la búsqueda.
+    int NextSemaphoreDist(const int &pos);
+
+    void Step();        ///< Aplica reglas de evolución temporal del AC con tope.
+    void DrawHistory(); ///< Dibuja mapa histórico del AC en formato BMP marcando los topes de verde.
+};
 
 /****************************
 *                           *
@@ -342,7 +377,8 @@ public:
 * @param rand_prob Probabilidad de descenso de velocidad.
 * @return Puntero de clase base que apunta hacia el AC.
 */
-CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const double &extra = 0.0);
+CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax, 
+	                        const double &rand_prob, const double &extra1 = 0.0, const bool &extra2 = false);
 
 /**
 * @brief Borra cualquier AC que haya sido creado anteriormente.
