@@ -230,12 +230,8 @@ void CellularAutomata::Step()
 }
 void CellularAutomata::Evolve(const unsigned &iter)
 {
-    unsigned cars = CountCars();
     for (unsigned i=0; i<iter; ++i)
         Step();
-
-    if (cars != CountCars())
-        cout << "Error: La cantidad de autos no se conserva." << endl;
 }
 unsigned CellularAutomata::GetSize()
 {
@@ -348,6 +344,15 @@ void CircularCA::Move()
     m_ca_flow_history.push_back(m_ca_flow_temp);
     m_ca.assign(m_ca_temp.begin(), m_ca_temp.end());
 }
+void CircularCA::Evolve(const unsigned &iter)
+{
+    unsigned cars = CountCars();
+    for (unsigned i=0; i<iter; ++i)
+        Step();
+
+    if (cars != CountCars())
+        cout << "Error: La cantidad de autos no se conserva." << endl;
+}
 
 
 /****************************
@@ -428,7 +433,7 @@ void OpenCA::Move()
     m_ca.assign(m_ca_temp.begin(), m_ca_temp.end());
     
     // Añade coche con probabilidad aleatoria.
-    if (Randomization(m_new_car_prob))
+    if (m_ca[0] == -1 && Randomization(m_new_car_prob))
         m_ca[0] = 1;
 }
 

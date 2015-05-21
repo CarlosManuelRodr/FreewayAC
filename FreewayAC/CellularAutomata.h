@@ -155,7 +155,7 @@ public:
 
     ///@brief Evoluciona (itera) el AC.
     ///@param iter Número de iteraciones.
-    void Evolve(const unsigned &iter);
+    virtual void Evolve(const unsigned &iter);
 
     ///@brief Devuelve la distancia al auto más próximo desde la posición pos.
     ///@param pos Posición desde dónde iniciar la búsqueda.
@@ -220,6 +220,10 @@ public:
     ///@param ca Tipo de autómata celular.
     using CellularAutomata::At;
     int &At(const unsigned &i, const unsigned &j, const CAS &ca);
+
+    ///@brief Evoluciona (itera) el AC. Verifica si se conserva la cantidad de autos.
+    ///@param iter Número de iteraciones.
+    void Evolve(const unsigned &iter);
 
     virtual void Move();    ///< Mueve los autos con condiciones de frontera periódicas.
 };
