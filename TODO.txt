@@ -1,2 +1,2 @@
 ﻿- Hacer estricta la convencion de nombres.
-- Revisa CA_SMART.
+- Intersección de carriles.

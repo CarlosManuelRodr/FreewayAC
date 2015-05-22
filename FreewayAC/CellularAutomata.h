@@ -85,7 +85,7 @@ template <class N> N aux_string_to_num(const std::string &s)
 ////////////////////////////////////
 //                                //
 //        Autómatas celulares     //
-//        de carril único.        //
+//        de carril único         //
 //                                //
 ////////////////////////////////////
 
@@ -161,9 +161,9 @@ public:
     ///@param pos Posición desde dónde iniciar la búsqueda.
     int NextCarDist(const int &pos);
 
-	///@brief Devuelve valores verdaderos con probabilidad prob. Si se usa en prueba usa valores de lista.
-	///@param prob Probabilidad de obtener valor verdadero. Por defecto se utiliza m_rand_prob.
-	bool Randomization(const double &prob = -1.0);
+    ///@brief Devuelve valores verdaderos con probabilidad prob. Si se usa en prueba usa valores de lista.
+    ///@param prob Probabilidad de obtener valor verdadero. Por defecto se utiliza m_rand_prob.
+    bool Randomization(const double &prob = -1.0);
 
     ///@brief Devuelve elemento del AC considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
@@ -180,12 +180,13 @@ public:
     unsigned GetSize();             ///< Devuelve tamaño del AC.
     unsigned GetHistorySize();      ///< Devuelve tamaño de la lista histórica de evolución del AC.
     unsigned CountCars();           ///< Cuenta la cantidad de autos en AC.
-	void PrintHistory();			///< Escribe los valores históricos del AC en la terminal.
+    void PrintHistory();            ///< Escribe los valores históricos del AC en la terminal.
     virtual void DrawHistory();     ///< Dibuja mapa histórico del AC en formato BMP.
     virtual void DrawFlowHistory(); ///< Dibuja mapa histórico del flujo de AC en formato BMP.
     virtual void Step();            ///< Aplica reglas de evolución temporal del AC.
     virtual void Move() = 0;        ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
 };
+
 
 /****************************
 *                           *
@@ -252,7 +253,7 @@ public:
     ///@param new_car_prob Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
     OpenCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const double &new_car_prob);
 
-	///@brief Constructor.
+    ///@brief Constructor.
     ///@param ca Lista con valores de AC.
     ///@param rand_values Valores aleatorios en cada paso.
     ///@param density Densidad de autos.
@@ -263,7 +264,7 @@ public:
     ///@param i Posición dentro del AC.
     ///@param j Posición temporal del AC.
     ///@param ca Tipo de autómata celular.
-	using CellularAutomata::At;
+    using CellularAutomata::At;
     int &At(const unsigned &i, const unsigned &j, const CAS &ca);
 
     void Move();    ///< Mueve los autos con condiciones de frontera abiertas.
@@ -339,10 +340,10 @@ public:
 class SemaphoreCA : public CircularCA
 {
     std::vector<unsigned> m_semaphore_pos;                ///< Lista con posiciones de los semáforos.
-	std::vector<int> m_semaphore_value;                   ///< Valor inicial del tiempo del semáforo.
-	std::vector< std::vector<int> > m_semaphore_val_hist; ///< Valores historicos de valores de semaforo.
-	int m_semaphore_init;	                              ///< Valor del contador de semáforo con el cual comienza.
-	int m_semaphore_open;                                 ///< Valor del contador del semáforo en el cual se abre.
+    std::vector<int> m_semaphore_value;                   ///< Valor inicial del tiempo del semáforo.
+    std::vector< std::vector<int> > m_semaphore_val_hist; ///< Valores historicos de valores de semaforo.
+    int m_semaphore_init;                                  ///< Valor del contador de semáforo con el cual comienza.
+    int m_semaphore_open;                                 ///< Valor del contador del semáforo en el cual se abre.
 public:
     ///@brief Constructor.
     ///@param size Tamaño del AC.
@@ -350,16 +351,16 @@ public:
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
     ///@param semaphore_density Densidad de semaforos respecto a tamaño total del AC.
-	///@param 
+    ///@param 
     SemaphoreCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob,
-		        const double &semaphore_density, const bool &random_semaphores = false);
+                const double &semaphore_density, const bool &random_semaphores = false);
 
     ///@brief Devuelve la distancia al semáforo más próximo desde la posición pos.
     ///@param pos Posición desde dónde iniciar la búsqueda.
     int NextSemaphoreDist(const int &pos);
 
     void Step();        ///< Aplica reglas de evolución temporal del AC con tope.
-    void DrawHistory(); ///< Dibuja mapa histórico del AC en formato BMP marcando los topes de verde.
+    void DrawHistory(); ///< Dibuja mapa histórico del AC en formato BMP marcando los semaforos de color.
 };
 
 /****************************
@@ -378,7 +379,7 @@ public:
 * @return Puntero de clase base que apunta hacia el AC.
 */
 CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax, 
-	                        const double &rand_prob, const double &extra1 = 0.0, const bool &extra2 = false);
+                            const double &rand_prob, const double &extra1 = 0.0, const bool &extra2 = false);
 
 /**
 * @brief Borra cualquier AC que haya sido creado anteriormente.
@@ -390,7 +391,7 @@ void delete_ca();
 ////////////////////////////////////
 //                                //
 //      Autómatas celulares       //
-//      de varios carriles.       //
+//      de varios carriles        //
 //                                //
 ////////////////////////////////////
 
