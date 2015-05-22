@@ -33,6 +33,7 @@
 *.suo
 *.mid
 *.sdf
+*.opensdf
  
 # OS generated files #
 ######################

@@ -41,6 +41,40 @@ void aux_progress_bar(double progress)
         cout << endl;
 }
 
+/****************************
+*                           *
+*        Argumentos         *
+*                           *
+****************************/
+Args::Args(initializer_list<double> d_args, std::initializer_list<int> i_args, 
+	       initializer_list<bool> b_args)
+{
+	m_double_args = d_args;
+	m_int_args = i_args;
+	m_bool_args = b_args;
+}
+double Args::GetDouble(const unsigned &i)
+{
+	if (i < m_double_args.size())
+		return m_double_args[i];
+	else
+		return 0.0;
+}
+int Args::GetInt(const unsigned &i)
+{
+	if (i < m_int_args.size())
+		return m_int_args[i];
+	else
+		return 0;
+}
+bool Args::GetBool(const unsigned &i)
+{
+	if (i < m_bool_args.size())
+		return m_bool_args[i];
+	else
+		return 0.0;
+}
+
 ////////////////////////////////////
 //                                //
 //        Autómatas celulares     //
@@ -361,10 +395,12 @@ void CircularCA::Evolve(const unsigned &iter)
 *                           *
 ****************************/
 
-OpenCA::OpenCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const double &new_car_prob) 
+OpenCA::OpenCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, 
+	           const double &new_car_prob, const int &new_car_speed)
     : CellularAutomata(size, density, vmax, rand_prob)
 {
     m_new_car_prob = new_car_prob;
+	m_new_car_speed = new_car_speed;
     m_empty = -1;
 
     // Verifica argumento.
@@ -374,10 +410,12 @@ OpenCA::OpenCA(const unsigned &size, const double &density, const int &vmax, con
         cout << "Probabilidad de nuevo auto invalida. Cambiando a new_car_prob=" << m_new_car_prob << "." << endl;
     }
 }
-OpenCA::OpenCA(const vector<int> &ca, const vector<bool> &rand_values, const int &vmax)
+OpenCA::OpenCA(const vector<int> &ca, const vector<bool> &rand_values, const int &vmax, 
+	           const int &new_car_speed)
     : CellularAutomata(ca, rand_values, vmax)
 {
     m_new_car_prob = -1.0;
+	m_new_car_speed = new_car_speed;
     m_empty = -1;
 }
 int &OpenCA::At(const unsigned &i, const unsigned &j, const CAS &ca)
@@ -433,7 +471,7 @@ void OpenCA::Move()
     
     // Añade coche con probabilidad aleatoria.
     if (m_ca[0] == -1 && Randomization(m_new_car_prob))
-        m_ca[0] = 1;
+		m_ca[0] = m_new_car_speed;
 }
 
 
@@ -443,7 +481,8 @@ void OpenCA::Move()
 *                           *
 ****************************/
 
-SmartCA::SmartCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const double &smart_density) 
+SmartCA::SmartCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, 
+	             const double &smart_density) 
     : CircularCA(size, density, vmax, rand_prob)
 {
     // Verifica argumento.
@@ -816,7 +855,7 @@ StreetStopCA* streetstopca = NULL;
 SemaphoreCA* semaphoreca = NULL;
 
 CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax, 
-                            const double &rand_prob, const double &extra1, const bool &extra2)
+	                        const double &rand_prob, Args &args)
 {
     delete_ca();
     switch(ca)
@@ -825,16 +864,18 @@ CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &dens
         cellularautomata = circularca = new CircularCA(size, density, vmax, rand_prob);
         break;
     case OPEN_CA:
-        cellularautomata = openca = new OpenCA(size, density, vmax, rand_prob, extra1);
+		cellularautomata = openca = new OpenCA(size, density, vmax, rand_prob, args.GetDouble(), 
+			                                   args.GetInt());
         break;
     case SMART_CA:
-        cellularautomata = smartca = new SmartCA(size, density, vmax, rand_prob, extra1);
+		cellularautomata = smartca = new SmartCA(size, density, vmax, rand_prob, args.GetDouble());
         break;
     case STOP_CA:
-        cellularautomata = streetstopca = new StreetStopCA(size, density, vmax, rand_prob, extra1);
+		cellularautomata = streetstopca = new StreetStopCA(size, density, vmax, rand_prob, args.GetDouble());
         break;
     case SEMAPHORE_CA:
-        cellularautomata = semaphoreca = new SemaphoreCA(size, density, vmax, rand_prob, extra1, extra2);
+		cellularautomata = semaphoreca = new SemaphoreCA(size, density, vmax, rand_prob, args.GetDouble(), 
+			                                             args.GetBool());
         break;
     };
     return cellularautomata;

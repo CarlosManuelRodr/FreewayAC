@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <algorithm>
+#include <initializer_list>
 #include "BmpWriter.h"
 #include "mtrand.h"
 
@@ -81,6 +82,42 @@ template <class N> N aux_string_to_num(const std::string &s)
         return 0;
     return static_cast<N>(x);
 }
+
+/****************************
+*                           *
+*        Argumentos         *
+*                           *
+****************************/
+
+/**
+* @class Args
+* @brief Clase para pasar una cantidad de argumentos variable a una función.
+*/
+class Args
+{
+	std::vector<double> m_double_args;
+	std::vector<int> m_int_args;
+	std::vector<bool> m_bool_args;
+public:
+	///@brief Constructor.
+	///@param d_args Argumentos del tipo double.
+	///@param i_args Argumentos del tipo int.
+	///@param b_args Argumentos del tipo bool.
+	Args(std::initializer_list<double> d_args, std::initializer_list<int> i_args = {},
+		 std::initializer_list<bool> b_args = {});
+
+	///@brief Devuelve elemento double.
+	///@param i Indice del elemento a devolver.
+	double GetDouble(const unsigned &i = 1);
+
+	///@brief Devuelve elemento int.
+	///@param i Indice del elemento a devolver.
+	int GetInt(const unsigned &i = 1);
+
+	///@brief Devuelve elemento bool.
+	///@param i Indice del elemento a devolver.
+	bool GetBool(const unsigned &i = 1);
+};
 
 ////////////////////////////////////
 //                                //
@@ -187,6 +224,43 @@ public:
     virtual void Move() = 0;        ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
 };
 
+/****************************
+*                           *
+*      AC Con uniones       *
+*                           *
+****************************/
+
+class JunctionCA : public CellularAutomata
+{
+	JunctionCA* m_connect;  ///< Puntero al AC al cual se va a conectar.
+	int m_empty;            ///< Se usa para devolver referencia de lugar vacío.
+	double m_new_car_prob;  ///< Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
+	int m_new_car_speed;    ///< Velocidad de nuevo auto cuando ingresa a la pista.
+public:
+	///@brief Constructor.
+	///@param size Tamaño del AC.
+	///@param density Densidad de autos.
+	///@param vmax Velocidad máxima de los autos.
+	///@param rand_prob Probabilidad de descenso de velocidad.
+	///@param new_car_prob Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
+	///@param new_car_speed Velocidad de nuevo auto cuando ingresa a la pista.
+	JunctionCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob,
+		       const double &new_car_prob, const int &new_car_speed);
+
+	///@brief Devuelve elemento de valores del autómata celular considerando las condiciones de frontera.
+	///@param i Posición dentro del AC.
+	///@param j Posición temporal del AC.
+	///@param ca Tipo de autómata celular.
+	using CellularAutomata::At;
+	int &At(const unsigned &i, const unsigned &j, const CAS &ca);
+
+	///@brief Conecta AC con otro. El flujo de autos ocurre desde el que realiza la conexión al objetivo.
+	///@param connect Puntero a AC objetivo.
+	void Connect(JunctionCA* connect);
+
+	void Move();    ///< Mueve los autos con condiciones de frontera abiertas.
+};
+
 
 /****************************
 *                           *
@@ -244,6 +318,7 @@ class OpenCA : public CellularAutomata
 {
     int m_empty;            ///< Se usa para devolver referencia de lugar vacío.
     double m_new_car_prob;  ///< Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
+	int m_new_car_speed;    ///< Velocidad de nuevo auto cuando ingresa a la pista.
 public:
     ///@brief Constructor.
     ///@param size Tamaño del AC.
@@ -251,14 +326,18 @@ public:
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
     ///@param new_car_prob Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
-    OpenCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const double &new_car_prob);
+	///@param new_car_speed Velocidad de nuevo auto cuando ingresa a la pista.
+    OpenCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, 
+		   const double &new_car_prob, const int &new_car_speed);
 
     ///@brief Constructor.
     ///@param ca Lista con valores de AC.
     ///@param rand_values Valores aleatorios en cada paso.
     ///@param density Densidad de autos.
     ///@param vmax Velocidad máxima de los autos.
-    OpenCA(const std::vector<int> &ca, const std::vector<bool> &rand_values, const int &vmax);
+	///@param new_car_speed Velocidad de nuevo auto cuando ingresa a la pista.
+	OpenCA(const std::vector<int> &ca, const std::vector<bool> &rand_values, const int &vmax, 
+		   const int &new_car_speed);
 
     ///@brief Devuelve elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
@@ -291,7 +370,8 @@ public:
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
     ///@param smart_density Densidad de autos inteligentes respecto a número total de autos.
-    SmartCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const double &smart_density);
+    SmartCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, 
+		    const double &smart_density);
 
     void Move();    ///< Mueve los autos con condiciones de frontera periódicas.
     void Step();    ///< Aplica reglas de evolución temporal del AC para autos normales e inteligentes.
@@ -376,10 +456,11 @@ public:
 * @param density Densidad de autos.
 * @param vmax Velocidad máxima.
 * @param rand_prob Probabilidad de descenso de velocidad.
+* @param args Argumentos extra que requieren algunos AC.
 * @return Puntero de clase base que apunta hacia el AC.
 */
 CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax, 
-                            const double &rand_prob, const double &extra1 = 0.0, const bool &extra2 = false);
+                            const double &rand_prob, Args &args);
 
 /**
 * @brief Borra cualquier AC que haya sido creado anteriormente.
