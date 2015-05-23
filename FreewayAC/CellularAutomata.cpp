@@ -100,6 +100,8 @@ CellularAutomata::CellularAutomata(const unsigned &size, const double &density, 
     m_ca_temp.assign(size, -1);
     m_ca_history.clear();
     m_ca_flow_history.clear();
+	m_connect = NULL;
+	m_connect_pos = -1;
 
 
     // Verifica argumentos.
@@ -148,6 +150,8 @@ CellularAutomata::CellularAutomata(const vector<int> &ca, const vector<bool> &ra
     m_ca_history.clear();
     m_ca_flow_history.clear();
     m_ca_history.push_back(m_ca);
+	m_connect = NULL;
+	m_connect_pos = -1;
 }
 CellularAutomata::~CellularAutomata() {}
 void CellularAutomata::Print()
@@ -262,6 +266,28 @@ void CellularAutomata::Step()
     Move();
     m_ca_history.push_back(m_ca);
 }
+void CellularAutomata::Move()
+{
+	m_ca_flow_temp.assign(m_size, 0);
+	m_ca_temp.assign(m_size, -1);
+	for (unsigned i = 0; i<m_ca.size(); ++i)
+	{
+		if (m_ca[i] != -1)
+		{
+			// Cambia las posiciones de los autos en AC.
+			if ((i + m_ca[i] >= m_size) && m_connect != NULL)
+				At(i + m_ca[i]) = m_ca[i];
+			else
+				At(i + m_ca[i], CA_TEMP) = m_ca[i];
+
+			// Marca las casillas donde hay flujo de autos.
+			for (unsigned j = i; j<i + m_ca[i]; ++j)
+				At(j, CA_FLOW_TEMP) = 1;
+		}
+	}
+	m_ca_flow_history.push_back(m_ca_flow_temp);
+	m_ca.assign(m_ca_temp.begin(), m_ca_temp.end());
+}
 void CellularAutomata::Evolve(const unsigned &iter)
 {
     for (unsigned i=0; i<iter; ++i)
@@ -315,7 +341,20 @@ bool CellularAutomata::Randomization(const double &prob)
 }
 int &CellularAutomata::At(const unsigned &i, const CAS &ca)
 {
-    return At(i, 0, ca);
+	if (m_connect != NULL && i >= m_size)
+		return m_connect->At(i- m_size + m_connect_pos, ca);
+	else
+		return At(i, 0, ca);
+}
+void CellularAutomata::Connect(CellularAutomata* connect, unsigned connect_pos)
+{
+	m_connect = connect;
+	m_connect_pos = connect_pos;
+	if (m_connect_pos > m_size)
+	{
+		m_connect_pos = m_size / 2;
+		cout << "Valor incorrecto de posicion de conexion. Cambiando a " << m_connect_pos << endl;
+	}
 }
 int CellularAutomata::NextCarDist(const int &pos)
 {
@@ -358,25 +397,6 @@ int &CircularCA::At(const unsigned &i, const unsigned &j, const CAS &ca)
         return m_ca[pos];
         break;
     };
-}
-void CircularCA::Move()
-{
-    m_ca_flow_temp.assign(m_size, 0);
-    m_ca_temp.assign(m_size, -1);
-    for (unsigned i=0; i<m_ca.size(); ++i)
-    {
-        if (m_ca[i] != -1)
-        {
-            // Cambia las posiciones de los autos en AC.
-            At(i+m_ca[i], CA_TEMP) = m_ca[i];
-
-            // Marca las casillas donde hay flujo de autos.
-            for (unsigned j=i; j<i+m_ca[i]; ++j)
-                At(j, CA_FLOW_TEMP) = 1;
-        }
-    }
-    m_ca_flow_history.push_back(m_ca_flow_temp);
-    m_ca.assign(m_ca_temp.begin(), m_ca_temp.end());
 }
 void CircularCA::Evolve(const unsigned &iter)
 {
@@ -450,28 +470,42 @@ int &OpenCA::At(const unsigned &i, const unsigned &j, const CAS &ca)
         };
     }
 }
-void OpenCA::Move()
+void OpenCA::Step()
 {
-    m_ca_flow_temp.assign(m_size, 0);
-    m_ca_temp.assign(m_size, -1);
-    for (unsigned i=0; i<m_ca.size(); ++i)
-    {
-        if (m_ca[i] != -1)
-        {
-            // Cambia las posiciones de los autos en AC.
-            At(i+m_ca[i], CA_TEMP) = m_ca[i];
+	// Iterar sobre AC hasta encotrar vehiculo.
+	for (unsigned i = 0; i<m_ca.size(); ++i)
+	{
+		if (m_ca[i] != -1)
+		{
+			// Aceleracion.
+			if ((m_ca[i] <= m_vmax) && (NextCarDist(i) >(m_ca[i] + 1)))
+				m_ca[i]++;
+			else
+			{
+				// Frenado.
+				if (m_ca[i] > 0)
+				{
+					int nd = NextCarDist(i);
+					if (nd <= m_ca[i])
+						m_ca[i] = nd - 1;
+				}
+			}
 
-            // Marca las casillas donde hay flujo de autos.
-            for (unsigned j=i; j<i+m_ca[i]; ++j)
-                At(j, CA_FLOW_TEMP) = 1;
-        }
-    }
-    m_ca_flow_history.push_back(m_ca_flow_temp);
-    m_ca.assign(m_ca_temp.begin(), m_ca_temp.end());
-    
-    // Añade coche con probabilidad aleatoria.
-    if (m_ca[0] == -1 && Randomization(m_new_car_prob))
+			// Aleatoriedad.
+			bool rnd = Randomization();
+			if ((m_ca[i] > 0) && rnd)
+				m_ca[i]--;
+		}
+	}
+
+	// Aplicar cambios.
+	Move();
+
+	// Añade coche con probabilidad aleatoria.
+	if (m_ca[0] == -1 && Randomization(m_new_car_prob))
 		m_ca[0] = m_new_car_speed;
+
+	m_ca_history.push_back(m_ca);
 }
 
 
@@ -840,6 +874,65 @@ void SemaphoreCA::DrawHistory()
     delete[] bmpData;
 }
 
+/****************************
+*                           *
+*  AC Intersección simple   *
+*                           *
+****************************/
+
+SimpleJunctionCA::SimpleJunctionCA(const unsigned &size, const double &density, const int &vmax, 
+	                               const double &rand_prob, const double &new_car_prob, const int &new_car_speed)
+	                             : OpenCA(size, density, vmax, rand_prob, new_car_prob, new_car_speed)
+{
+	m_source = new OpenCA(size, density, vmax, rand_prob, new_car_prob, new_car_speed);
+	m_source->Connect(this, size / 2);
+}
+SimpleJunctionCA::~SimpleJunctionCA()
+{
+	delete m_source;
+}
+void SimpleJunctionCA::Evolve(const unsigned &iter)
+{
+	for (unsigned i = 0; i < iter; ++i)
+	{
+		m_source->Step();
+		this->Step();
+	}
+}
+void SimpleJunctionCA::DrawHistory()
+{
+	m_source->DrawHistory();
+	unsigned height = m_ca_history.size();
+	unsigned width = m_size;
+	BMPWriter writer("ca_junction.bmp", width, height);
+	BMPPixel* bmpData = new BMPPixel[width];
+	for (int i = height - 1; i >= 0; i--)
+	{
+		for (unsigned j = 0; j<width; ++j)
+		{
+			BMPPixel color;
+			if (j == m_size/2)
+			{
+				if (m_ca_history[i][j] == -1)
+					color = BMPPixel((char)0, (char)255, (char)0);
+				else
+					color = BMPPixel((char)0, (char)255, (char)(255.0*(double)m_ca_history[i][j] / (double)m_vmax));
+			}
+			else
+			{
+				if (m_ca_history[i][j] == -1)
+					color = BMPPixel((char)255, (char)255, (char)255);
+				else
+					color = BMPPixel((char)0, (char)0, (char)(255.0*(double)m_ca_history[i][j] / (double)m_vmax));
+			}
+			bmpData[j] = color;
+		}
+		writer.WriteLine(bmpData);
+	}
+	writer.CloseBMP();
+	delete[] bmpData;
+}
+
 
 /****************************
 *                           *
@@ -853,6 +946,7 @@ OpenCA* openca = NULL;
 SmartCA* smartca = NULL;
 StreetStopCA* streetstopca = NULL;
 SemaphoreCA* semaphoreca = NULL;
+SimpleJunctionCA* simplejunctionca = NULL;
 
 CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax, 
 	                        const double &rand_prob, Args &args)
@@ -877,6 +971,10 @@ CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &dens
 		cellularautomata = semaphoreca = new SemaphoreCA(size, density, vmax, rand_prob, args.GetDouble(), 
 			                                             args.GetBool());
         break;
+	case SIMPLE_JUNCTION_CA:
+		cellularautomata = simplejunctionca = new SimpleJunctionCA(size, density, vmax, rand_prob,
+			                                                       args.GetDouble(), args.GetInt());
+		break;
     };
     return cellularautomata;
 }
@@ -892,6 +990,8 @@ void delete_ca()
         delete streetstopca;
     if (semaphoreca != NULL)
         delete semaphoreca;
+	if (simplejunctionca != NULL)
+		delete simplejunctionca;
 
     circularca = NULL;
     openca = NULL;
@@ -899,6 +999,7 @@ void delete_ca()
     streetstopca = NULL;
     cellularautomata = NULL;
     semaphoreca = NULL;
+	simplejunctionca = NULL;
 }
 
 

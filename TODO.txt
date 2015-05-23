@@ -1,2 +1,1 @@
-﻿- Hacer estricta la convencion de nombres.
-- Intersección de carriles.
+﻿- OpenCA debería redefinir step, no move.

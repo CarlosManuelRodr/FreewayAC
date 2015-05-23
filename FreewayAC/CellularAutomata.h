@@ -108,15 +108,15 @@ public:
 
 	///@brief Devuelve elemento double.
 	///@param i Indice del elemento a devolver.
-	double GetDouble(const unsigned &i = 1);
+	double GetDouble(const unsigned &i = 0);
 
 	///@brief Devuelve elemento int.
 	///@param i Indice del elemento a devolver.
-	int GetInt(const unsigned &i = 1);
+	int GetInt(const unsigned &i = 0);
 
 	///@brief Devuelve elemento bool.
 	///@param i Indice del elemento a devolver.
-	bool GetBool(const unsigned &i = 1);
+	bool GetBool(const unsigned &i = 0);
 };
 
 ////////////////////////////////////
@@ -150,7 +150,7 @@ enum CAS
 */
 enum CA_TYPE
 {
-    CIRCULAR_CA, OPEN_CA, SMART_CA, STOP_CA, SEMAPHORE_CA
+    CIRCULAR_CA, OPEN_CA, SMART_CA, STOP_CA, SEMAPHORE_CA, SIMPLE_JUNCTION_CA
 };
 
 /**
@@ -173,6 +173,10 @@ protected:
     std::vector<bool> m_rand_values;                                    ///< Lista con valores aleatorios para usar en modo de prueba.
     MTRand m_drand;              ///< Generador de aleatorios (flotantes) entre 0 y 1.
     MTRand_int32 m_irand;        ///< Generador de enteros aleatorios.
+
+	// Conexión de carriles.
+	CellularAutomata* m_connect; ///< Puntero al AC al cual se va a conectar.
+	unsigned m_connect_pos;      ///< Posición del AC objetivo donde se realiza la conexión.
 
 public:
     ///@brief Constructor.
@@ -213,6 +217,11 @@ public:
     ///@param ca Tipo de autómata celular.
     virtual int &At(const unsigned &i, const unsigned &j, const CAS &ca) = 0;
 
+	///@brief Conecta AC con otro. El flujo de autos ocurre desde el que realiza la conexión al objetivo.
+	///@param connect Puntero a AC objetivo.
+	///@param connect_pos Posición del AC objetivo donde se realiza la conexión.
+	void Connect(CellularAutomata* connect, unsigned connect_pos);
+
     void Print();                   ///< Escribe línea de autómata celular en la terminal.
     unsigned GetSize();             ///< Devuelve tamaño del AC.
     unsigned GetHistorySize();      ///< Devuelve tamaño de la lista histórica de evolución del AC.
@@ -221,44 +230,7 @@ public:
     virtual void DrawHistory();     ///< Dibuja mapa histórico del AC en formato BMP.
     virtual void DrawFlowHistory(); ///< Dibuja mapa histórico del flujo de AC en formato BMP.
     virtual void Step();            ///< Aplica reglas de evolución temporal del AC.
-    virtual void Move() = 0;        ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
-};
-
-/****************************
-*                           *
-*      AC Con uniones       *
-*                           *
-****************************/
-
-class JunctionCA : public CellularAutomata
-{
-	JunctionCA* m_connect;  ///< Puntero al AC al cual se va a conectar.
-	int m_empty;            ///< Se usa para devolver referencia de lugar vacío.
-	double m_new_car_prob;  ///< Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
-	int m_new_car_speed;    ///< Velocidad de nuevo auto cuando ingresa a la pista.
-public:
-	///@brief Constructor.
-	///@param size Tamaño del AC.
-	///@param density Densidad de autos.
-	///@param vmax Velocidad máxima de los autos.
-	///@param rand_prob Probabilidad de descenso de velocidad.
-	///@param new_car_prob Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
-	///@param new_car_speed Velocidad de nuevo auto cuando ingresa a la pista.
-	JunctionCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob,
-		       const double &new_car_prob, const int &new_car_speed);
-
-	///@brief Devuelve elemento de valores del autómata celular considerando las condiciones de frontera.
-	///@param i Posición dentro del AC.
-	///@param j Posición temporal del AC.
-	///@param ca Tipo de autómata celular.
-	using CellularAutomata::At;
-	int &At(const unsigned &i, const unsigned &j, const CAS &ca);
-
-	///@brief Conecta AC con otro. El flujo de autos ocurre desde el que realiza la conexión al objetivo.
-	///@param connect Puntero a AC objetivo.
-	void Connect(JunctionCA* connect);
-
-	void Move();    ///< Mueve los autos con condiciones de frontera abiertas.
+    virtual void Move();            ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
 };
 
 
@@ -299,8 +271,6 @@ public:
     ///@brief Evoluciona (itera) el AC. Verifica si se conserva la cantidad de autos.
     ///@param iter Número de iteraciones.
     void Evolve(const unsigned &iter);
-
-    virtual void Move();    ///< Mueve los autos con condiciones de frontera periódicas.
 };
 
 
@@ -346,7 +316,7 @@ public:
     using CellularAutomata::At;
     int &At(const unsigned &i, const unsigned &j, const CAS &ca);
 
-    void Move();    ///< Mueve los autos con condiciones de frontera abiertas.
+	void Step();	///< Aplica reglas de evolución temporal del AC.
 };
 
 
@@ -442,6 +412,39 @@ public:
     void Step();        ///< Aplica reglas de evolución temporal del AC con tope.
     void DrawHistory(); ///< Dibuja mapa histórico del AC en formato BMP marcando los semaforos de color.
 };
+
+/****************************
+*                           *
+*  AC Intersección simple   *
+*                           *
+****************************/
+
+/**
+* @class SimpleJunctionCA
+* @brief AC Con intersección simple y fronteras abiertas.
+*/
+class SimpleJunctionCA : public OpenCA
+{
+	OpenCA *m_source;
+public:
+	///@brief Constructor.
+	///@param size Tamaño del AC.
+	///@param density Densidad de autos.
+	///@param vmax Velocidad máxima de los autos.
+	///@param rand_prob Probabilidad de descenso de velocidad.
+	SimpleJunctionCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, 
+		             const double &new_car_prob, const int &new_car_speed);
+
+	~SimpleJunctionCA();
+
+	///@brief Evoluciona (itera) el AC. Verifica si se conserva la cantidad de autos.
+	///@param iter Número de iteraciones.
+	void Evolve(const unsigned &iter);
+
+	void DrawHistory(); ///< Dibuja mapa histórico del AC en formato BMP marcando los semaforos de color.
+};
+
+
 
 /****************************
 *                           *

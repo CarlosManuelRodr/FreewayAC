@@ -730,12 +730,13 @@ struct Arg: public option::Arg
 };
 
 enum  OptionIndex { UNKNOWN, SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, PLOT_TRAFFIC, MEASURE_OCUPANCY, MEASURE_FLOW, 
-                    FLOW_VS_DENSITY, FLOW_PER_DENSITY, FLOW_VS_VMAX, FLOW_VS_RAND_PROB, FLOW_VS_SMART_CARS, FLOW_VS_STOP_DENSITY,
-                    FLOW_VS_NEW_CAR, FLOW_VS_SEMAPHORE_DENSITY, CA_CIRCULAR, CA_OPEN, CA_SMART, CA_STOP, CA_SEMAPHORE, 
-                    NEW_CAR_PROB, NEW_CAR_SPEED, SMART_DENSITY, STOP_DENSITY, SEMAPHORE_DENSITY, RANDOM_SEMAPHORES, 
-					DT, DMIN, DMAX, VMAX_MIN, VMAX_MAX, RAND_PROB_MIN, SMART_MIN, SMART_MAX, STOP_DENSITY_MIN, 
-					STOP_DENSITY_MAX, NEW_CAR_MIN, NEW_CAR_MAX, RAND_PROB_MAX, SEMAPHORE_DENSITY_MIN,
-					SEMAPHORE_DENSITY_MAX, OUT_FILE_NAME, TEST, HELP };
+                    FLOW_VS_DENSITY, FLOW_PER_DENSITY, FLOW_VS_VMAX, FLOW_VS_RAND_PROB, FLOW_VS_SMART_CARS, 
+					FLOW_VS_STOP_DENSITY, FLOW_VS_NEW_CAR, FLOW_VS_SEMAPHORE_DENSITY, CA_CIRCULAR, CA_OPEN, 
+					CA_SMART, CA_STOP, CA_SEMAPHORE, CA_SIMPLE_JUNCTION, NEW_CAR_PROB, NEW_CAR_SPEED, SMART_DENSITY, 
+					STOP_DENSITY, SEMAPHORE_DENSITY, RANDOM_SEMAPHORES, DT, DMIN, DMAX, VMAX_MIN, VMAX_MAX, 
+					RAND_PROB_MIN, SMART_MIN, SMART_MAX, STOP_DENSITY_MIN, STOP_DENSITY_MAX, NEW_CAR_MIN, 
+					NEW_CAR_MAX, RAND_PROB_MAX, SEMAPHORE_DENSITY_MIN, SEMAPHORE_DENSITY_MAX, OUT_FILE_NAME, 
+					TEST, HELP };
 
 const option::Descriptor usage[] =
 {
@@ -771,6 +772,8 @@ const option::Descriptor usage[] =
      "  \t--ca_stop  \tAutomata celular con tope. La posicion del tope se especifica por stop_density." },
     {CA_SEMAPHORE,  0,"","ca_semaphore", Arg::None, 
      "  \t--ca_semaphore  \tAutomata celular con semaforo. La posicion del semaforo se especifica por semaphore_density." },
+	{CA_SIMPLE_JUNCTION, 0, "", "ca_simple_junction", Arg::None,
+	 "  \t--ca_simple_junction  \tAutomata de interseccion simple." },
     {NEW_CAR_PROB,  0,"","new_car_prob", Arg::Required, "  \t--new_car_prob  \tProbabilidad de que se aparezca nuevo auto en frontera abierta." },
 	{NEW_CAR_SPEED, 0, "", "new_car_speed", Arg::Required, "  \t--new_car_speed  \tVelocidad que entre a AC abierto." },
     {SMART_DENSITY,  0,"","smart_density", Arg::Required, "  \t--smart_density  \tDensidad de autos inteligentes." },
@@ -982,6 +985,10 @@ int main(int argc, char* argv[])
             ca_type = SEMAPHORE_CA;
             break;
 
+			case CA_SIMPLE_JUNCTION:
+			ca_type = SIMPLE_JUNCTION_CA;
+			break;
+
             case NEW_CAR_PROB:
             new_car_prob = aux_string_to_num<double>(opt.arg);
             break;
@@ -1098,7 +1105,7 @@ int main(int argc, char* argv[])
     double extra1 = 0.0;    // Parámetro extra en el constructor de CA.
 	int extra2 = 0;
     bool extra3 = 0.0;
-	if (ca_type == OPEN_CA)
+	if (ca_type == OPEN_CA || ca_type == SIMPLE_JUNCTION_CA)
 	{
 		extra1 = new_car_prob;
 		extra2 = new_car_speed;
