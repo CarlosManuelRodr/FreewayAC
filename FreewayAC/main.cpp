@@ -701,6 +701,34 @@ void perform_test()
         cout << "Incorrecto. Log:" << endl;
         open_ca.PrintHistory();
     }
+
+	// Inteligente.
+	const bool rand_val_smart[] = { false, false, false, true, true,
+		                            true, false, true, false, false,
+		                            false, true, false, true, false };
+	const int smart_cars[] = { 5, 13 };
+	const int end_smart[] = { -1, 2, -1, 1, 0, -1, -1, 1, -1, 1, -1, -1, -1, -1, 2, -1, -1, -1, 2, -1 };
+	vector<bool> rand_val_smart_vec(rand_val_smart, rand_val_smart + sizeof(rand_val_smart) / sizeof(rand_val_smart[0]));
+	vector<int> smart_cars_vec(smart_cars, smart_cars + sizeof(smart_cars) / sizeof(smart_cars[0]));
+
+	cout << "Comprobando automata celular inteligente... ";
+	SmartCA smart_ca(init_vec, smart_cars_vec, rand_val_smart_vec, 5);
+	smart_ca.Evolve(3);
+
+	match = true;
+	for (unsigned i = 0; i<init_vec.size(); i++)
+	{
+		if (smart_ca.At(i) != end_smart[i])
+			match = false;
+	}
+
+	if (match)
+		cout << "Correcto!" << endl;
+	else
+	{
+		cout << "Incorrecto. Log:" << endl;
+		smart_ca.PrintHistory();
+	}
 }
 
 
@@ -864,7 +892,7 @@ int main(int argc, char* argv[])
     int vmax = 5, vmax_min = 0, vmax_max = 20;
     double density = 0.2, rand_prob = 0.2;
     double dt = 0.1, dmin = 0.0, dmax = 1.0, rand_prob_min = 0.0, rand_prob_max = 1.0;
-    double smart_min = 0.0, smart_max = 0.7, new_car_min = 0.0, new_car_max = 1.0, stop_density_min = 0.0;
+    double smart_min = 0.0, smart_max = 1.0, new_car_min = 0.0, new_car_max = 1.0, stop_density_min = 0.0;
     double stop_density_max = 0.1, semaphore_density_min = 0.0, semaphore_density_max = 1.0;
     bool ocupancy_fixed = false, flow_fixed = false, flow_vs_density = false;
     bool plot_traffic = false, flow_vs_vmax = false, flow_vs_rand_prob = false, flow_vs_smart_cars = false;

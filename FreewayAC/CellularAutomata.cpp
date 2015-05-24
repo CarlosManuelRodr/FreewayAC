@@ -540,6 +540,12 @@ SmartCA::SmartCA(const unsigned &size, const double &density, const int &vmax, c
     for (unsigned i=0; i<smart_car_positions.size() && i<smart_car_number; ++i)
         m_smart_cars.push_back(smart_car_positions[i]);
 }
+SmartCA::SmartCA(const vector<int> &ca, vector<int> smart_cars, const vector<bool> &rand_values,
+	             const int &vmax)
+				 : CircularCA(ca, rand_values, vmax)
+{
+	m_smart_cars = smart_cars;
+}
 void SmartCA::Move()
 {
     m_ca_flow_temp.assign(m_size, 0);
@@ -570,12 +576,14 @@ void SmartCA::Step()
     {
         if (m_ca[i] != -1)
         {
-            if (aux_is_in<int>(m_smart_cars, i))
+			bool smart = aux_is_in<int>(m_smart_cars, i);
+            if (smart)
             {
                 // Auto inteligente.
                 int nc = i + NextCarDist(i);
                 nc %= m_size;
-                if (((m_ca[i] <= m_vmax) && (NextCarDist(i) > (m_ca[i] + 1))) || ((m_ca[nc] <= m_vmax) && (NextCarDist(nc) > (m_ca[nc] + 1))))
+                if (((m_ca[i] <= m_vmax) && (NextCarDist(i) > (m_ca[i] + 1))) 
+					|| ((m_ca[nc] <= m_vmax) && (NextCarDist(nc) > (m_ca[nc] + 1))))
                     m_ca[i]++;
             }
             else
@@ -583,10 +591,6 @@ void SmartCA::Step()
                 // Aceleracion.
                 if ((m_ca[i] <= m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
                     m_ca[i]++;
-
-                // Aleatoriedad.
-                if ((m_ca[i] > 0) && Randomization())
-                    m_ca[i]--;
             }
 
             // Frenado.
@@ -596,6 +600,14 @@ void SmartCA::Step()
                 if (nd <= m_ca[i])
                     m_ca[i] = nd - 1;
             }
+
+			// Aleatoriedad.
+			if (!smart)
+			{
+				bool rnd = Randomization();
+				if ((m_ca[i] > 0) && rnd)
+					m_ca[i]--;
+			}
         }
     }
 

@@ -343,6 +343,15 @@ public:
     SmartCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, 
 		    const double &smart_density);
 
+	///@brief Constructor.
+	///@param ca Lista con valores de AC.
+	///@param smart_cars Lista con posiciones de autos inteligentes.
+	///@param rand_values Valores aleatorios en cada paso.
+	///@param density Densidad de autos.
+	///@param vmax Velocidad máxima de los autos.
+	SmartCA(const std::vector<int> &ca, std::vector<int> smart_cars, const std::vector<bool> &rand_values, 
+		    const int &vmax);
+
     void Move();    ///< Mueve los autos con condiciones de frontera periódicas.
     void Step();    ///< Aplica reglas de evolución temporal del AC para autos normales e inteligentes.
 };
