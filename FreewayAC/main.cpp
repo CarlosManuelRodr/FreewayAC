@@ -893,7 +893,7 @@ int main(int argc, char* argv[])
     double density = 0.2, rand_prob = 0.2;
     double dt = 0.1, dmin = 0.0, dmax = 1.0, rand_prob_min = 0.0, rand_prob_max = 1.0;
     double smart_min = 0.0, smart_max = 1.0, new_car_min = 0.0, new_car_max = 1.0, stop_density_min = 0.0;
-    double stop_density_max = 0.1, semaphore_density_min = 0.0, semaphore_density_max = 1.0;
+    double stop_density_max = 1.0, semaphore_density_min = 0.0, semaphore_density_max = 1.0;
     bool ocupancy_fixed = false, flow_fixed = false, flow_vs_density = false;
     bool plot_traffic = false, flow_vs_vmax = false, flow_vs_rand_prob = false, flow_vs_smart_cars = false;
     bool flow_vs_stop_density = false, flow_per_density = false, flow_vs_new_car = false, flow_vs_semaphore_density = false;
