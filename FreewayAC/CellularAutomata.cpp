@@ -576,30 +576,69 @@ void SmartCA::Step()
     {
         if (m_ca[i] != -1)
         {
-			bool smart = aux_is_in<int>(m_smart_cars, i);
-            if (smart)
-            {
-                // Auto inteligente.
-                int nc = i + NextCarDist(i);
-                nc %= m_size;
-                if (((m_ca[i] <= m_vmax) && (NextCarDist(i) > (m_ca[i] + 1))) 
-					|| ((m_ca[nc] <= m_vmax) && (NextCarDist(nc) > (m_ca[nc] + 1))))
-                    m_ca[i]++;
-            }
-            else
-            {
-                // Aceleracion.
-                if ((m_ca[i] <= m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
-                    m_ca[i]++;
-            }
 
-            // Frenado.
-            if (m_ca[i] > 0)
-            {
-                int nd = NextCarDist(i);
-                if (nd <= m_ca[i])
-                    m_ca[i] = nd - 1;
-            }
+			bool smart = aux_is_in<int>(m_smart_cars, i);
+			if (smart)
+			{
+				// Auto inteligente.
+				int nc = i + NextCarDist(i);
+				nc %= m_size;
+				if ((m_ca[nc] <= m_vmax) && (NextCarDist(nc) > (m_ca[nc] + 1)) && (NextCarDist(i) <= m_ca[i]))
+				{
+					if ((m_ca[i] <= m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
+						m_ca[i]++;
+					else
+					{
+						// Frenado.
+						if (m_ca[i] > 0)
+						{
+							int nd = NextCarDist(i);
+							if (m_ca[nc] >= m_ca[i])
+							{
+								if (nd <= m_ca[i]-1)
+									m_ca[i] = nd - 1;
+							}
+							else
+							{
+								if (nd <= m_ca[i])
+									m_ca[i] = nd - 1;
+							}
+						}
+					}
+				}
+				else
+				{
+					// Aceleracion.
+					if ((m_ca[i] <= m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
+						m_ca[i]++;
+					else
+					{
+						// Frenado.
+						if (m_ca[i] > 0)
+						{
+							int nd = NextCarDist(i);
+							if (nd <= m_ca[i])
+								m_ca[i] = nd - 1;
+						}
+					}
+				}
+			}
+			else
+			{
+				// Aceleracion.
+				if ((m_ca[i] <= m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
+					m_ca[i]++;
+				else
+				{
+					// Frenado.
+					if (m_ca[i] > 0)
+					{
+						int nd = NextCarDist(i);
+						if (nd <= m_ca[i])
+							m_ca[i] = nd - 1;
+					}
+				}
+			}
 
 			// Aleatoriedad.
 			if (!smart)

@@ -706,8 +706,8 @@ void perform_test()
 	const bool rand_val_smart[] = { false, false, false, true, true,
 		                            true, false, true, false, false,
 		                            false, true, false, true, false };
-	const int smart_cars[] = { 5, 13 };
-	const int end_smart[] = { -1, 2, -1, 1, 0, -1, -1, 1, -1, 1, -1, -1, -1, -1, 2, -1, -1, -1, 2, -1 };
+	const int smart_cars[] = { 0, 1, 3, 5 };
+	const int end_smart[] = { -1, -1, -1, -1, 1, 0, -1, 1, -1, -1, -1, -1, 2, -1, -1, 2, -1, 1, -1, 1 };
 	vector<bool> rand_val_smart_vec(rand_val_smart, rand_val_smart + sizeof(rand_val_smart) / sizeof(rand_val_smart[0]));
 	vector<int> smart_cars_vec(smart_cars, smart_cars + sizeof(smart_cars) / sizeof(smart_cars[0]));
 
