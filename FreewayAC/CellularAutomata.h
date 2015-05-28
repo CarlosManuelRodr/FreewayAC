@@ -40,7 +40,7 @@ void aux_random_seed();
 * @brief Devuelve número aleatorio entre 0 y i-1.
 * @param i Límite de número aleatorio.
 */
-int aux_random(int &i);
+int aux_random(int i);
 
 /**
 * @brief Informa si find_val está dentro de v.
@@ -472,7 +472,7 @@ public:
 * @return Puntero de clase base que apunta hacia el AC.
 */
 CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax, 
-                            const double &rand_prob, Args &args);
+                            const double &rand_prob, Args args);
 
 /**
 * @brief Borra cualquier AC que haya sido creado anteriormente.

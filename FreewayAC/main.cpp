@@ -104,7 +104,7 @@ void ex_flow_fixed(CellularAutomata *ca, string out_file_name = "")
 */
 void ex_flow_vs_density(const CA_TYPE &type, const unsigned &size, const unsigned &iterations, const int &vmax, 
                         const double &density_min, const double &density_max, const double &dt, const double &rand_prob, 
-                        Args &args, const bool &per_density = false, string out_file_name = "")
+                        Args args, const bool &per_density = false, string out_file_name = "")
 {
     vector<double> density;
     vector<double> flow;
@@ -190,7 +190,7 @@ void ex_flow_vs_density(const CA_TYPE &type, const unsigned &size, const unsigne
 */
 void ex_flow_vs_vmax(const CA_TYPE &type, const unsigned &size, const unsigned &iterations, const int &vmax_min,
                      const int &vmax_max, const int &dt, const double &density, const double &rand_prob,
-					 Args &args, string out_file_name = "")
+					 Args args, string out_file_name = "")
 {
     vector<double> vmax;
     vector<double> flow;
@@ -269,7 +269,7 @@ void ex_flow_vs_vmax(const CA_TYPE &type, const unsigned &size, const unsigned &
 */
 void ex_flow_vs_rand_prob(const CA_TYPE &type, const unsigned &size, const unsigned &iterations, const int &vmax,
                           const double &density, const double &rand_prob_min, const double &rand_prob_max,
-						  const double &dt, Args &args, string out_file_name = "")
+						  const double &dt, Args args, string out_file_name = "")
 {
     vector<double> rand_prob;
     vector<double> flow;

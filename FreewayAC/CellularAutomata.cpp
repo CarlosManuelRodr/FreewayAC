@@ -19,7 +19,7 @@ void aux_random_seed()
     m_drand.seed(seed);
     m_irand.seed(seed);
 }
-int aux_random(int &i)
+int aux_random(int i)
 {
     return m_irand() % i;
 }
@@ -1000,7 +1000,7 @@ SemaphoreCA* semaphoreca = NULL;
 SimpleJunctionCA* simplejunctionca = NULL;
 
 CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax, 
-	                        const double &rand_prob, Args &args)
+	                        const double &rand_prob, Args args)
 {
     delete_ca();
     switch(ca)
