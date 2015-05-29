@@ -932,11 +932,13 @@ void SemaphoreCA::DrawHistory()
 ****************************/
 
 SimpleJunctionCA::SimpleJunctionCA(const unsigned &size, const double &density, const int &vmax, 
-	                               const double &rand_prob, const double &new_car_prob, const int &new_car_speed)
+	                               const double &rand_prob, const double &new_car_prob, 
+								   const int &new_car_speed, const int &target_lane)
 	                             : OpenCA(size, density, vmax, rand_prob, new_car_prob, new_car_speed)
 {
 	m_source = new OpenCA(size, density, vmax, rand_prob, new_car_prob, new_car_speed);
 	m_source->Connect(this, size / 2);
+	m_target_lane = target_lane;
 }
 SimpleJunctionCA::~SimpleJunctionCA()
 {
@@ -983,6 +985,13 @@ void SimpleJunctionCA::DrawHistory()
 	writer.CloseBMP();
 	delete[] bmpData;
 }
+int &SimpleJunctionCA::At(const unsigned &i, const unsigned &j, const CAS &ca)
+{
+	if (m_target_lane == 0)
+		return m_source->At(i, j, ca);
+	else
+		return this->At(i, j, ca);
+}
 
 
 /****************************
@@ -1024,7 +1033,7 @@ CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &dens
         break;
 	case SIMPLE_JUNCTION_CA:
 		cellularautomata = simplejunctionca = new SimpleJunctionCA(size, density, vmax, rand_prob,
-			                                                       args.GetDouble(), args.GetInt());
+			                                                       args.GetDouble(), args.GetInt(0), args.GetInt(1));
 		break;
     };
     return cellularautomata;

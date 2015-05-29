@@ -435,20 +435,29 @@ public:
 class SimpleJunctionCA : public OpenCA
 {
 	OpenCA *m_source;
+	int m_target_lane;
 public:
 	///@brief Constructor.
 	///@param size Tamaño del AC.
 	///@param density Densidad de autos.
 	///@param vmax Velocidad máxima de los autos.
 	///@param rand_prob Probabilidad de descenso de velocidad.
+	///@param return_lane Carril al que apunta la función At.
 	SimpleJunctionCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, 
-		             const double &new_car_prob, const int &new_car_speed);
+		             const double &new_car_prob, const int &new_car_speed, const int &target_lane = 0);
 
 	~SimpleJunctionCA();
 
 	///@brief Evoluciona (itera) el AC. Verifica si se conserva la cantidad de autos.
 	///@param iter Número de iteraciones.
 	void Evolve(const unsigned &iter);
+
+	///@brief Devuelve elemento de valores del autómata celular considerando las condiciones de frontera.
+	///@param i Posición dentro del AC.
+	///@param j Posición temporal del AC.
+	///@param ca Tipo de autómata celular.
+	using CellularAutomata::At;
+	int &At(const unsigned &i, const unsigned &j, const CAS &ca);
 
 	void DrawHistory(); ///< Dibuja mapa histórico del AC en formato BMP marcando los semaforos de color.
 };

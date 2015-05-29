@@ -761,7 +761,7 @@ enum  OptionIndex { UNKNOWN, SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, PLOT_TR
                     FLOW_VS_DENSITY, FLOW_PER_DENSITY, FLOW_VS_VMAX, FLOW_VS_RAND_PROB, FLOW_VS_SMART_CARS, 
 					FLOW_VS_STOP_DENSITY, FLOW_VS_NEW_CAR, FLOW_VS_SEMAPHORE_DENSITY, CA_CIRCULAR, CA_OPEN, 
 					CA_SMART, CA_STOP, CA_SEMAPHORE, CA_SIMPLE_JUNCTION, NEW_CAR_PROB, NEW_CAR_SPEED, SMART_DENSITY, 
-					STOP_DENSITY, SEMAPHORE_DENSITY, RANDOM_SEMAPHORES, DT, DMIN, DMAX, VMAX_MIN, VMAX_MAX, 
+					STOP_DENSITY, SEMAPHORE_DENSITY, RANDOM_SEMAPHORES, TARGET_LANE, DT, DMIN, DMAX, VMAX_MIN, VMAX_MAX, 
 					RAND_PROB_MIN, SMART_MIN, SMART_MAX, STOP_DENSITY_MIN, STOP_DENSITY_MAX, NEW_CAR_MIN, 
 					NEW_CAR_MAX, RAND_PROB_MAX, SEMAPHORE_DENSITY_MIN, SEMAPHORE_DENSITY_MAX, OUT_FILE_NAME, 
 					TEST, HELP };
@@ -810,6 +810,8 @@ const option::Descriptor usage[] =
      "  \t--semaphore_density=<arg>  \tDensidad de semaforos en ca_semaphore." },
     {RANDOM_SEMAPHORES,  0,"", "random_semapahores", Arg::None, 
      "  \t--random_semapahores  \tColoca los semaforos en posiciones aleatorias en vez de uniformes." },
+	{TARGET_LANE, 0, "", "target_lane", Arg::None,
+	 "  \t--target_lane  \tCarril objetivo en AC de uniones." },
     {DT,  0,"", "dt", Arg::Required, "  \t--dt=<arg>  \tTamagno del intervalo en medicion con rango." },
     {DMIN,  0,"", "dmin", Arg::Required, "  \t--dmin=<arg>  \tDensidad minima en medicion con rango." },
     {DMAX,  0,"", "dmax", Arg::Required, "  \t--dmax=<arg>  \tDensidad maxima en medicion con rango." },
@@ -847,6 +849,8 @@ void describe_experiments()
                        "                        Parametros relevantes: STOP_DENSITY.\n"
                        "CA_SEMAPHORE         -> Descripcion: Automata celular circular con semaforos en la pista.\n"
                        "                        Parametros relevantes: SEMAPHORE_DENSITY, RANDOM_SEMAPHORES.\n"
+					   "CA_SIMPLE_JUNCTION   -> Descripcion: Automata celular abierto con unión simple y fronteras abiertas.\n"
+					   "                        Parametros relevantes: NEW_CAR_PROB, NEW_CAR_SPEED, TARGET_LANE.\n"
                        "\n=== Experimentos de parametro fijo ===\n"
                        "PLOT_TRAFFIC         -> Descripcion: Evoluciona automata celular y grafica su representacion.\n"
                        "                        Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB.\n"
@@ -900,7 +904,7 @@ int main(int argc, char* argv[])
     bool random_semaphores = false, test = false;
     CA_TYPE ca_type = CIRCULAR_CA;
     double new_car_prob = 0.1, smart_density = 0.1, stop_density = 0.1, semaphore_density = 0.1;
-	int new_car_speed = 1;
+	int new_car_speed = 1, target_lane = 0;
     string out_file_name = "";
 
     // Ejecuta parser de argumentos.
@@ -1040,6 +1044,10 @@ int main(int argc, char* argv[])
             case RANDOM_SEMAPHORES:
             random_semaphores = true;
             break;
+
+			case TARGET_LANE:
+			target_lane = aux_string_to_num<int>(opt.arg);
+			break;
 
             case DT:
             dt = aux_string_to_num<double>(opt.arg);
