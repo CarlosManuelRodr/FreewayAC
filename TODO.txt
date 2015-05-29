@@ -1,1 +1,1 @@
-﻿- OpenCA debería redefinir step, no move.
+﻿- Implementar decisión de carril en unión.

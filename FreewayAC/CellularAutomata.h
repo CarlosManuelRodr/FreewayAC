@@ -57,6 +57,21 @@ template <class N> bool aux_is_in(std::vector<N> &v, const N &find_val)
 }
 
 /**
+* @brief Informa si find_val está dentro de lista.
+* @param list Lista dónde buscar.
+* @param find_val Valor a buscar.
+*/
+template <class N> bool aux_is_in(std::initializer_list<N> list, const N &find_val)
+{
+	std::vector<N> v = list;
+	typename std::vector<N>::iterator it = find(v.begin(), v.end(), find_val);
+	if (it != v.end())
+		return true;
+	else
+		return false;
+}
+
+/**
 * @brief Informa la posición dentro de v donde se encuentra find_val.
 * @param v Vector dónde buscar.
 * @param find_val Valor a buscar.
@@ -99,6 +114,8 @@ class Args
 	std::vector<int> m_int_args;
 	std::vector<bool> m_bool_args;
 public:
+	Args();
+
 	///@brief Constructor.
 	///@param d_args Argumentos del tipo double.
 	///@param i_args Argumentos del tipo int.
@@ -117,6 +134,10 @@ public:
 	///@brief Devuelve elemento bool.
 	///@param i Indice del elemento a devolver.
 	bool GetBool(const unsigned &i = 0);
+
+	///@brief Copia los valores del argumento.
+	///@param arg Objetivo a copiar.
+	void operator=(const Args &arg);
 };
 
 ////////////////////////////////////
@@ -206,16 +227,27 @@ public:
     ///@param prob Probabilidad de obtener valor verdadero. Por defecto se utiliza m_rand_prob.
     bool Randomization(const double &prob = -1.0);
 
-    ///@brief Devuelve elemento del AC considerando las condiciones de frontera.
+    ///@brief Devuelve referencia a elemento del AC considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
     ///@param ca Tipo de AC.
     int &At(const unsigned &i, const CAS &ca = CA);
 
-    ///@brief Devuelve elemento de valores del autómata celular considerando las condiciones de frontera.
+    ///@brief Devuelve referencia a  elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
     ///@param j Posición temporal del AC.
     ///@param ca Tipo de autómata celular.
     virtual int &At(const unsigned &i, const unsigned &j, const CAS &ca) = 0;
+
+	///@brief Similar a AC pero sólo devuelve el valor y en AC multicarril puede apuntar a un carril en específico.
+	///@param i Posición dentro del AC.
+	///@param ca Tipo de AC.
+	int GetAt(const unsigned &i, const CAS &ca = CA);
+
+	///@brief Similar a AC pero sólo devuelve el valor y en AC multicarril puede apuntar a un carril en específico.
+	///@param i Posición dentro del AC.
+	///@param j Posición temporal del AC.
+	///@param ca Tipo de autómata celular.
+	virtual int GetAt(const unsigned &i, const unsigned &j, const CAS &ca);
 
 	///@brief Conecta AC con otro. El flujo de autos ocurre desde el que realiza la conexión al objetivo.
 	///@param connect Puntero a AC objetivo.
@@ -286,6 +318,7 @@ public:
  */
 class OpenCA : public CellularAutomata
 {
+protected:
     int m_empty;            ///< Se usa para devolver referencia de lugar vacío.
     double m_new_car_prob;  ///< Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
 	int m_new_car_speed;    ///< Velocidad de nuevo auto cuando ingresa a la pista.
@@ -332,6 +365,7 @@ public:
  */
 class SmartCA : public CircularCA
 {
+protected:
     std::vector<int> m_smart_cars;  ///< Lista con posiciones de autos inteligentes.
 public:
     ///@brief Constructor.
@@ -368,6 +402,7 @@ public:
  */
 class StreetStopCA : public CircularCA
 {
+protected:
     std::vector<unsigned> m_stop_pos;   ///< Lista con posiciones de los topes.
 public:
     ///@brief Constructor.
@@ -398,6 +433,7 @@ public:
  */
 class SemaphoreCA : public CircularCA
 {
+protected:
     std::vector<unsigned> m_semaphore_pos;                ///< Lista con posiciones de los semáforos.
     std::vector<int> m_semaphore_value;                   ///< Valor inicial del tiempo del semáforo.
     std::vector< std::vector<int> > m_semaphore_val_hist; ///< Valores historicos de valores de semaforo.
@@ -434,6 +470,7 @@ public:
 */
 class SimpleJunctionCA : public OpenCA
 {
+protected:
 	OpenCA *m_source;
 	int m_target_lane;
 public:
@@ -452,12 +489,11 @@ public:
 	///@param iter Número de iteraciones.
 	void Evolve(const unsigned &iter);
 
-	///@brief Devuelve elemento de valores del autómata celular considerando las condiciones de frontera.
+	///@brief Devuelve el valor de AC apuntando al carril m_target_lane.
 	///@param i Posición dentro del AC.
 	///@param j Posición temporal del AC.
 	///@param ca Tipo de autómata celular.
-	using CellularAutomata::At;
-	int &At(const unsigned &i, const unsigned &j, const CAS &ca);
+	int GetAt(const unsigned &i, const unsigned &j, const CAS &ca);
 
 	void DrawHistory(); ///< Dibuja mapa histórico del AC en formato BMP marcando los semaforos de color.
 };

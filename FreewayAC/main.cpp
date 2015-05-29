@@ -26,9 +26,9 @@ void ex_ocupancy_fixed(CellularAutomata *ca, string out_file_name = "")
     for (unsigned i=0; i<width; ++i)
     {
         int sum = 0;
-        for (unsigned j=0; j<height; ++j)
+        for (unsigned j=1; j<height; ++j)
         {
-            if (ca->At(i, j, CA_HISTORY) != -1)
+            if (ca->GetAt(i, j, CA_HISTORY) != -1)
                 sum++;
         }
         ocupancy[i] = (double)sum/(double)height;
@@ -64,9 +64,9 @@ void ex_flow_fixed(CellularAutomata *ca, string out_file_name = "")
     for (unsigned i=0; i<width; ++i)
     {
         int sum = 0;
-        for (unsigned j=0; j<height; ++j)
+        for (unsigned j=1; j<height; ++j)
         {
-            if ((ca->At(i, j, CA_FLOW_HISTORY) != 0) && (ca->At(i+1, j, CA_FLOW_HISTORY) != 0)) 
+            if ((ca->GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca->GetAt(i+1, j, CA_FLOW_HISTORY) != 0)) 
                 sum++;
         }
         flow[i] = (double)sum/(double)height;
@@ -120,9 +120,7 @@ void ex_flow_vs_density(const CA_TYPE &type, const unsigned &size, const unsigne
 
         // Evoluciona el sistema.
         ca = create_ca(type, size, d, vmax, rand_prob, args);
-        for (unsigned i=0; i<iterations; ++i)
-            ca->Step();
-
+		ca->Evolve(iterations);
 
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
@@ -135,7 +133,7 @@ void ex_flow_vs_density(const CA_TYPE &type, const unsigned &size, const unsigne
             int sum = 0;
             for (unsigned j=0; j<height; ++j)
             {
-                if ((ca->At(i, j, CA_FLOW_HISTORY) != 0) && (ca->At(i+1, j, CA_FLOW_HISTORY) != 0))
+                if ((ca->GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca->GetAt(i+1, j, CA_FLOW_HISTORY) != 0))
                     sum++;
             }
             tmp_flow[i] = (double)sum/(double)height;
@@ -206,9 +204,7 @@ void ex_flow_vs_vmax(const CA_TYPE &type, const unsigned &size, const unsigned &
 
         // Evoluciona el sistema.
 		ca = create_ca(type, size, density, v, rand_prob, args);
-        for (unsigned i=0; i<iterations; ++i)
-            ca->Step();
-
+		ca->Evolve(iterations);
 
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
@@ -221,7 +217,7 @@ void ex_flow_vs_vmax(const CA_TYPE &type, const unsigned &size, const unsigned &
             int sum = 0;
             for (unsigned j=0; j<height; ++j)
             {
-                if ((ca->At(i, j, CA_FLOW_HISTORY) != 0) && (ca->At(i+1, j, CA_FLOW_HISTORY) != 0))
+                if ((ca->GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca->GetAt(i+1, j, CA_FLOW_HISTORY) != 0))
                     sum++;
             }
             tmp_flow[i] = (double)sum/(double)height;
@@ -285,9 +281,7 @@ void ex_flow_vs_rand_prob(const CA_TYPE &type, const unsigned &size, const unsig
 
         // Evoluciona el sistema.
 		ca = create_ca(type, size, density, vmax, r, args);
-        for (unsigned i=0; i<iterations; ++i)
-            ca->Step();
-
+		ca->Evolve(iterations);
 
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
@@ -300,7 +294,7 @@ void ex_flow_vs_rand_prob(const CA_TYPE &type, const unsigned &size, const unsig
             int sum = 0;
             for (unsigned j=0; j<height; ++j)
             {
-                if ((ca->At(i, j, CA_FLOW_HISTORY) != 0) && (ca->At(i+1, j, CA_FLOW_HISTORY) != 0))
+                if ((ca->GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca->GetAt(i+1, j, CA_FLOW_HISTORY) != 0))
                     sum++;
             }
             tmp_flow[i] = (double)sum/(double)height;
@@ -362,9 +356,7 @@ void ex_flow_vs_smart_cars(const unsigned &size, const unsigned &iterations, con
 
         // Evoluciona el sistema.
 		ca = create_ca(SMART_CA, size, density, vmax, rand_prob, Args({ s }));
-        for (unsigned i=0; i<iterations; ++i)
-            ca->Step();
-
+		ca->Evolve(iterations);
 
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
@@ -377,7 +369,7 @@ void ex_flow_vs_smart_cars(const unsigned &size, const unsigned &iterations, con
             int sum = 0;
             for (unsigned j=0; j<height; ++j)
             {
-                if ((ca->At(i, j, CA_FLOW_HISTORY) != 0) && (ca->At(i+1, j, CA_FLOW_HISTORY) != 0))
+                if ((ca->GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca->GetAt(i+1, j, CA_FLOW_HISTORY) != 0))
                     sum++;
             }
             tmp_flow[i] = (double)sum/(double)height;
@@ -421,10 +413,16 @@ void ex_flow_vs_smart_cars(const unsigned &size, const unsigned &iterations, con
 * @param dt Intervalo entre valores a recorrer.
 * @param out_file_name Nombre opcional para el archivo de salida.
 */
-void ex_flow_vs_new_car_prob(const unsigned &size, const unsigned &iterations, const int &vmax, const double &density, 
+void ex_flow_vs_new_car_prob(const CA_TYPE &type, const unsigned &size, const unsigned &iterations, const int &vmax, const double &density,
                              const double &rand_prob, const double &new_car_prob_min, const double &new_car_prob_max,
-                             const double &dt, const int &new_car_speed, string out_file_name = "")
+							 const double &dt, Args args, string out_file_name = "")
 {
+	if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, type))
+	{
+		cout << "AC no valido para experimento seleccionado." << endl;
+		return;
+	}
+
     vector<double> new_car_density;
     vector<double> flow;
     CellularAutomata* ca;
@@ -438,10 +436,8 @@ void ex_flow_vs_new_car_prob(const unsigned &size, const unsigned &iterations, c
             aux_progress_bar(s/new_car_prob_max);
 
         // Evoluciona el sistema.
-		ca = create_ca(OPEN_CA, size, density, vmax, rand_prob, Args({ s }, { new_car_speed }));
-        for (unsigned i=0; i<iterations; ++i)
-            ca->Step();
-
+		ca = create_ca(type, size, density, vmax, rand_prob, args);
+		ca->Evolve(iterations);
 
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
@@ -454,7 +450,7 @@ void ex_flow_vs_new_car_prob(const unsigned &size, const unsigned &iterations, c
             int sum = 0;
             for (unsigned j=0; j<height; ++j)
             {
-                if ((ca->At(i, j, CA_FLOW_HISTORY) != 0) && (ca->At(i+1, j, CA_FLOW_HISTORY) != 0))
+                if ((ca->GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca->GetAt(i+1, j, CA_FLOW_HISTORY) != 0))
                     sum++;
             }
             tmp_flow[i] = (double)sum/(double)height;
@@ -465,7 +461,7 @@ void ex_flow_vs_new_car_prob(const unsigned &size, const unsigned &iterations, c
         for (unsigned i=0; i<tmp_flow.size(); ++i)
             mean += tmp_flow[i];
         mean /= (double)tmp_flow.size();
-        mean /= s;
+        //mean /= s;
 
         // Asigna valores.
         new_car_density.push_back(s);
@@ -517,9 +513,7 @@ void ex_flow_vs_stop_density(const unsigned &size, const unsigned &iterations, c
 
         // Evoluciona el sistema.
 		ca = create_ca(STOP_CA, size, density, vmax, rand_prob, Args({ d }));
-        for (unsigned i=0; i<iterations; ++i)
-            ca->Step();
-
+		ca->Evolve(iterations);
 
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
@@ -532,7 +526,7 @@ void ex_flow_vs_stop_density(const unsigned &size, const unsigned &iterations, c
             int sum = 0;
             for (unsigned j=0; j<height; ++j)
             {
-                if ((ca->At(i, j, CA_FLOW_HISTORY) != 0) && (ca->At(i+1, j, CA_FLOW_HISTORY) != 0))
+                if ((ca->GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca->GetAt(i+1, j, CA_FLOW_HISTORY) != 0))
                     sum++;
             }
             tmp_flow[i] = (double)sum/(double)height;
@@ -595,9 +589,7 @@ void ex_flow_vs_semaphore_density(const unsigned &size, const unsigned &iteratio
 
         // Evoluciona el sistema.
 		ca = create_ca(SEMAPHORE_CA, size, density, vmax, rand_prob, Args({ d }, {}, { random_semaphores }));
-        for (unsigned i=0; i<iterations; ++i)
-            ca->Step();
-
+		ca->Evolve(iterations);
 
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
@@ -610,7 +602,7 @@ void ex_flow_vs_semaphore_density(const unsigned &size, const unsigned &iteratio
             int sum = 0;
             for (unsigned j=0; j<height; ++j)
             {
-                if ((ca->At(i, j, CA_FLOW_HISTORY) != 0) && (ca->At(i+1, j, CA_FLOW_HISTORY) != 0))
+                if ((ca->GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca->GetAt(i+1, j, CA_FLOW_HISTORY) != 0))
                     sum++;
             }
             tmp_flow[i] = (double)sum/(double)height;
@@ -664,7 +656,7 @@ void perform_test()
     bool match = true;
     for (unsigned i=0; i<init_vec.size(); i++)
     {
-        if (circ_ca.At(i) != end_circ[i])
+        if (circ_ca.GetAt(i) != end_circ[i])
             match = false;
     }
 
@@ -690,7 +682,7 @@ void perform_test()
     match = true;
     for (unsigned i=0; i<init_vec.size(); i++)
     {
-        if (open_ca.At(i) != end_open[i])
+        if (open_ca.GetAt(i) != end_open[i])
             match = false;
     }
 
@@ -718,7 +710,7 @@ void perform_test()
 	match = true;
 	for (unsigned i = 0; i<init_vec.size(); i++)
 	{
-		if (smart_ca.At(i) != end_smart[i])
+		if (smart_ca.GetAt(i) != end_smart[i])
 			match = false;
 	}
 
@@ -810,7 +802,7 @@ const option::Descriptor usage[] =
      "  \t--semaphore_density=<arg>  \tDensidad de semaforos en ca_semaphore." },
     {RANDOM_SEMAPHORES,  0,"", "random_semapahores", Arg::None, 
      "  \t--random_semapahores  \tColoca los semaforos en posiciones aleatorias en vez de uniformes." },
-	{TARGET_LANE, 0, "", "target_lane", Arg::None,
+	{ TARGET_LANE, 0, "", "target_lane", Arg::Required,
 	 "  \t--target_lane  \tCarril objetivo en AC de uniones." },
     {DT,  0,"", "dt", Arg::Required, "  \t--dt=<arg>  \tTamagno del intervalo en medicion con rango." },
     {DMIN,  0,"", "dmin", Arg::Required, "  \t--dmin=<arg>  \tDensidad minima en medicion con rango." },
@@ -1138,23 +1130,17 @@ int main(int argc, char* argv[])
     if (flow_vs_vmax && dt < 1)
         dt = 1.0;
 
-    double extra1 = 0.0;    // Parámetro extra en el constructor de CA.
-	int extra2 = 0;
-    bool extra3 = 0.0;
-	if (ca_type == OPEN_CA || ca_type == SIMPLE_JUNCTION_CA)
-	{
-		extra1 = new_car_prob;
-		extra2 = new_car_speed;
-	}
+	Args args;			// Parámetro extra en el constructor de CA.
+	if (ca_type == OPEN_CA)
+		args = Args({ new_car_prob }, { new_car_speed });
     if (ca_type == SMART_CA)
-        extra1 = smart_density;
+		args = Args({ smart_density });
     if (ca_type == STOP_CA)
-        extra1 = stop_density;
+		args = Args({ stop_density });
     if (ca_type == SEMAPHORE_CA)
-    {
-        extra1 = semaphore_density;
-        extra2 = random_semaphores;
-    }
+		args = Args({ semaphore_density }, { random_semaphores });
+	if (ca_type == SIMPLE_JUNCTION_CA)
+		args = Args({ new_car_prob }, { new_car_speed, target_lane });
 
     // Realiza acciones.
     if (test)
@@ -1165,8 +1151,7 @@ int main(int argc, char* argv[])
     if (ocupancy_fixed || flow_fixed || plot_traffic)
     {
         cout << "Evolucionando automata." << endl;
-		CellularAutomata* ca = create_ca(ca_type, size, density, vmax, rand_prob, 
-			                             Args({ extra1 }, { extra2 }, { extra3 }));
+		CellularAutomata* ca = create_ca(ca_type, size, density, vmax, rand_prob, args);
         ca->Evolve(iterations);
         if (plot_traffic)
         {
@@ -1192,26 +1177,25 @@ int main(int argc, char* argv[])
         {
             cout << "Midiendo flujo vs densidad." << endl;
             ex_flow_vs_density(ca_type, size, iterations, vmax, dmin, dmax, dt, rand_prob, 
-				               Args({ extra1 }, { extra2 }, { extra3 }), false, out_file_name);
+				               args, false, out_file_name);
         }
         if (flow_per_density)
         {
             cout << "Midiendo flujo/densidad vs densidad." << endl;
             ex_flow_vs_density(ca_type, size, iterations, vmax, dmin, dmax, dt, rand_prob, 
-				               Args({ extra1 }, { extra2 }, { extra3 }), true, out_file_name);
+				               args, true, out_file_name);
         }
         if (flow_vs_vmax)
         {
             cout << "Midiendo flujo vs vmax." << endl;
             ex_flow_vs_vmax(ca_type, size, iterations, vmax_min, vmax_max, (int)dt, density, 
-		               		rand_prob, Args({ extra1 }, { extra2 }, { extra3 }), out_file_name);
+				            rand_prob, args, out_file_name);
         }
         if (flow_vs_rand_prob)
         {
             cout << "Midiendo flujo vs rand_prob." << endl;
             ex_flow_vs_rand_prob(ca_type, size, iterations, vmax, density, rand_prob_min, 
-				                 rand_prob_max, dt, Args({ extra1 }, { extra2 }, { extra3 }), 
-								 out_file_name);
+				                 rand_prob_max, dt, args, out_file_name);
         }
         if (flow_vs_smart_cars)
         {
@@ -1228,8 +1212,8 @@ int main(int argc, char* argv[])
         if (flow_vs_new_car)
         {
             cout << "Midiendo flujo vs probabilidad de nuevo auto." << endl;
-            ex_flow_vs_new_car_prob(size, iterations, vmax, density, rand_prob, new_car_min, 
-				                    new_car_max, dt, new_car_speed, out_file_name);
+            ex_flow_vs_new_car_prob(ca_type, size, iterations, vmax, density, rand_prob, new_car_min, 
+				                    new_car_max, dt, args, out_file_name);
         }
         if (flow_vs_semaphore_density)
         {

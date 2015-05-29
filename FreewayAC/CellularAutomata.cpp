@@ -46,6 +46,12 @@ void aux_progress_bar(double progress)
 *        Argumentos         *
 *                           *
 ****************************/
+Args::Args()
+{
+	m_double_args.push_back(0.0);
+	m_int_args.push_back(0);
+	m_bool_args.push_back(false);
+}
 Args::Args(initializer_list<double> d_args, std::initializer_list<int> i_args, 
 	       initializer_list<bool> b_args)
 {
@@ -74,6 +80,12 @@ bool Args::GetBool(const unsigned &i)
 	else
 		return 0.0;
 }
+void Args::operator=(const Args &arg)
+{
+	m_double_args = arg.m_double_args;
+	m_int_args = arg.m_int_args;
+	m_bool_args = arg.m_bool_args;
+}
 
 ////////////////////////////////////
 //                                //
@@ -98,6 +110,7 @@ CellularAutomata::CellularAutomata(const unsigned &size, const double &density, 
     m_rand_prob = rand_prob;
     m_ca.assign(size, -1);
     m_ca_temp.assign(size, -1);
+	m_ca_flow_temp.assign(size, 0);
     m_ca_history.clear();
     m_ca_flow_history.clear();
 	m_connect = NULL;
@@ -136,6 +149,7 @@ CellularAutomata::CellularAutomata(const unsigned &size, const double &density, 
         m_ca[car_positions[i]] = 1;
 
     m_ca_history.push_back(m_ca);
+	m_ca_flow_history.push_back(m_ca_flow_temp);
 }
 CellularAutomata::CellularAutomata(const vector<int> &ca, const vector<bool> &rand_values, const int &vmax)
 {
@@ -345,6 +359,14 @@ int &CellularAutomata::At(const unsigned &i, const CAS &ca)
 		return m_connect->At(i- m_size + m_connect_pos, ca);
 	else
 		return At(i, 0, ca);
+}
+int CellularAutomata::GetAt(const unsigned &i, const CAS &ca)
+{
+	return At(i, ca);
+}
+int CellularAutomata::GetAt(const unsigned &i, const unsigned &j, const CAS &ca)
+{
+	return At(i, j, ca);
 }
 void CellularAutomata::Connect(CellularAutomata* connect, unsigned connect_pos)
 {
@@ -985,7 +1007,7 @@ void SimpleJunctionCA::DrawHistory()
 	writer.CloseBMP();
 	delete[] bmpData;
 }
-int &SimpleJunctionCA::At(const unsigned &i, const unsigned &j, const CAS &ca)
+int SimpleJunctionCA::GetAt(const unsigned &i, const unsigned &j, const CAS &ca)
 {
 	if (m_target_lane == 0)
 		return m_source->At(i, j, ca);
