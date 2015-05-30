@@ -593,7 +593,7 @@ public:
 
 	///@brief Evoluciona (itera) el AC.
 	///@param iter Número de iteraciones.
-	void Evolve(const unsigned &iter, const bool &print = false);
+	void Evolve(const unsigned &iter);
 
 	///@brief Devuelve referencia a elemento del AC considerando las condiciones de frontera.
 	///@param i Posición dentro del AC.
@@ -610,15 +610,16 @@ public:
 
 	///@brief Devuelve la distancia al auto más próximo desde la posición pos.
 	///@param pos Posición desde dónde iniciar la búsqueda.
-	virtual int NextCarDist(const int &pos, const unsigned &lane) = 0;
+	virtual int NextCarDist(const int &pos, const unsigned &lane);
 
     void Print();			    ///< Escribe línea de autómata celular en la terminal.
     void DrawHistory();		    ///< Dibuja mapa histórico del AC en formato BMP.
     void DrawFlowHistory();     ///< Dibuja mapa histórico del flujo de AC en formato BMP.
     unsigned GetSize();		    ///< Devuelve tamaño del AC.
     unsigned GetHistorySize();  ///< Devuelve tamaño de la lista histórica de evolución del AC.
+    unsigned CountCars();           ///< Cuenta la cantidad de autos en AC.
     virtual void Step();        ///< Aplica reglas de evolución temporal del AC.
-    virtual void Move() = 0;    ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
+    virtual void Move();        ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
 };
 
 /****************************
@@ -652,11 +653,9 @@ public:
     using CellularAutomataML::At;
     int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca);
 
-	///@brief Devuelve la distancia al auto más próximo desde la posición pos.
-	///@param pos Posición desde dónde iniciar la búsqueda.
-    int NextCarDist(const int &pos, const unsigned &lane);
-
-    virtual void Move();	///< Mueve los autos según las condiciones de frontera especificadas.
+    ///@brief Evoluciona (itera) el AC. Verifica si se conserva la cantidad de autos.
+	///@param iter Número de iteraciones.
+	void Evolve(const unsigned &iter);
 };
 
 /********************************

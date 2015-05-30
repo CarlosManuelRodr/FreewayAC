@@ -1088,6 +1088,9 @@ CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &dens
 		cellularautomata = simplejunctionca = new SimpleJunctionCA(size, density, vmax, rand_prob,
 			                                                       args.GetDouble(), args.GetInt(0), args.GetInt(1));
 		break;
+	default:
+		cout << "Error: No se puede crear AC especificado en create_ca." << endl;
+		break;
     };
     return cellularautomata;
 }
@@ -1184,7 +1187,7 @@ CellularAutomataML::CellularAutomataML(const unsigned &size, const unsigned &lan
         do
         {
             pos = m_irand() % m_ca.size();
-            lane = m_irand() % 2;
+            lane = m_irand() % m_lanes;
         }
         while (m_ca[pos][lane] != -1);
         m_ca[pos][lane] = 1;
@@ -1300,62 +1303,64 @@ void CellularAutomataML::Step()
                 // Si no puede acelerar
                 if (!((At(i, j) <= m_vmax) && (NextCarDist(i, j) > (At(i, j) + 1))))
                 {
-                    if (NextCarDist(i, j) <= At(i, j))
-                    {
-                        // Intenta cambiar de carril.
-                        bool left = false, right = false;
-                        for (int k=(int)j-1; k<=(int)j+1 && k<(int)m_lanes; k++)
-                        {
-                            if (k<0 || (unsigned)k==j || At(i, k) != -1) continue;
+					// Intenta cambiar de carril.
+					bool left = false, right = false;
+					for (int k=(int)j-1; k<=(int)j+1 && k<(int)m_lanes; k++)
+					{
+						// Evita carril inexistente, el mismo y carril ocupado.
+						if (k<0 || (unsigned)k==j || At(i, k) != -1) continue;
 
-                            // Busca auto anterior y verifica si puede cambiarse sin chocar.
-                            int v, s = 0;
-                            for (int l=i-1; s<=m_vmax; ++s, l--)
-                            {
-                                v = At(l, k);
-                                if ((v != -1) && (v-s < 0))
-                                {
-                                    // Ahora busca si en este nuevo carril puede acelerar.
-                                    if ((At(i, k) <= m_vmax) && (NextCarDist(i, k) > (At(i, k) + 1)))
-                                    {
-                                        // Marca carril como disponible.
-                                        if ((unsigned)k == j-1) left = true;
-                                        else right = true;
-                                    }
-                                    break;
-                                }
-                            }
-                            if (s == m_vmax)
-                            {
-                                if ((At(i, k) <= m_vmax) && (NextCarDist(i, k) > (At(i, k) + 1)))
-                                {
-                                    // Marca carril como disponible.
-                                    if ((unsigned)k == j-1) left = true;
-                                    else right = true;
-                                }
-                            }
-                        }
-
-                        // Si el carril está disponible adelenta.
-                        if (left || right)
-                        {
-                            // Si ambos están disponibles apaga uno al azar.
-                            if (left && right)
-                            {
-                                int select = m_irand() % 2;
-                                if (select == 1) right = false;
-                                else left = false;
-                            }
-                            unsigned new_lane;
-                            if (left)
-                                new_lane = j-1;
-                            else
-                                new_lane = j+1;
-
-                            At(i, new_lane) = At(i, j);
-                            At(i, j) = -1;
-                        }
+						// Busca auto anterior y verifica si puede cambiarse sin chocar.
+						int v, s=0;
+						for (int l=i-1; s<=m_vmax; ++s, l--)
+						{
+							// Verifica posibilidad de choque.
+							v = At(l, k);
+							if ((v != -1) && (v-s <= 0))
+							{
+								// Ahora busca si en este nuevo carril puede acelerar.
+								if (NextCarDist(i, k) > (At(i, j) + 1))
+								{
+									// Marca carril como disponible.
+									if ((unsigned)k == j-1) left = true;
+									else right = true;
+								}
+								if (left && right)
+									break;
+							}
+						}
+						if (s == m_vmax)
+						{
+							if (NextCarDist(i, k) > (At(i, j) + 1))
+							{
+								// Marca carril como disponible.
+								if ((unsigned)k == j-1) left = true;
+								else right = true;
+							}
+							if (left && right)
+								break;
+						}
                     }
+
+					// Si el carril está disponible adelenta.
+					if (left || right)
+					{
+						// Si ambos están disponibles apaga uno al azar.
+						if (left && right)
+						{
+							int select = m_irand() % 2;
+							if (select == 1) right = false;
+							else left = false;
+						}
+						unsigned new_lane;
+						if (left)
+							new_lane = j-1;
+						else
+							new_lane = j+1;
+
+						At(i, new_lane) = At(i, j);
+						At(i, j) = -1;
+					}
                 }
             }
         }
@@ -1378,7 +1383,7 @@ void CellularAutomataML::Step()
                     if (At(i, j) > 0)
                     {
                         int nd = NextCarDist(i, j);
-                        if (nd <= m_ca[i][j])
+                        if (nd <= At(i, j))
                             At(i, j) = nd - 1;
                     }
                 }
@@ -1394,17 +1399,11 @@ void CellularAutomataML::Step()
     Move();
     m_ca_history.push_back(m_ca);
 }
-void CellularAutomataML::Evolve(const unsigned &iter, const bool &print)
+void CellularAutomataML::Evolve(const unsigned &iter)
 {
-    // Escribe condiciones iniciales.
-    if (print)
-        Print();
-
     for (unsigned i=0; i<iter; ++i)
     {
         Step();
-        if (print)
-            Print();
     }
 }
 unsigned CellularAutomataML::GetSize()
@@ -1415,9 +1414,56 @@ unsigned CellularAutomataML::GetHistorySize()
 {
     return m_ca_history.size();
 }
+unsigned CellularAutomataML::CountCars()
+{
+    unsigned count = 0;
+    for (unsigned i=0; i<m_ca.size(); ++i)
+    {
+    	for (unsigned j=0; j<m_lanes; ++j)
+    	{
+			if (m_ca[i][j] != -1)
+				count++;
+    	}
+    }
+    return count;
+}
 int &CellularAutomataML::At(const int &i, const unsigned &lane, const CAS &ca)
 {
     return At(i, lane, 0, ca);
+}
+int CellularAutomataML::NextCarDist(const int &pos, const unsigned &lane)
+{
+    int dist = 1;
+    while ((At(pos+dist, lane) == -1)  && (dist < 2*(int)m_size))
+        dist++;
+    return dist;
+}
+void CellularAutomataML::Move()
+{
+    m_ca_flow_temp.assign(m_size, CAElement(m_lanes, 0));
+    for (unsigned i=0; i<m_ca_temp.size(); ++i)
+    {
+        for (unsigned j=0; j<m_lanes; ++j)
+            m_ca_temp[i][j] = -1;
+    }
+
+    for (unsigned i=0; i<m_ca.size(); ++i)
+    {
+        for (unsigned j=0; j<m_lanes; ++j)
+        {
+            if (m_ca[i][j] != -1)
+            {
+                // Cambia las posiciones de los autos en AC.
+                At(i+m_ca[i][j], j, CA_TEMP) = m_ca[i][j];
+
+                // Marca las casillas donde hay flujo de autos.
+                for (unsigned k=i; k<i+m_ca[i][j]; ++k)
+                    At(k, j, CA_FLOW_TEMP) = 1;
+            }
+        }
+    }
+    m_ca_flow_history.push_back(m_ca_flow_temp);
+    m_ca.assign(m_ca_temp.begin(), m_ca_temp.end());
 }
 
 
@@ -1461,39 +1507,14 @@ int &CircularCAML::At(const int &i, const unsigned &lane, const unsigned &j, con
         break;
     };
 }
-int CircularCAML::NextCarDist(const int &pos, const unsigned &lane)
+void CircularCAML::Evolve(const unsigned &iter)
 {
-    unsigned dist = 1;
-    while (At(pos+dist, lane) == -1)
-        dist++;
-    return dist;
-}
-void CircularCAML::Move()
-{
-    m_ca_flow_temp.assign(m_size, CAElement(m_lanes, 0));
-    for (unsigned i=0; i<m_ca_temp.size(); ++i)
-    {
-        for (unsigned j=0; j<m_lanes; ++j)
-            m_ca_temp[i][j] = -1;
-    }
+    unsigned cars = CountCars();
+    for (unsigned i=0; i<iter; ++i)
+        Step();
 
-    for (unsigned i=0; i<m_ca.size(); ++i)
-    {
-        for (unsigned j=0; j<m_lanes; ++j)
-        {
-            if (m_ca[i][j] != -1)
-            {
-                // Cambia las posiciones de los autos en AC.
-                At(i+m_ca[i][j], j, CA_TEMP) = m_ca[i][j];
-
-                // Marca las casillas donde hay flujo de autos.
-                for (unsigned k=i; k<i+m_ca[i][j]; ++k)
-                    At(k, j, CA_FLOW_TEMP) = 1;
-            }
-        }
-    }
-    m_ca_flow_history.push_back(m_ca_flow_temp);
-    m_ca.assign(m_ca_temp.begin(), m_ca_temp.end());
+    if (cars != CountCars())
+        cout << "Error: La cantidad de autos no se conserva." << endl;
 }
 
 /********************************
@@ -1513,6 +1534,9 @@ CellularAutomataML* create_multilane_ca(CA_TYPE ca, const unsigned &size, const 
 	{
 	case CIRCULAR_MULTILANE_CA:
 		cellularautomataml = circularcaml = new CircularCAML(size, lanes, density, vmax, rand_prob);
+		break;
+	default:
+		cout << "Error: No se puede crear AC especificado en create_multilane_ca." << endl;
 		break;
 	};
 	return cellularautomataml;
