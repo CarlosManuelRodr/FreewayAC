@@ -627,6 +627,11 @@ public:
 *                           *
 ****************************/
 
+/**
+* @class CircularCAML
+* @brief AC multicarril con condiciones de frontera periódicas.
+*/
+
 class CircularCAML : public CellularAutomataML
 {
 public:
@@ -653,5 +658,15 @@ public:
 
     virtual void Move();	///< Mueve los autos según las condiciones de frontera especificadas.
 };
+
+/********************************
+*                               *
+*  Manejador de CA Multicarril  *
+*                               *
+********************************/
+
+CellularAutomataML* create_multilane_ca(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density,
+	                                    const int &vmax, const double &rand_prob, Args args);
+void delete_multilane_ca();
 
 #endif

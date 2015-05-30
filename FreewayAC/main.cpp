@@ -910,6 +910,7 @@ int main(int argc, char* argv[])
     bool plot_traffic = false, flow_vs_vmax = false, flow_vs_rand_prob = false, flow_vs_smart_cars = false;
 	bool flow_vs_stop_density = false, flow_per_density = false, flow_vs_new_car = false, flow_per_new_car = false;
 	bool flow_vs_semaphore_density = false, random_semaphores = false, test = false;
+	bool multilane = false;
     CA_TYPE ca_type = CIRCULAR_CA;
     double new_car_prob = 0.1, smart_density = 0.1, stop_density = 0.1, semaphore_density = 0.1;
 	int new_car_speed = 1, target_lane = 0, lanes = 2;
@@ -1171,6 +1172,8 @@ int main(int argc, char* argv[])
 		args = Args({ semaphore_density }, { random_semaphores });
 	if (ca_type == SIMPLE_JUNCTION_CA)
 		args = Args({ new_car_prob }, { new_car_speed, target_lane });
+	if (ca_type == CIRCULAR_MULTILANE_CA)
+		multilane = true;
 
     // Realiza acciones.
     if (test)
@@ -1178,86 +1181,104 @@ int main(int argc, char* argv[])
         cout << "Realizando tests." << endl;
         perform_test();
     }
-    if (ocupancy_fixed || flow_fixed || plot_traffic)
-    {
-        cout << "Evolucionando automata." << endl;
-		CellularAutomata* ca = create_ca(ca_type, size, density, vmax, rand_prob, args);
-        ca->Evolve(iterations);
-        if (plot_traffic)
-        {
-            cout << "Creando mapas." << endl;
-            ca->DrawHistory();
-            ca->DrawFlowHistory();
-        }
-        if (ocupancy_fixed)
-        {
-            cout << "Midiendo ocupacion." << endl;
-            ex_ocupancy_fixed(ca, out_file_name);
-        }
-        if (flow_fixed)
-        {
-            cout << "Midiendo flujo." << endl;
-            ex_flow_fixed(ca, out_file_name);
-        }
-        delete_ca();
-    }
-    else
-    {
-        if (flow_vs_density)
-        {
-            cout << "Midiendo flujo vs densidad." << endl;
-            ex_flow_vs_density(ca_type, size, iterations, vmax, dmin, dmax, dt, rand_prob, 
-				               args, false, out_file_name);
-        }
-        if (flow_per_density)
-        {
-            cout << "Midiendo flujo/densidad vs densidad." << endl;
-            ex_flow_vs_density(ca_type, size, iterations, vmax, dmin, dmax, dt, rand_prob, 
-				               args, true, out_file_name);
-        }
-        if (flow_vs_vmax)
-        {
-            cout << "Midiendo flujo vs vmax." << endl;
-            ex_flow_vs_vmax(ca_type, size, iterations, vmax_min, vmax_max, (int)dt, density, 
-				            rand_prob, args, out_file_name);
-        }
-        if (flow_vs_rand_prob)
-        {
-            cout << "Midiendo flujo vs rand_prob." << endl;
-            ex_flow_vs_rand_prob(ca_type, size, iterations, vmax, density, rand_prob_min, 
-				                 rand_prob_max, dt, args, out_file_name);
-        }
-        if (flow_vs_smart_cars)
-        {
-            cout << "Midiendo flujo vs densidad de autos inteligentes." << endl;
-            ex_flow_vs_smart_cars(size, iterations, vmax, density, rand_prob, smart_min, 
-                                  smart_max, dt, out_file_name);
-        }
-        if (flow_vs_stop_density)
-        {
-            cout << "Midiendo flujo vs densidad de topes." << endl;
-            ex_flow_vs_stop_density(size, iterations, vmax, density, rand_prob, stop_density_min, 
-                                    stop_density_max, dt, out_file_name);
-        }
-        if (flow_vs_new_car)
-        {
-            cout << "Midiendo flujo vs probabilidad de nuevo auto." << endl;
-            ex_flow_vs_new_car_prob(ca_type, size, iterations, vmax, density, rand_prob, new_car_min, 
-				                    new_car_max, dt, args, false, out_file_name);
-        }
-		if (flow_per_new_car)
+	if (!multilane)
+	{
+		if (ocupancy_fixed || flow_fixed || plot_traffic)
 		{
-			cout << "Midiendo flujo/probabilidad vs probabilidad de nuevo auto." << endl;
-			ex_flow_vs_new_car_prob(ca_type, size, iterations, vmax, density, rand_prob, new_car_min,
-									new_car_max, dt, args, true, out_file_name);
+			cout << "Evolucionando automata." << endl;
+			CellularAutomata* ca = create_ca(ca_type, size, density, vmax, rand_prob, args);
+			ca->Evolve(iterations);
+			if (plot_traffic)
+			{
+				cout << "Creando mapas." << endl;
+				ca->DrawHistory();
+				ca->DrawFlowHistory();
+			}
+			if (ocupancy_fixed)
+			{
+				cout << "Midiendo ocupacion." << endl;
+				ex_ocupancy_fixed(ca, out_file_name);
+			}
+			if (flow_fixed)
+			{
+				cout << "Midiendo flujo." << endl;
+				ex_flow_fixed(ca, out_file_name);
+			}
+			delete_ca();
 		}
-        if (flow_vs_semaphore_density)
-        {
-             cout << "Midiendo flujo vs densidad de semaforos." << endl;
-             ex_flow_vs_semaphore_density(size, iterations, vmax, density, rand_prob, semaphore_density_min,
-                                          semaphore_density_max, dt, random_semaphores, out_file_name);
-        }
-    }
+		else
+		{
+			if (flow_vs_density)
+			{
+				cout << "Midiendo flujo vs densidad." << endl;
+				ex_flow_vs_density(ca_type, size, iterations, vmax, dmin, dmax, dt, rand_prob,
+					               args, false, out_file_name);
+			}
+			if (flow_per_density)
+			{
+				cout << "Midiendo flujo/densidad vs densidad." << endl;
+				ex_flow_vs_density(ca_type, size, iterations, vmax, dmin, dmax, dt, rand_prob,
+				            	   args, true, out_file_name);
+			}
+			if (flow_vs_vmax)
+			{
+				cout << "Midiendo flujo vs vmax." << endl;
+				ex_flow_vs_vmax(ca_type, size, iterations, vmax_min, vmax_max, (int)dt, density,
+					            rand_prob, args, out_file_name);
+			}
+			if (flow_vs_rand_prob)
+			{
+				cout << "Midiendo flujo vs rand_prob." << endl;
+				ex_flow_vs_rand_prob(ca_type, size, iterations, vmax, density, rand_prob_min,
+					                 rand_prob_max, dt, args, out_file_name);
+			}
+			if (flow_vs_smart_cars)
+			{
+				cout << "Midiendo flujo vs densidad de autos inteligentes." << endl;
+				ex_flow_vs_smart_cars(size, iterations, vmax, density, rand_prob, smart_min,
+					                  smart_max, dt, out_file_name);
+			}
+			if (flow_vs_stop_density)
+			{
+				cout << "Midiendo flujo vs densidad de topes." << endl;
+				ex_flow_vs_stop_density(size, iterations, vmax, density, rand_prob, stop_density_min,
+					                    stop_density_max, dt, out_file_name);
+			}
+			if (flow_vs_new_car)
+			{
+				cout << "Midiendo flujo vs probabilidad de nuevo auto." << endl;
+				ex_flow_vs_new_car_prob(ca_type, size, iterations, vmax, density, rand_prob, new_car_min,
+					                    new_car_max, dt, args, false, out_file_name);
+			}
+			if (flow_per_new_car)
+			{
+				cout << "Midiendo flujo/probabilidad vs probabilidad de nuevo auto." << endl;
+				ex_flow_vs_new_car_prob(ca_type, size, iterations, vmax, density, rand_prob, new_car_min,
+					                    new_car_max, dt, args, true, out_file_name);
+			}
+			if (flow_vs_semaphore_density)
+			{
+				cout << "Midiendo flujo vs densidad de semaforos." << endl;
+				ex_flow_vs_semaphore_density(size, iterations, vmax, density, rand_prob, semaphore_density_min,
+					                         semaphore_density_max, dt, random_semaphores, out_file_name);
+			}
+		}
+	}
+	else
+	{
+		if (plot_traffic)
+		{
+			cout << "Evolucionando automata." << endl;
+			CellularAutomataML* ca = create_multilane_ca(ca_type, size, lanes, density, vmax, rand_prob, args);
+			ca->Evolve(iterations);
+			if (plot_traffic)
+			{
+				cout << "Creando mapas." << endl;
+				ca->DrawHistory();
+				ca->DrawFlowHistory();
+			}
+		}
+	}
     cout << "Hecho." << endl;
     return 0;
 }
