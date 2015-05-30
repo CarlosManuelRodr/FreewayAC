@@ -1495,3 +1495,31 @@ void CircularCAML::Move()
     m_ca_flow_history.push_back(m_ca_flow_temp);
     m_ca.assign(m_ca_temp.begin(), m_ca_temp.end());
 }
+
+/********************************
+*                               *
+*  Manejador de CA Multicarril  *
+*                               *
+********************************/
+
+CellularAutomataML* cellularautomataml = NULL;
+CircularCAML* circularcaml = NULL;
+
+CellularAutomataML* create_multilane_ca(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density, 
+                             	        const int &vmax, const double &rand_prob, Args args)
+{
+	delete_ca();
+	switch (ca)
+	{
+	case CIRCULAR_MULTILANE_CA:
+		cellularautomataml = circularcaml = new CircularCAML(size, lanes, density, vmax, rand_prob);
+		break;
+	};
+	return cellularautomataml;
+}
+void delete_multilane_ca()
+{
+	if (circularca != NULL)
+		delete circularca;
+	circularca = NULL;
+}

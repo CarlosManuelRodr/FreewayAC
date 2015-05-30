@@ -183,7 +183,7 @@ enum CAS
 */
 enum CA_TYPE
 {
-    CIRCULAR_CA, OPEN_CA, SMART_CA, STOP_CA, SEMAPHORE_CA, SIMPLE_JUNCTION_CA
+    CIRCULAR_CA, CIRCULAR_MULTILANE_CA, OPEN_CA, SMART_CA, STOP_CA, SEMAPHORE_CA, SIMPLE_JUNCTION_CA
 };
 
 /**
@@ -559,33 +559,66 @@ public:
 *                           *
 ****************************/
 
+/**
+* @class CellularAutomataML
+* @brief Clase base para autómata celular multicarril.
+* Esta clase implementa los métodos básicos que todos los autómatas celulares de tráfico poseen.
+* Las condiciones de frontera del autómata se reflejan en los métodos At y Move que se necesitan
+* definir en las clases hijas.
+*/
+
 class CellularAutomataML
 {
 protected:
-    int m_vmax;
-    unsigned m_lanes;
-    double m_rand_prob;
-    unsigned m_size;
-    std::vector<CAElement> m_ca, m_ca_temp, m_ca_flow_temp;    // Automata celular. -1 para casillas sin auto, y valores >= 0 indican velocidad del auto en esa casilla.
-    std::vector< std::vector<CAElement> > m_ca_history, m_ca_flow_history;
-    MTRand m_drand;            // Generador de aleatorios (flotantes) entre 0 y 1.
-    MTRand_int32 m_irand;      // Generador de enteros aleatorios.
+	int m_vmax;                  ///< Valor máximo de la velocidad.
+    unsigned m_lanes;			 ///< Número de carriles.
+	double m_rand_prob;          ///< Valor de la probabilidad de descenso de velocidad.
+	unsigned m_size;             ///< Tamaño del autómata celular
+	std::vector<CAElement> m_ca;    ///< Automata celular. -1 para casillas sin auto, y valores >= 0 indican velocidad del auto en esa casilla.
+	std::vector<CAElement> m_ca_temp, m_ca_flow_temp;                         ///< Variable temporal para operaciones con AC.
+	std::vector< std::vector<CAElement> > m_ca_history, m_ca_flow_history;    ///< Lista con valores históricos de AC.
+	MTRand m_drand;              ///< Generador de aleatorios (flotantes) entre 0 y 1.
+	MTRand_int32 m_irand;        ///< Generador de enteros aleatorios.
 
 public:
+	///@brief Constructor.
+	///@param size Tamaño del AC.
+	///@param lanes Número de carriles.
+	///@param density Densidad de autos.
+	///@param vmax Velocidad máxima de los autos.
+	///@param rand_prob Probabilidad de descenso de velocidad.
     CellularAutomataML(const unsigned &size, const unsigned &lanes, const double &density, 
                        const int &vmax, const double &rand_prob);
     virtual ~CellularAutomataML();
-    void Print();
-    void DrawHistory();
-    void DrawFlowHistory();
-    void Evolve(const unsigned &iter, const bool &print = false);
-    unsigned GetSize();
-    unsigned GetHistorySize();
-    int &At(const int &i, const unsigned &lane, const CAS &ca = CA);
-    virtual void Step();
-    virtual int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca) = 0;
-    virtual int NextCarDist(const int &pos, const unsigned &lane) = 0;
-    virtual void Move() = 0;
+
+	///@brief Evoluciona (itera) el AC.
+	///@param iter Número de iteraciones.
+	void Evolve(const unsigned &iter, const bool &print = false);
+
+	///@brief Devuelve referencia a elemento del AC considerando las condiciones de frontera.
+	///@param i Posición dentro del AC.
+	///@param lane Carril objetivo.
+	///@param ca Tipo de AC.
+	int &At(const int &i, const unsigned &lane, const CAS &ca = CA);
+
+	///@brief Devuelve referencia a  elemento de valores del autómata celular considerando las condiciones de frontera.
+	///@param i Posición dentro del AC.
+	///@param lane Carril objetivo.
+	///@param j Posición temporal del AC.
+	///@param ca Tipo de autómata celular.
+	virtual int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca) = 0;
+
+	///@brief Devuelve la distancia al auto más próximo desde la posición pos.
+	///@param pos Posición desde dónde iniciar la búsqueda.
+	virtual int NextCarDist(const int &pos, const unsigned &lane) = 0;
+
+    void Print();			    ///< Escribe línea de autómata celular en la terminal.
+    void DrawHistory();		    ///< Dibuja mapa histórico del AC en formato BMP.
+    void DrawFlowHistory();     ///< Dibuja mapa histórico del flujo de AC en formato BMP.
+    unsigned GetSize();		    ///< Devuelve tamaño del AC.
+    unsigned GetHistorySize();  ///< Devuelve tamaño de la lista histórica de evolución del AC.
+    virtual void Step();        ///< Aplica reglas de evolución temporal del AC.
+    virtual void Move() = 0;    ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
 };
 
 /****************************
@@ -597,12 +630,28 @@ public:
 class CircularCAML : public CellularAutomataML
 {
 public:
+	///@brief Constructor.
+	///@param size Tamaño del AC.
+	///@param lanes Número de carriles.
+	///@param density Densidad de autos.
+	///@param vmax Velocidad máxima de los autos.
+	///@param rand_prob Probabilidad de descenso de velocidad.
     CircularCAML(const unsigned size, const unsigned int lanes, const double density, 
                  const int vmax, const double rand_prob);
+
+	///@brief Devuelve referencia a  elemento de valores del autómata celular considerando las condiciones de frontera.
+	///@param i Posición dentro del AC.
+	///@param lane Carril objetivo.
+	///@param j Posición temporal del AC.
+	///@param ca Tipo de autómata celular.
     using CellularAutomataML::At;
     int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca);
+
+	///@brief Devuelve la distancia al auto más próximo desde la posición pos.
+	///@param pos Posición desde dónde iniciar la búsqueda.
     int NextCarDist(const int &pos, const unsigned &lane);
-    virtual void Move();
+
+    virtual void Move();	///< Mueve los autos según las condiciones de frontera especificadas.
 };
 
 #endif
