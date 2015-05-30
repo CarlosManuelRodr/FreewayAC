@@ -64,21 +64,52 @@ double Args::GetDouble(const unsigned &i)
 	if (i < m_double_args.size())
 		return m_double_args[i];
 	else
+
+	{
+		cout << "Error: Argumento double faltante. Indice: " << i << "." << endl;
 		return 0.0;
+	}
 }
 int Args::GetInt(const unsigned &i)
 {
 	if (i < m_int_args.size())
 		return m_int_args[i];
 	else
+	{
+		cout << "Error: Argumento int faltante. Indice: " << i << "." << endl;
 		return 0;
+	}
 }
 bool Args::GetBool(const unsigned &i)
 {
 	if (i < m_bool_args.size())
 		return m_bool_args[i];
 	else
-		return 0.0;
+	{
+		cout << "Error: Argumento bool faltante. Indice: " << i << "." << endl;
+		return false;
+	}
+}
+void Args::SetDouble(const unsigned &i, double val)
+{
+	if (i < m_double_args.size())
+		m_double_args[i] = val;
+	else
+		cout << "Error: Asignacion double invalida. Indice: " << i << ", valor: " << val << "." << endl;
+}
+void Args::SetInt(const unsigned &i, int val)
+{
+	if (i < m_int_args.size())
+		m_int_args[i] = val;
+	else
+		cout << "Error: Asignacion int invalida. Indice: " << i << ", valor: " << val << "." << endl;
+}
+void Args::SetBool(const unsigned &i, bool val)
+{
+	if (i < m_bool_args.size())
+		m_bool_args[i] = val;
+	else
+		cout << "Error: Asignacion bool invalida. Indice: " << i << ", valor: " << val << "." << endl;
 }
 void Args::operator=(const Args &arg)
 {

@@ -436,6 +436,7 @@ void ex_flow_vs_new_car_prob(const CA_TYPE &type, const unsigned &size, const un
             aux_progress_bar(s/new_car_prob_max);
 
         // Evoluciona el sistema.
+		args.SetDouble(0, s);
 		ca = create_ca(type, size, density, vmax, rand_prob, args);
 		ca->Evolve(iterations);
 
@@ -461,7 +462,6 @@ void ex_flow_vs_new_car_prob(const CA_TYPE &type, const unsigned &size, const un
         for (unsigned i=0; i<tmp_flow.size(); ++i)
             mean += tmp_flow[i];
         mean /= (double)tmp_flow.size();
-        //mean /= s;
 
         // Asigna valores.
         new_car_density.push_back(s);
@@ -470,7 +470,7 @@ void ex_flow_vs_new_car_prob(const CA_TYPE &type, const unsigned &size, const un
 
     // Escribe a CSV.
     if (out_file_name.empty())
-        out_file_name = "flow_vs_new_density.csv";
+        out_file_name = "flow_vs_new_car_prob.csv";
     ofstream file(out_file_name.c_str(), ofstream::out);
     for (unsigned i = 0; i < flow.size(); ++i)
     {

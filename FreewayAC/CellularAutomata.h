@@ -135,6 +135,18 @@ public:
 	///@param i Indice del elemento a devolver.
 	bool GetBool(const unsigned &i = 0);
 
+	///@brief Asigna elemento double.
+	///@param i Indice del elemento a devolver.
+	void SetDouble(const unsigned &i, double val);
+
+	///@brief Asigna elemento int.
+	///@param i Indice del elemento a devolver.
+	void SetInt(const unsigned &i, int val);
+
+	///@brief Asigna elemento bool.
+	///@param i Indice del elemento a devolver.
+	void SetBool(const unsigned &i, bool val);
+
 	///@brief Copia los valores del argumento.
 	///@param arg Objetivo a copiar.
 	void operator=(const Args &arg);
