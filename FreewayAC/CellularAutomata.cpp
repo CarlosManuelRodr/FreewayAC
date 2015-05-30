@@ -235,11 +235,14 @@ void CellularAutomata::PrintHistory()
         cout << endl;
     }
 }
-void CellularAutomata::DrawHistory()
+void CellularAutomata::DrawHistory(string out_file_name)
 {
+	if (out_file_name == "")
+		out_file_name = "ca.bmp";
+
     unsigned height = m_ca_history.size();
     unsigned width = m_size;
-    BMPWriter writer("ca.bmp", width, height);
+    BMPWriter writer(out_file_name.c_str(), width, height);
     BMPPixel* bmpData = new BMPPixel[width];
     for (int i=height-1; i>=0; i--)     // Los archivos BMP se escriben de abajo a arriba.
     {
@@ -257,11 +260,14 @@ void CellularAutomata::DrawHistory()
     writer.CloseBMP();
     delete[] bmpData;
 }
-void CellularAutomata::DrawFlowHistory()
+void CellularAutomata::DrawFlowHistory(string out_file_name)
 {
+	if (out_file_name == "")
+			out_file_name = "ca_flow.bmp";
+
     unsigned height = m_ca_flow_history.size();
     unsigned width = m_size;
-    BMPWriter writer("ca_flow.bmp", width, height);
+    BMPWriter writer(out_file_name.c_str(), width, height);
     BMPPixel* bmpData = new BMPPixel[width];
     for (int i=height-1; i>=0; i--)
     {
@@ -287,7 +293,7 @@ void CellularAutomata::Step()
         if (m_ca[i] != -1)
         {
             // Aceleracion.
-            if ((m_ca[i] <= m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
+            if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
                 m_ca[i]++;
             else
             {
@@ -531,7 +537,7 @@ void OpenCA::Step()
 		if (m_ca[i] != -1)
 		{
 			// Aceleracion.
-			if ((m_ca[i] <= m_vmax) && (NextCarDist(i) >(m_ca[i] + 1)))
+			if ((m_ca[i] < m_vmax) && (NextCarDist(i) >(m_ca[i] + 1)))
 				m_ca[i]++;
 			else
 			{
@@ -636,9 +642,9 @@ void SmartCA::Step()
 				// Auto inteligente.
 				int nc = i + NextCarDist(i);
 				nc %= m_size;
-				if ((m_ca[nc] <= m_vmax) && (NextCarDist(nc) > (m_ca[nc] + 1)) && (NextCarDist(i) <= m_ca[i]))
+				if ((m_ca[nc] < m_vmax) && (NextCarDist(nc) > (m_ca[nc] + 1)) && (NextCarDist(i) <= m_ca[i]))
 				{
-					if ((m_ca[i] <= m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
+					if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
 						m_ca[i]++;
 					else
 					{
@@ -662,7 +668,7 @@ void SmartCA::Step()
 				else
 				{
 					// Aceleracion.
-					if ((m_ca[i] <= m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
+					if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
 						m_ca[i]++;
 					else
 					{
@@ -679,7 +685,7 @@ void SmartCA::Step()
 			else
 			{
 				// Aceleracion.
-				if ((m_ca[i] <= m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
+				if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
 					m_ca[i]++;
 				else
 				{
@@ -742,7 +748,7 @@ void StreetStopCA::Step()
         if (m_ca[i] != -1)
         {
             // Aceleracion.
-            if ((m_ca[i] <= m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
+            if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
                 m_ca[i]++;
             else
             {
@@ -787,11 +793,14 @@ int StreetStopCA::NextStopDist(const int &pos)
     else
         return numeric_limits<int>::max();
 }
-void StreetStopCA::DrawHistory()
+void StreetStopCA::DrawHistory(string out_file_name)
 {
+	if (out_file_name == "")
+		out_file_name = "ca.bmp";
+
     unsigned height = m_ca_history.size();
     unsigned width = m_size;
-    BMPWriter writer("ca.bmp", width, height);
+    BMPWriter writer(out_file_name.c_str(), width, height);
     BMPPixel* bmpData = new BMPPixel[width];
     for (int i=height-1; i>=0; i--)
     {
@@ -876,7 +885,7 @@ void SemaphoreCA::Step()
         if (m_ca[i] != -1)
         {
             // Aceleracion.
-            if ((m_ca[i] <= m_vmax) && ((NextCarDist(i) > (m_ca[i] + 1)) && (NextSemaphoreDist(i) > (m_ca[i] + 1))))
+            if ((m_ca[i] < m_vmax) && ((NextCarDist(i) > (m_ca[i] + 1)) && (NextSemaphoreDist(i) > (m_ca[i] + 1))))
                 m_ca[i]++;
             else
             {
@@ -934,11 +943,14 @@ int SemaphoreCA::NextSemaphoreDist(const int &pos)
     else
         return numeric_limits<int>::max();
 }
-void SemaphoreCA::DrawHistory()
+void SemaphoreCA::DrawHistory(string out_file_name)
 {
+	if (out_file_name == "")
+		out_file_name = "ca.bmp";
+
     unsigned height = m_ca_history.size();
     unsigned width = m_size;
-    BMPWriter writer("ca.bmp", width, height);
+    BMPWriter writer(out_file_name.c_str(), width, height);
     BMPPixel* bmpData = new BMPPixel[width];
     for (int i=height-1; i>=0; i--)
     {
@@ -1005,12 +1017,15 @@ void SimpleJunctionCA::Evolve(const unsigned &iter)
 		this->Step();
 	}
 }
-void SimpleJunctionCA::DrawHistory()
+void SimpleJunctionCA::DrawHistory(string out_file_name)
 {
+	if (out_file_name == "")
+		out_file_name = "ca_junction.bmp";
+
 	m_source->DrawHistory();
 	unsigned height = m_ca_history.size();
 	unsigned width = m_size;
-	BMPWriter writer("ca_junction.bmp", width, height);
+	BMPWriter writer(out_file_name.c_str(), width, height);
 	BMPPixel* bmpData = new BMPPixel[width];
 	for (int i = height - 1; i >= 0; i--)
 	{
@@ -1213,8 +1228,11 @@ void CellularAutomataML::Print()
         cout << ".";
     cout << endl;
 }
-void CellularAutomataML::DrawHistory()
+void CellularAutomataML::DrawHistory(string out_file_name)
 {
+	if (out_file_name == "")
+		out_file_name = "ca.bmp";
+
     unsigned bmp_height;
     if (m_lanes == 1)
         bmp_height =  m_ca_history.size();
@@ -1223,7 +1241,7 @@ void CellularAutomataML::DrawHistory()
 
     unsigned height =  m_ca_history.size();
     unsigned width = m_size;
-    BMPWriter writer("ca.bmp", width, bmp_height);
+    BMPWriter writer(out_file_name.c_str(), width, bmp_height);
     BMPPixel* bmpData = new BMPPixel[width];
     BMPPixel color;
 
@@ -1252,8 +1270,11 @@ void CellularAutomataML::DrawHistory()
     writer.CloseBMP();
     delete[] bmpData;
 }
-void CellularAutomataML::DrawFlowHistory()
+void CellularAutomataML::DrawFlowHistory(string out_file_name)
 {
+	if (out_file_name == "")
+		out_file_name = "ca_flow.bmp";
+
     unsigned bmp_height;
     if (m_lanes == 1)
         bmp_height =  m_ca_flow_history.size();
@@ -1262,7 +1283,7 @@ void CellularAutomataML::DrawFlowHistory()
 
     unsigned height =  m_ca_flow_history.size();
     unsigned width = m_size;
-    BMPWriter writer("ca_flow.bmp", width, bmp_height);
+    BMPWriter writer(out_file_name.c_str(), width, bmp_height);
     BMPPixel* bmpData = new BMPPixel[width];
     BMPPixel color;
 
@@ -1301,7 +1322,7 @@ void CellularAutomataML::Step()
             for (unsigned j=0; j<m_lanes; ++j)
             {
                 // Si no puede acelerar
-                if (!((At(i, j) <= m_vmax) && (NextCarDist(i, j) > (At(i, j) + 1))))
+                if (!((At(i, j) < m_vmax) && (NextCarDist(i, j) > (At(i, j) + 1))))
                 {
 					// Intenta cambiar de carril.
 					bool left = false, right = false;
@@ -1375,7 +1396,7 @@ void CellularAutomataML::Step()
             if (At(i, j) != -1)
             {
                 // Aceleracion.
-                if ((At(i, j) <= m_vmax) && (NextCarDist(i, j) > (At(i, j) + 1)))
+                if ((At(i, j) < m_vmax) && (NextCarDist(i, j) > (At(i, j) + 1)))
                     At(i, j)++;
                 else
                 {

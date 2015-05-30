@@ -266,13 +266,20 @@ public:
 	///@param connect_pos Posición del AC objetivo donde se realiza la conexión.
 	void Connect(CellularAutomata* connect, unsigned connect_pos);
 
+	///@brief Dibuja mapa histórico del AC en formato BMP.
+	///@param out_file_name Ruta del archivo de salida.
+    virtual void DrawHistory(std::string out_file_name = "");
+
+    ///@brief Dibuja mapa histórico del flujo de AC en formato BMP.
+    ///@param out_file_name Ruta del archivo de salida.
+    virtual void DrawFlowHistory(std::string out_file_name = "");
+
+
     void Print();                   ///< Escribe línea de autómata celular en la terminal.
     unsigned GetSize();             ///< Devuelve tamaño del AC.
     unsigned GetHistorySize();      ///< Devuelve tamaño de la lista histórica de evolución del AC.
     unsigned CountCars();           ///< Cuenta la cantidad de autos en AC.
     void PrintHistory();            ///< Escribe los valores históricos del AC en la terminal.
-    virtual void DrawHistory();     ///< Dibuja mapa histórico del AC en formato BMP.
-    virtual void DrawFlowHistory(); ///< Dibuja mapa histórico del flujo de AC en formato BMP.
     virtual void Step();            ///< Aplica reglas de evolución temporal del AC.
     virtual void Move();            ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
 };
@@ -429,8 +436,11 @@ public:
     ///@param pos Posición desde dónde iniciar la búsqueda.
     int NextStopDist(const int &pos);
 
+    ///@brief Dibuja mapa histórico del AC en formato BMP.
+	///@param out_file_name Ruta del archivo de salida.
+	void DrawHistory(std::string out_file_name = "");
+
     void Step();        ///< Aplica reglas de evolución temporal del AC con tope.
-    void DrawHistory(); ///< Dibuja mapa histórico del AC en formato BMP marcando los topes de verde.
 };
 
 /****************************
@@ -466,8 +476,11 @@ public:
     ///@param pos Posición desde dónde iniciar la búsqueda.
     int NextSemaphoreDist(const int &pos);
 
+    ///@brief Dibuja mapa histórico del AC en formato BMP.
+	///@param out_file_name Ruta del archivo de salida.
+	void DrawHistory(std::string out_file_name = "");
+
     void Step();        ///< Aplica reglas de evolución temporal del AC con tope.
-    void DrawHistory(); ///< Dibuja mapa histórico del AC en formato BMP marcando los semaforos de color.
 };
 
 /****************************
@@ -507,7 +520,9 @@ public:
 	///@param ca Tipo de autómata celular.
 	int GetAt(const unsigned &i, const unsigned &j, const CAS &ca);
 
-	void DrawHistory(); ///< Dibuja mapa histórico del AC en formato BMP marcando los semaforos de color.
+    ///@brief Dibuja mapa histórico del AC en formato BMP.
+	///@param out_file_name Ruta del archivo de salida.
+	void DrawHistory(std::string out_file_name = "");
 };
 
 
@@ -612,9 +627,15 @@ public:
 	///@param pos Posición desde dónde iniciar la búsqueda.
 	virtual int NextCarDist(const int &pos, const unsigned &lane);
 
+	///@brief Dibuja mapa histórico del AC en formato BMP.
+	///@param out_file_name Ruta del archivo de salida.
+    void DrawHistory(std::string out_file_name = "");
+
+    ///@brief Dibuja mapa histórico del flujo de AC en formato BMP.
+    ///@param out_file_name Ruta del archivo de salida.
+    void DrawFlowHistory(std::string out_file_name = "");
+
     void Print();			    ///< Escribe línea de autómata celular en la terminal.
-    void DrawHistory();		    ///< Dibuja mapa histórico del AC en formato BMP.
-    void DrawFlowHistory();     ///< Dibuja mapa histórico del flujo de AC en formato BMP.
     unsigned GetSize();		    ///< Devuelve tamaño del AC.
     unsigned GetHistorySize();  ///< Devuelve tamaño de la lista histórica de evolución del AC.
     unsigned CountCars();           ///< Cuenta la cantidad de autos en AC.
