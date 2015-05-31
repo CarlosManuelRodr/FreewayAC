@@ -1079,13 +1079,13 @@ int SimpleJunctionCA::GetAt(const unsigned &i, const unsigned &j, const CAS &ca)
 *                           *
 ****************************/
 
-CellularAutomata* cellularautomata = NULL;
-CircularCA* circularca = NULL;
-OpenCA* openca = NULL;
-SmartCA* smartca = NULL;
-StreetStopCA* streetstopca = NULL;
-SemaphoreCA* semaphoreca = NULL;
-SimpleJunctionCA* simplejunctionca = NULL;
+CellularAutomata* cellularautomata = nullptr;
+CircularCA* circularca = nullptr;
+OpenCA* openca = nullptr;
+SmartCA* smartca = nullptr;
+StreetStopCA* streetstopca = nullptr;
+SemaphoreCA* semaphoreca = nullptr;
+SimpleJunctionCA* simplejunctionca = nullptr;
 
 CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax, 
 	                        const double &rand_prob, Args args)
@@ -1125,31 +1125,31 @@ CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &dens
 	catch (std::bad_alloc&)
 	{
 		cout << "Fatal: Memoria insuficiente." << endl;
-		return NULL;
+		return nullptr;
 	}
 }
 void delete_ca()
 {
-    if (circularca != NULL)
+	if (circularca != nullptr)
         delete circularca;
-    if (openca != NULL)
+	if (openca != nullptr)
         delete openca;
-    if (smartca != NULL)
+	if (smartca != nullptr)
         delete smartca;
-    if (streetstopca != NULL)
+	if (streetstopca != nullptr)
         delete streetstopca;
-    if (semaphoreca != NULL)
+	if (semaphoreca != nullptr)
         delete semaphoreca;
-	if (simplejunctionca != NULL)
+	if (simplejunctionca != nullptr)
 		delete simplejunctionca;
 
-    circularca = NULL;
-    openca = NULL;
-    smartca = NULL;
-    streetstopca = NULL;
-    cellularautomata = NULL;
-    semaphoreca = NULL;
-	simplejunctionca = NULL;
+	circularca = nullptr;
+	openca = nullptr;
+	smartca = nullptr;
+	streetstopca = nullptr;
+	cellularautomata = nullptr;
+	semaphoreca = nullptr;
+	simplejunctionca = nullptr;
 }
 
 
@@ -1604,8 +1604,8 @@ void CircularCAML::Evolve(const unsigned &iter)
 *                               *
 ********************************/
 
-CellularAutomataML* cellularautomataml = NULL;
-CircularCAML* circularcaml = NULL;
+CellularAutomataML* cellularautomataml = nullptr;
+CircularCAML* circularcaml = nullptr;
 
 CellularAutomataML* create_multilane_ca(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density, 
                              	        const int &vmax, const double &rand_prob, Args args)
@@ -1627,12 +1627,12 @@ CellularAutomataML* create_multilane_ca(CA_TYPE ca, const unsigned &size, const 
 	catch (std::bad_alloc&)
 	{
 		cout << "Fatal: Memoria insuficiente." << endl;
-		return NULL;
+		return nullptr;
 	}
 }
 void delete_multilane_ca()
 {
-	if (circularcaml != NULL)
+	if (circularcaml != nullptr)
 		delete circularcaml;
-	circularcaml = NULL;
+	circularcaml = nullptr;
 }
