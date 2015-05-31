@@ -1,4 +1,5 @@
 #include <string>
+#include <climits>
 #include "BmpWriter.h"
 using namespace std;
 
@@ -69,7 +70,7 @@ BMPWriter::BMPWriter(const char* filepath, unsigned int width, unsigned int heig
     unsigned int offsetData = 54;
     m_paddingBytes = m_width % 4;
 
-    // Calcula tamaño del archivo.
+    // Calcula tamaÃ±o del archivo.
     bmpSize += 14;        //BMPHeader size.
     bmpSize += 40;        //DIBHeader size.
     bmpSize += 3*width*height;
@@ -104,7 +105,7 @@ BMPWriter::~BMPWriter()
 }
 void BMPWriter::WriteLine(BMPPixel* data)
 {
-    // Escribe línea individual del BMP.
+    // Escribe lÃ­nea individual del BMP.
     if(m_indexHeight < m_height)
     {
         for(unsigned int i = 0; i < m_width; i++)

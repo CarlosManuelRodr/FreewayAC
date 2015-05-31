@@ -189,7 +189,7 @@ enum CAS
 */
 enum CA_TYPE
 {
-    CIRCULAR_CA, CIRCULAR_MULTILANE_CA, OPEN_CA, SMART_CA, STOP_CA, SEMAPHORE_CA, SIMPLE_JUNCTION_CA
+    CIRCULAR_CA, CIRCULAR_MULTILANE_CA, OPEN_CA, AUTONOMOUS_CA, STOP_CA, SEMAPHORE_CA, SIMPLE_JUNCTION_CA
 };
 
 /**
@@ -271,12 +271,14 @@ public:
 	void Connect(CellularAutomata* connect, unsigned connect_pos);
 
 	///@brief Dibuja mapa histórico del AC en formato BMP.
-	///@param out_file_name Ruta del archivo de salida.
-    virtual void DrawHistory(std::string out_file_name = "");
+	///@param path Ruta del archivo.
+	///@param out_file_name Nombre del archivo de salida.
+    virtual void DrawHistory(std::string path = "", std::string out_file_name = "");
 
     ///@brief Dibuja mapa histórico del flujo de AC en formato BMP.
-    ///@param out_file_name Ruta del archivo de salida.
-    virtual void DrawFlowHistory(std::string out_file_name = "");
+    ///@param path Ruta del archivo.
+    ///@param out_file_name Nombre del archivo de salida.
+    virtual void DrawFlowHistory(std::string path = "", std::string out_file_name = "");
 
 
     void Print();                   ///< Escribe línea de autómata celular en la terminal.
@@ -378,36 +380,36 @@ public:
 
 /****************************
 *                           *
-*  AC Coches inteligentes   *
+*    AC Coches autónomos    *
 *                           *
 ****************************/
 
 /**
- * @class SmartCA
- * @brief AC con autos inteligentes y condiciones de frontera periódicas.
+ * @class AutonomousCA
+ * @brief AC con autos autónomos y condiciones de frontera periódicas.
  */
-class SmartCA : public CircularCA
+class AutonomousCA : public CircularCA
 {
 protected:
-    std::vector<int> m_smart_cars;  ///< Lista con posiciones de autos inteligentes.
+    std::vector<int> m_aut_cars;  ///< Lista con posiciones de autos autónomos.
 public:
     ///@brief Constructor.
     ///@param size Tamaño del AC.
     ///@param density Densidad de autos.
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
-    ///@param smart_density Densidad de autos inteligentes respecto a número total de autos.
-    SmartCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, 
-		    const double &smart_density);
+    ///@param aut_density Densidad de autos autónomos respecto a número total de autos.
+    AutonomousCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob,
+		         const double &aut_density);
 
 	///@brief Constructor.
 	///@param ca Lista con valores de AC.
-	///@param smart_cars Lista con posiciones de autos inteligentes.
+	///@param aut_cars Lista con posiciones de autos autónomos.
 	///@param rand_values Valores aleatorios en cada paso.
 	///@param density Densidad de autos.
 	///@param vmax Velocidad máxima de los autos.
-	SmartCA(const std::vector<int> &ca, std::vector<int> smart_cars, const std::vector<bool> &rand_values, 
-		    const int &vmax);
+	AutonomousCA(const std::vector<int> &ca, std::vector<int> aut_cars, const std::vector<bool> &rand_values,
+		         const int &vmax);
 
     void Move();    ///< Mueve los autos con condiciones de frontera periódicas.
     void Step();    ///< Aplica reglas de evolución temporal del AC para autos normales e inteligentes.
@@ -441,8 +443,9 @@ public:
     int NextStopDist(const int &pos);
 
     ///@brief Dibuja mapa histórico del AC en formato BMP.
-	///@param out_file_name Ruta del archivo de salida.
-	void DrawHistory(std::string out_file_name = "");
+    ///@param path Ruta del archivo.
+	///@param out_file_name Nombre del archivo de salida.
+	void DrawHistory(std::string path = "", std::string out_file_name = "");
 
     void Step();        ///< Aplica reglas de evolución temporal del AC con tope.
 };
@@ -481,8 +484,9 @@ public:
     int NextSemaphoreDist(const int &pos);
 
     ///@brief Dibuja mapa histórico del AC en formato BMP.
-	///@param out_file_name Ruta del archivo de salida.
-	void DrawHistory(std::string out_file_name = "");
+    ///@param path Ruta del archivo.
+	///@param out_file_name Nombre del archivo de salida.
+	void DrawHistory(std::string path = "", std::string out_file_name = "");
 
     void Step();        ///< Aplica reglas de evolución temporal del AC con tope.
 };
@@ -525,8 +529,9 @@ public:
 	int GetAt(const unsigned &i, const unsigned &j, const CAS &ca);
 
     ///@brief Dibuja mapa histórico del AC en formato BMP.
-	///@param out_file_name Ruta del archivo de salida.
-	void DrawHistory(std::string out_file_name = "");
+	///@param path Ruta del archivo.
+	///@param out_file_name Nombre del archivo de salida.
+	void DrawHistory(std::string path = "", std::string out_file_name = "");
 };
 
 
@@ -643,12 +648,14 @@ public:
 	virtual int NextCarDist(const int &pos, const unsigned &lane);
 
 	///@brief Dibuja mapa histórico del AC en formato BMP.
-	///@param out_file_name Ruta del archivo de salida.
-    void DrawHistory(std::string out_file_name = "");
+	///@param path Ruta del archivo.
+	///@param out_file_name Nombre del archivo de salida.
+    void DrawHistory(std::string path = "", std::string out_file_name = "");
 
     ///@brief Dibuja mapa histórico del flujo de AC en formato BMP.
-    ///@param out_file_name Ruta del archivo de salida.
-    void DrawFlowHistory(std::string out_file_name = "");
+    ///@param path Ruta del archivo.
+	///@param out_file_name Nombre del archivo de salida.
+    void DrawFlowHistory(std::string path = "", std::string out_file_name = "");
 
 	///@brief Devuelve valores verdaderos con probabilidad prob. Si se usa en prueba usa valores de lista.
 	///@param prob Probabilidad de obtener valor verdadero. Por defecto se utiliza m_rand_prob.

@@ -164,17 +164,17 @@ CellularAutomata::CellularAutomata(const unsigned &size, const double &density, 
     if (l_density < 0.0 || l_density > 1.0)
     {
         l_density = 0.1;
-        cout << "Densidad invalida. Cambiando a density=" << l_density << "." << endl;
+        cout << "Aviso: Densidad invalida. Cambiando a density=" << l_density << "." << endl;
     }
     if (m_vmax < 1)
     {
         m_vmax = 1;
-        cout << "Velocidad limite invalida. Cambiando a vmax=" << m_vmax << "." << endl;
+        cout << "Aviso: Velocidad limite invalida. Cambiando a vmax=" << m_vmax << "." << endl;
     }
     if (m_rand_prob < 0.0 || m_rand_prob > 1.0)
     {
         m_rand_prob = 0.0;
-        cout << "Probabilidad de frenado invalida. Cambiando a rand_prob=" << m_rand_prob << "." << endl;
+        cout << "Aviso: Probabilidad de frenado invalida. Cambiando a rand_prob=" << m_rand_prob << "." << endl;
     }
     unsigned vehicles = (unsigned)(((double)size)*l_density);
 
@@ -246,10 +246,12 @@ void CellularAutomata::PrintHistory()
         cout << endl;
     }
 }
-void CellularAutomata::DrawHistory(string out_file_name)
+void CellularAutomata::DrawHistory(string path, string out_file_name)
 {
 	if (out_file_name == "")
-		out_file_name = "ca.bmp";
+		out_file_name = path + "ca.bmp";
+	else
+		out_file_name = path + out_file_name;
 
     unsigned height = m_ca_history.size();
     unsigned width = m_size;
@@ -271,10 +273,12 @@ void CellularAutomata::DrawHistory(string out_file_name)
     writer.CloseBMP();
     delete[] bmpData;
 }
-void CellularAutomata::DrawFlowHistory(string out_file_name)
+void CellularAutomata::DrawFlowHistory(string path, string out_file_name)
 {
 	if (out_file_name == "")
-			out_file_name = "ca_flow.bmp";
+			out_file_name = path + "ca_flow.bmp";
+	else
+		out_file_name = path + out_file_name;
 
     unsigned height = m_ca_flow_history.size();
     unsigned width = m_size;
@@ -497,7 +501,7 @@ OpenCA::OpenCA(const unsigned &size, const double &density, const int &vmax, con
     if (m_new_car_prob < 0 || m_new_car_prob > 1)
     {
         m_new_car_prob = 0.5;
-        cout << "Probabilidad de nuevo auto invalida. Cambiando a new_car_prob=" << m_new_car_prob << "." << endl;
+        cout << "Aviso: Probabilidad de nuevo auto invalida. Cambiando a new_car_prob=" << m_new_car_prob << "." << endl;
     }
 }
 OpenCA::OpenCA(const vector<int> &ca, const vector<bool> &rand_values, const int &vmax, 
@@ -585,38 +589,38 @@ void OpenCA::Step()
 *                           *
 ****************************/
 
-SmartCA::SmartCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, 
-	             const double &smart_density) 
+AutonomousCA::AutonomousCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob,
+	             const double &aut_density)
     : CircularCA(size, density, vmax, rand_prob)
 {
     // Verifica argumento.
-    double l_smart_density = smart_density;
-    if (l_smart_density < 0 || l_smart_density > 1)
+    double l_aut_density = aut_density;
+    if (l_aut_density < 0 || l_aut_density > 1)
     {
-        l_smart_density = 0.5;
-        cout << "Densidad de autos inteligentes invalida. Cambiando a smart_density=" << l_smart_density << "." << endl;
+        l_aut_density = 0.5;
+        cout << "Densidad de autos inteligentes invalida. Cambiando a smart_density=" << l_aut_density << "." << endl;
     }
 
     // Selecciona autos inteligentes.
-    unsigned smart_car_number = (unsigned)(((double)size)*l_smart_density);
-    vector<int> smart_car_positions;
+    unsigned aut_car_number = (unsigned)(((double)size)*l_aut_density);
+    vector<int> aut_car_positions;
     for (unsigned i = 0; i < m_size; ++i)
     {
         if (m_ca[i] != -1)
-            smart_car_positions.push_back(i);
+        	aut_car_positions.push_back(i);
     }
 
-    random_shuffle(smart_car_positions.begin(), smart_car_positions.end(), aux_random);
-    for (unsigned i = 0; i < smart_car_positions.size() && i < smart_car_number; ++i)
-        m_smart_cars.push_back(smart_car_positions[i]);
+    random_shuffle(aut_car_positions.begin(), aut_car_positions.end(), aux_random);
+    for (unsigned i = 0; i < aut_car_positions.size() && i < aut_car_number; ++i)
+        m_aut_cars.push_back(aut_car_positions[i]);
 }
-SmartCA::SmartCA(const vector<int> &ca, vector<int> smart_cars, const vector<bool> &rand_values,
+AutonomousCA::AutonomousCA(const vector<int> &ca, vector<int> smart_cars, const vector<bool> &rand_values,
 	             const int &vmax)
 				 : CircularCA(ca, rand_values, vmax)
 {
-	m_smart_cars = smart_cars;
+	m_aut_cars = smart_cars;
 }
-void SmartCA::Move()
+void AutonomousCA::Move()
 {
     m_ca_flow_temp.assign(m_size, 0);
     m_ca_temp.assign(m_size, -1);
@@ -624,9 +628,9 @@ void SmartCA::Move()
     {
         if (m_ca[i] != -1)
         {
-            int pos = aux_find_pos<int>(m_smart_cars, i);
+            int pos = aux_find_pos<int>(m_aut_cars, i);
             if (pos != -1)
-                m_smart_cars[pos] = (i+m_ca[i]) % m_size;
+                m_aut_cars[pos] = (i+m_ca[i]) % m_size;
 
             // Cambia las posiciones de los autos en AC.
             At(i+m_ca[i], CA_TEMP) = m_ca[i];
@@ -639,7 +643,7 @@ void SmartCA::Move()
     m_ca_flow_history.push_back(m_ca_flow_temp);
     m_ca.assign(m_ca_temp.begin(), m_ca_temp.end());
 }
-void SmartCA::Step()
+void AutonomousCA::Step()
 {
     // Iterar sobre AC hasta encotrar vehiculo.
     for (unsigned i = 0; i < m_ca.size(); ++i)
@@ -647,7 +651,7 @@ void SmartCA::Step()
         if (m_ca[i] != -1)
         {
 
-			bool smart = aux_is_in<int>(m_smart_cars, i);
+			bool smart = aux_is_in<int>(m_aut_cars, i);
 			if (smart)
 			{
 				// Auto inteligente.
@@ -739,7 +743,7 @@ StreetStopCA::StreetStopCA(const unsigned &size, const double &density, const in
     if (stops >= size)
     {
         stops = size - 2;
-        cout << "Densidad de topes invalida. Se usaran " << stops << " topes." << endl;
+        cout << "Aviso: Densidad de topes invalida. Se usaran " << stops << " topes." << endl;
     }
 
     // Coloca topes.
@@ -804,10 +808,12 @@ int StreetStopCA::NextStopDist(const int &pos)
     else
         return numeric_limits<int>::max();
 }
-void StreetStopCA::DrawHistory(string out_file_name)
+void StreetStopCA::DrawHistory(string path, string out_file_name)
 {
 	if (out_file_name == "")
-		out_file_name = "ca.bmp";
+		out_file_name = path + "ca.bmp";
+	else
+		out_file_name = path + out_file_name;
 
     unsigned height = m_ca_history.size();
     unsigned width = m_size;
@@ -857,7 +863,7 @@ SemaphoreCA::SemaphoreCA(const unsigned &size, const double &density, const int 
     if (semaphores >= size)
     {
         semaphores = size - 2;
-        cout << "Densidad de topes invalida. Se usaran " << semaphores << " topes." << endl;
+        cout << "Aviso: Densidad de topes invalida. Se usaran " << semaphores << " topes." << endl;
     }
 
     // Coloca semáforo.
@@ -954,10 +960,12 @@ int SemaphoreCA::NextSemaphoreDist(const int &pos)
     else
         return numeric_limits<int>::max();
 }
-void SemaphoreCA::DrawHistory(string out_file_name)
+void SemaphoreCA::DrawHistory(string path, string out_file_name)
 {
 	if (out_file_name == "")
-		out_file_name = "ca.bmp";
+		out_file_name = path + "ca.bmp";
+	else
+		out_file_name = path + out_file_name;
 
     unsigned height = m_ca_history.size();
     unsigned width = m_size;
@@ -1015,6 +1023,12 @@ SimpleJunctionCA::SimpleJunctionCA(const unsigned &size, const double &density, 
 	m_source = new OpenCA(size, density, vmax, rand_prob, new_car_prob, new_car_speed);
 	m_source->Connect(this, size / 2);
 	m_target_lane = target_lane;
+
+	if (m_target_lane < 0 || m_target_lane > 1)
+	{
+		m_target_lane = 1;
+		cout << "Aviso: Carril objetivo invalido. Se usara el carril " << m_target_lane << "." << endl;
+	}
 }
 SimpleJunctionCA::~SimpleJunctionCA()
 {
@@ -1028,12 +1042,14 @@ void SimpleJunctionCA::Evolve(const unsigned &iter)
 		this->Step();
 	}
 }
-void SimpleJunctionCA::DrawHistory(string out_file_name)
+void SimpleJunctionCA::DrawHistory(string path, string out_file_name)
 {
 	if (out_file_name == "")
-		out_file_name = "ca_junction.bmp";
+		out_file_name = path + "ca_junction.bmp";
+	else
+		out_file_name = path + out_file_name;
 
-	m_source->DrawHistory();
+	m_source->DrawHistory(path);
 	unsigned height = m_ca_history.size();
 	unsigned width = m_size;
 	BMPWriter writer(out_file_name.c_str(), width, height);
@@ -1082,7 +1098,7 @@ int SimpleJunctionCA::GetAt(const unsigned &i, const unsigned &j, const CAS &ca)
 CellularAutomata* cellularautomata = nullptr;
 CircularCA* circularca = nullptr;
 OpenCA* openca = nullptr;
-SmartCA* smartca = nullptr;
+AutonomousCA* smartca = nullptr;
 StreetStopCA* streetstopca = nullptr;
 SemaphoreCA* semaphoreca = nullptr;
 SimpleJunctionCA* simplejunctionca = nullptr;
@@ -1102,8 +1118,8 @@ CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &dens
 			cellularautomata = openca = new OpenCA(size, density, vmax, rand_prob, args.GetDouble(),
 				args.GetInt());
 			break;
-		case SMART_CA:
-			cellularautomata = smartca = new SmartCA(size, density, vmax, rand_prob, args.GetDouble());
+		case AUTONOMOUS_CA:
+			cellularautomata = smartca = new AutonomousCA(size, density, vmax, rand_prob, args.GetDouble());
 			break;
 		case STOP_CA:
 			cellularautomata = streetstopca = new StreetStopCA(size, density, vmax, rand_prob, args.GetDouble());
@@ -1179,6 +1195,7 @@ CellularAutomataML::CellularAutomataML(const unsigned &size, const unsigned &lan
                                        const int &vmax, const double &rand_prob)
 {
     // Inicializa variables.
+	m_test = false;
     m_size = size;
     m_lanes = lanes;
     m_vmax = vmax;
@@ -1193,17 +1210,17 @@ CellularAutomataML::CellularAutomataML(const unsigned &size, const unsigned &lan
     if (l_density < 0.0 || l_density > 1.0)
     {
         l_density = 0.1;
-        cout << "Densidad invalida. Cambiando a density=" << l_density << "." << endl;
+        cout << "Aviso: Densidad invalida. Cambiando a density=" << l_density << "." << endl;
     }
     if (m_vmax < 1)
     {
         m_vmax = 1;
-        cout << "Velocidad limite invalida. Cambiando a vmax=" << m_vmax << "." << endl;
+        cout << "Aviso: Velocidad limite invalida. Cambiando a vmax=" << m_vmax << "." << endl;
     }
     if (m_rand_prob < 0.0 || m_rand_prob > 1.0)
     {
         m_rand_prob = 0.0;
-        cout << "Probabilidad de frenado invalida. Cambiando a rand_prob=" << m_rand_prob << "." << endl;
+        cout << "Aviso: Probabilidad de frenado invalida. Cambiando a rand_prob=" << m_rand_prob << "." << endl;
     }
     unsigned vehicles = (unsigned)(((double)size)*density);
 
@@ -1241,10 +1258,12 @@ void CellularAutomataML::Print()
         cout << ".";
     cout << endl;
 }
-void CellularAutomataML::DrawHistory(string out_file_name)
+void CellularAutomataML::DrawHistory(string path, string out_file_name)
 {
 	if (out_file_name == "")
-		out_file_name = "ca.bmp";
+		out_file_name = path + "ca.bmp";
+	else
+		out_file_name = path + out_file_name;
 
     unsigned bmp_height;
     if (m_lanes == 1)
@@ -1286,10 +1305,12 @@ void CellularAutomataML::DrawHistory(string out_file_name)
     writer.CloseBMP();
     delete[] bmpData;
 }
-void CellularAutomataML::DrawFlowHistory(string out_file_name)
+void CellularAutomataML::DrawFlowHistory(string path, string out_file_name)
 {
 	if (out_file_name == "")
-		out_file_name = "ca_flow.bmp";
+		out_file_name = path + "ca_flow.bmp";
+	else
+		out_file_name = path + out_file_name;
 
     unsigned bmp_height;
     if (m_lanes == 1)

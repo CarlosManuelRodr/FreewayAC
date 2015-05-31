@@ -66,3 +66,9 @@ build/
 /Release/
 /FreewayAC/*.bmp
 /FreewayAC/*.csv
+/scripts/Autonomous/
+/scripts/Circular/
+/scripts/Open/
+/scripts/Semaphore/
+/scripts/SimpleJunction/
+/scripts/Stop/

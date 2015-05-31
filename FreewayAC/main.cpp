@@ -16,7 +16,7 @@ using namespace std;
 * @param ca Puntero al AC sobre el cual se desea medir la ocupación.
 * @param out_file_name Nombre opcional para el archivo de salida.
 */
-void ex_ocupancy_fixed(CellularAutomata *ca, string out_file_name = "")
+void ex_ocupancy_fixed(CellularAutomata *ca, string path = "", string out_file_name = "")
 {
     vector<double> ocupancy;
     ocupancy.assign(ca->GetSize(), 0.0);
@@ -36,7 +36,10 @@ void ex_ocupancy_fixed(CellularAutomata *ca, string out_file_name = "")
 
     // Escribe a CSV.
     if (out_file_name.empty())
-        out_file_name = "ocupancy.csv";
+        out_file_name = path + "ocupancy.csv";
+    else
+    	out_file_name = path + out_file_name;
+
     ofstream file(out_file_name.c_str(), ofstream::out);
     for (unsigned i = 0; i < ocupancy.size(); ++i)
     {
@@ -54,7 +57,7 @@ void ex_ocupancy_fixed(CellularAutomata *ca, string out_file_name = "")
 * @param ca Puntero al AC sobre el cual se desea medir la ocupación.
 * @param out_file_name Nombre opcional para el archivo de salida.
 */
-void ex_flow_fixed(CellularAutomata *ca, string out_file_name = "")
+void ex_flow_fixed(CellularAutomata *ca, string path = "", string out_file_name = "")
 {
     vector<double> flow;
     flow.assign(ca->GetSize(), 0.0);
@@ -74,7 +77,10 @@ void ex_flow_fixed(CellularAutomata *ca, string out_file_name = "")
 
     // Escribe a CSV.
     if (out_file_name.empty())
-        out_file_name = "flow.csv";
+        out_file_name = path + "flow.csv";
+    else
+    	out_file_name = path + out_file_name;
+
     ofstream file(out_file_name.c_str(), ofstream::out);
     for (unsigned i = 0; i < flow.size(); ++i)
     {
@@ -104,7 +110,8 @@ void ex_flow_fixed(CellularAutomata *ca, string out_file_name = "")
 */
 void ex_flow_vs_density(const CA_TYPE &type, const unsigned &size, const unsigned &iterations, const int &vmax, 
                         const double &density_min, const double &density_max, const double &dt, const double &rand_prob, 
-                        Args args, const bool &per_density, const bool &show_progress = true, string out_file_name = "")
+                        Args args, const bool &per_density, const bool &show_progress = true, string path = "",
+						string out_file_name = "")
 {
     vector<double> density;
     vector<double> flow;
@@ -158,10 +165,12 @@ void ex_flow_vs_density(const CA_TYPE &type, const unsigned &size, const unsigne
     if (out_file_name.empty())
     {
         if (per_density)
-            out_file_name = "flow_per_density.csv";
+            out_file_name = path + "flow_per_density.csv";
         else
-            out_file_name = "flow_vs_density.csv";
+            out_file_name = path + "flow_vs_density.csv";
     }
+    else
+    	out_file_name = path + out_file_name;
 
     ofstream file(out_file_name.c_str(), ofstream::out);
     for (unsigned i = 0; i < flow.size(); ++i)
@@ -193,7 +202,7 @@ void ex_flow_vs_density(const CA_TYPE &type, const unsigned &size, const unsigne
 void ex_multilane_flow_vs_density(const CA_TYPE &type, const unsigned &size, const unsigned &lanes, const unsigned &iterations, 
 	                             const int &vmax, const double &density_min, const double &density_max, const double &dt, 
 								 const double &rand_prob, Args args, const bool &per_density, const bool &show_progress = true, 
-								 string out_file_name = "")
+								 string path = "", string out_file_name = "")
 {
 	vector<double> density;
 	vector<double> flow;
@@ -251,10 +260,12 @@ void ex_multilane_flow_vs_density(const CA_TYPE &type, const unsigned &size, con
 	if (out_file_name.empty())
 	{
 		if (per_density)
-			out_file_name = "flow_per_density_multilane.csv";
+			out_file_name = path + "flow_per_density_multilane.csv";
 		else
-			out_file_name = "flow_vs_density_multilane.csv";
+			out_file_name = path + "flow_vs_density_multilane.csv";
 	}
+    else
+    	out_file_name = path + out_file_name;
 
 	ofstream file(out_file_name.c_str(), ofstream::out);
 	for (unsigned i = 0; i < flow.size(); ++i)
@@ -284,7 +295,7 @@ void ex_multilane_flow_vs_density(const CA_TYPE &type, const unsigned &size, con
 */
 void ex_flow_vs_vmax(const CA_TYPE &type, const unsigned &size, const unsigned &iterations, const int &vmax_min,
                      const int &vmax_max, const int &dt, const double &density, const double &rand_prob,
-		  			 Args args, const bool &show_progress = true, string out_file_name = "")
+		  			 Args args, const bool &show_progress = true, string path = "", string out_file_name = "")
 {
     vector<double> vmax;
     vector<double> flow;
@@ -335,7 +346,10 @@ void ex_flow_vs_vmax(const CA_TYPE &type, const unsigned &size, const unsigned &
 
     // Escribe a CSV.
     if (out_file_name.empty())
-        out_file_name = "flow_vs_vmax.csv";
+        out_file_name = path + "flow_vs_vmax.csv";
+    else
+    	out_file_name = path + out_file_name;
+
     ofstream file(out_file_name.c_str(), ofstream::out);
     for (unsigned i = 0; i < flow.size(); ++i)
     {
@@ -364,7 +378,8 @@ void ex_flow_vs_vmax(const CA_TYPE &type, const unsigned &size, const unsigned &
 */
 void ex_flow_vs_rand_prob(const CA_TYPE &type, const unsigned &size, const unsigned &iterations, const int &vmax,
                           const double &density, const double &rand_prob_min, const double &rand_prob_max,
-						  const double &dt, Args args, const bool &show_progress = true, string out_file_name = "")
+						  const double &dt, Args args, const bool &show_progress = true, string path = "",
+						  string out_file_name = "")
 {
     vector<double> rand_prob;
     vector<double> flow;
@@ -415,7 +430,10 @@ void ex_flow_vs_rand_prob(const CA_TYPE &type, const unsigned &size, const unsig
 
     // Escribe a CSV.
     if (out_file_name.empty())
-        out_file_name = "flow_vs_rand_prob.csv";
+        out_file_name = path + "flow_vs_rand_prob.csv";
+    else
+    	out_file_name = path + out_file_name;
+
     ofstream file(out_file_name.c_str(), ofstream::out);
     for (unsigned i = 0; i < flow.size(); ++i)
     {
@@ -440,9 +458,9 @@ void ex_flow_vs_rand_prob(const CA_TYPE &type, const unsigned &size, const unsig
 * @param dt Intervalo entre valores a recorrer.
 * @param out_file_name Nombre opcional para el archivo de salida.
 */
-void ex_flow_vs_smart_cars(const unsigned &size, const unsigned &iterations, const int &vmax, const double &density, 
-                           const double &rand_prob, const double &smart_car_density_min, const double &smart_car_density_max,
-                           const double &dt, const bool &show_progress = true, string out_file_name = "")
+void ex_flow_vs_aut_cars(const unsigned &size, const unsigned &iterations, const int &vmax, const double &density,
+                         const double &rand_prob, const double &smart_car_density_min, const double &smart_car_density_max,
+                         const double &dt, const bool &show_progress = true, string path = "", string out_file_name = "")
 {
     vector<double> smart_car_density;
     vector<double> flow;
@@ -460,7 +478,7 @@ void ex_flow_vs_smart_cars(const unsigned &size, const unsigned &iterations, con
     	}
 
         // Evoluciona el sistema.
-		ca = create_ca(SMART_CA, size, density, vmax, rand_prob, Args({ s }));
+		ca = create_ca(AUTONOMOUS_CA, size, density, vmax, rand_prob, Args({ s }));
 		ca->Evolve(iterations);
 
         // Obtiene flujo en cada posición.
@@ -493,7 +511,10 @@ void ex_flow_vs_smart_cars(const unsigned &size, const unsigned &iterations, con
 
     // Escribe a CSV.
     if (out_file_name.empty())
-        out_file_name = "flow_vs_smart_car_density.csv";
+        out_file_name = path + "flow_vs_smart_car_density.csv";
+    else
+    	out_file_name = path + out_file_name;
+
     ofstream file(out_file_name.c_str(), ofstream::out);
     for (unsigned i = 0; i < flow.size(); ++i)
     {
@@ -521,7 +542,7 @@ void ex_flow_vs_smart_cars(const unsigned &size, const unsigned &iterations, con
 void ex_flow_vs_new_car_prob(const CA_TYPE &type, const unsigned &size, const unsigned &iterations, const int &vmax, const double &density,
                              const double &rand_prob, const double &new_car_prob_min, const double &new_car_prob_max,
 							 const double &dt, Args args, const bool &per_prob, const bool &show_progress = true,
-							 string out_file_name = "")
+							 string path = "", string out_file_name = "")
 {
 	if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, type))
 	{
@@ -583,10 +604,13 @@ void ex_flow_vs_new_car_prob(const CA_TYPE &type, const unsigned &size, const un
 	if (out_file_name.empty())
 	{
 		if (per_prob)
-			out_file_name = "flow_per_new_car_prob.csv";
+			out_file_name = path + "flow_per_new_car_prob.csv";
 		else
-			out_file_name = "flow_vs_new_car_prob.csv";
+			out_file_name = path + "flow_vs_new_car_prob.csv";
 	}
+    else
+    	out_file_name = path + out_file_name;
+
     ofstream file(out_file_name.c_str(), ofstream::out);
     for (unsigned i = 0; i < flow.size(); ++i)
     {
@@ -614,7 +638,7 @@ void ex_flow_vs_new_car_prob(const CA_TYPE &type, const unsigned &size, const un
 void ex_flow_vs_stop_density(const unsigned &size, const unsigned &iterations, const int &vmax,
                              const double &density, const double &rand_prob, const double &stop_density_min,
                              const double &stop_density_max, const double &dt, const bool &show_progress = true,
-							 string out_file_name = "")
+							 string path = "", string out_file_name = "")
 {
     vector<double> stop_density;
     vector<double> flow;
@@ -665,7 +689,10 @@ void ex_flow_vs_stop_density(const unsigned &size, const unsigned &iterations, c
 
     // Escribe a CSV.
     if (out_file_name.empty())
-        out_file_name = "flow_vs_stop_density.csv";
+        out_file_name = path + "flow_vs_stop_density.csv";
+    else
+    	out_file_name = path + out_file_name;
+
     ofstream file(out_file_name.c_str(), ofstream::out);
     for (unsigned i = 0; i < flow.size(); ++i)
     {
@@ -693,7 +720,7 @@ void ex_flow_vs_stop_density(const unsigned &size, const unsigned &iterations, c
 void ex_flow_vs_semaphore_density(const unsigned &size, const unsigned &iterations, const int &vmax,
                                   const double &density, const double &rand_prob, const double &semaphore_density_min,
                                   const double &semaphore_density_max, const double &dt, const bool &random_semaphores, 
-								  const bool &show_progress = true, string out_file_name = "")
+								  const bool &show_progress = true, string path = "", string out_file_name = "")
 {
     vector<double> semaphore_density;
     vector<double> flow;
@@ -744,7 +771,10 @@ void ex_flow_vs_semaphore_density(const unsigned &size, const unsigned &iteratio
 
     // Escribe a CSV.
     if (out_file_name.empty())
-        out_file_name = "flow_vs_semaphore_density.csv";
+        out_file_name = path + "flow_vs_semaphore_density.csv";
+    else
+    	out_file_name = path + out_file_name;
+
     ofstream file(out_file_name.c_str(), ofstream::out);
     for (unsigned i = 0; i < flow.size(); ++i)
     {
@@ -826,14 +856,14 @@ void perform_test()
 	vector<bool> rand_val_smart_vec(rand_val_smart, rand_val_smart + sizeof(rand_val_smart) / sizeof(rand_val_smart[0]));
 	vector<int> smart_cars_vec(smart_cars, smart_cars + sizeof(smart_cars) / sizeof(smart_cars[0]));
 
-	cout << "Comprobando automata celular inteligente... ";
-	SmartCA smart_ca(init_vec, smart_cars_vec, rand_val_smart_vec, 5);
-	smart_ca.Evolve(3);
+	cout << "Comprobando automata celular con vehiculos autonomos... ";
+	AutonomousCA autonomous_ca(init_vec, smart_cars_vec, rand_val_smart_vec, 5);
+	autonomous_ca.Evolve(3);
 
 	match = true;
 	for (unsigned i = 0; i<init_vec.size(); i++)
 	{
-		if (smart_ca.GetAt(i) != end_smart[i])
+		if (autonomous_ca.GetAt(i) != end_smart[i])
 			match = false;
 	}
 
@@ -842,7 +872,7 @@ void perform_test()
 	else
 	{
 		cout << "Incorrecto. Log:" << endl;
-		smart_ca.PrintHistory();
+		autonomous_ca.PrintHistory();
 	}
 }
 
@@ -873,13 +903,13 @@ struct Arg: public option::Arg
 };
 
 enum  OptionIndex { UNKNOWN, SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, PLOT_TRAFFIC, MEASURE_OCUPANCY, MEASURE_FLOW, 
-                    FLOW_VS_DENSITY, FLOW_PER_DENSITY, FLOW_VS_VMAX, FLOW_VS_RAND_PROB, FLOW_VS_SMART_CARS, 
+                    FLOW_VS_DENSITY, FLOW_PER_DENSITY, FLOW_VS_VMAX, FLOW_VS_RAND_PROB, FLOW_VS_AUT_CARS,
 					FLOW_VS_STOP_DENSITY, FLOW_VS_NEW_CAR, FLOW_PER_NEW_CAR, FLOW_VS_SEMAPHORE_DENSITY, CA_CIRCULAR,
 					CA_MULTILANE_CIRCULAR,
-					CA_OPEN, CA_SMART, CA_STOP, CA_SEMAPHORE, CA_SIMPLE_JUNCTION, NEW_CAR_PROB, NEW_CAR_SPEED, SMART_DENSITY, 
+					CA_OPEN, CA_AUTONOMOUS, CA_STOP, CA_SEMAPHORE, CA_SIMPLE_JUNCTION, NEW_CAR_PROB, NEW_CAR_SPEED, AUT_DENSITY,
 					STOP_DENSITY, SEMAPHORE_DENSITY, RANDOM_SEMAPHORES, TARGET_LANE, LANES, DT, DMIN, DMAX, VMAX_MIN, VMAX_MAX, 
-					RAND_PROB_MIN, SMART_MIN, SMART_MAX, STOP_DENSITY_MIN, STOP_DENSITY_MAX, NEW_CAR_MIN, 
-					NEW_CAR_MAX, RAND_PROB_MAX, SEMAPHORE_DENSITY_MIN, SEMAPHORE_DENSITY_MAX, OUT_FILE_NAME,
+					RAND_PROB_MIN, AUT_MIN, AUT_MAX, STOP_DENSITY_MIN, STOP_DENSITY_MAX, NEW_CAR_MIN,
+					NEW_CAR_MAX, RAND_PROB_MAX, SEMAPHORE_DENSITY_MIN, SEMAPHORE_DENSITY_MAX, OUT_FILE_NAME, PATH,
 					SHOW_PROGRESS, TEST, HELP };
 
 const option::Descriptor usage[] =
@@ -901,8 +931,8 @@ const option::Descriptor usage[] =
     "  \t--flow_vs_vmax  \tMide el flujo respecto a vmax en un rango especificado por vmax_min, vmax_max y dt." },
     {FLOW_VS_RAND_PROB,  0,"","flow_vs_rand_prob", Arg::None, 
      "  \t--flow_vs_rand_prob  \tMide el flujo respecto a probabilidad de frenado en un rango especificado por rand_min, rand_max y dt." },
-    {FLOW_VS_SMART_CARS,  0,"","flow_vs_smart_cars", Arg::None, 
-     "  \t--flow_vs_smart_cars  \tMide el flujo respecto a densidad de autos inteligentes en un rango especificado por smart_min, smart_max y dt." },
+    {FLOW_VS_AUT_CARS,  0,"","flow_vs_aut_cars", Arg::None,
+     "  \t--flow_vs_aut_cars  \tMide el flujo respecto a densidad de vehiculos autonomos en un rango especificado por aut_min, aut_max y dt." },
     {FLOW_VS_STOP_DENSITY,  0,"","flow_vs_stop_density", Arg::None,
           "  \t--flow_vs_stop_density  \tMide el flujo respecto a densidad de topes en un rango especificado por stop_density_min, stop_density_max y dt." },
     {FLOW_VS_NEW_CAR,  0,"","flow_vs_new_car", Arg::None, 
@@ -915,7 +945,7 @@ const option::Descriptor usage[] =
 	{CA_MULTILANE_CIRCULAR, 0, "", "ca_multilane_circular", Arg::None, 
 	"  \t--ca_multilane_circular  \tAutomata celular multicarril circular." },
     {CA_OPEN,  0,"","ca_open", Arg::None, "  \t--ca_open  \tAutomata celular con frontera abierta." },
-    {CA_SMART,  0,"","ca_smart", Arg::None, "  \t--ca_smart  \tAutomata celular con autos inteligentes." },
+    {CA_AUTONOMOUS,  0,"","ca_autonomous", Arg::None, "  \t--ca_autonomous  \tAutomata celular con vehiculos autonomos." },
     {CA_STOP,  0,"","ca_stop", Arg::None,
      "  \t--ca_stop  \tAutomata celular con tope. La posicion del tope se especifica por stop_density." },
     {CA_SEMAPHORE,  0,"","ca_semaphore", Arg::None, 
@@ -924,12 +954,12 @@ const option::Descriptor usage[] =
 	 "  \t--ca_simple_junction  \tAutomata de interseccion simple." },
     {NEW_CAR_PROB,  0,"","new_car_prob", Arg::Required, "  \t--new_car_prob  \tProbabilidad de que se aparezca nuevo auto en frontera abierta." },
 	{NEW_CAR_SPEED, 0, "", "new_car_speed", Arg::Required, "  \t--new_car_speed  \tVelocidad que entre a AC abierto." },
-    {SMART_DENSITY,  0,"","smart_density", Arg::Required, "  \t--smart_density  \tDensidad de autos inteligentes." },
+    {AUT_DENSITY,  0,"","aut_density", Arg::Required, "  \t--aut_density  \tDensidad de autos autonomos." },
     {STOP_DENSITY,  0,"", "stop_density", Arg::Required, "  \t--stop_density=<arg>  \tDensidad de topes en ca_stop." },
     {SEMAPHORE_DENSITY,  0,"", "semaphore_density", Arg::Required, 
      "  \t--semaphore_density=<arg>  \tDensidad de semaforos en ca_semaphore." },
-    {RANDOM_SEMAPHORES,  0,"", "random_semapahores", Arg::None, 
-     "  \t--random_semapahores  \tColoca los semaforos en posiciones aleatorias en vez de uniformes." },
+    {RANDOM_SEMAPHORES,  0,"", "random_semaphores", Arg::Required,
+     "  \t--random_semaphores  \tTrue o False. Coloca los semaforos en posiciones aleatorias en vez de uniformes." },
 	{TARGET_LANE, 0, "", "target_lane", Arg::Required,
 	 "  \t--target_lane  \tCarril objetivo en AC de uniones." },
 	{LANES, 0, "", "lanes", Arg::Required,
@@ -941,8 +971,8 @@ const option::Descriptor usage[] =
     {VMAX_MAX,  0,"", "vmax_max", Arg::Required, "  \t--vmax_max=<arg>  \tVmax maxima en medicion con rango." },
     {RAND_PROB_MIN,  0,"", "rand_prob_min", Arg::Required, "  \t--rand_prob_min=<arg>  \tProbabilidad de frenado minima en medicion con rango." },
     {RAND_PROB_MAX,  0,"", "rand_prob_max", Arg::Required, "  \t--rand_prob_max=<arg>  \tProbabilidad de frenado maxima en medicion con rango." },
-    {SMART_MIN,  0,"", "smart_min", Arg::Required, "  \t--smart_min=<arg>  \tDensidad minima de autos inteligentes." },
-    {SMART_MAX,  0,"", "smart_max", Arg::Required, "  \t--smart_max=<arg>  \tDensidad maxima de autos inteligentes." },
+    {AUT_MIN,  0,"", "aut_min", Arg::Required, "  \t--aut_min=<arg>  \tDensidad minima de autos autonomos." },
+    {AUT_MAX,  0,"", "aut_max", Arg::Required, "  \t--aut_max=<arg>  \tDensidad maxima de autos autonomos." },
     {STOP_DENSITY_MIN,  0,"", "stop_density_min", Arg::Required, "  \t--stop_density_min=<arg>  \tDensidad minima de topes." },
     {STOP_DENSITY_MAX,  0,"", "stop_density_max", Arg::Required, "  \t--stop_density_max=<arg>  \tDensidad maxima de topes." },
     {SEMAPHORE_DENSITY_MIN,  0,"", "semaphore_density_min", Arg::Required, "  \t--semaphore_density_min=<arg>  \tDensidad minima de semaforos." },
@@ -950,6 +980,7 @@ const option::Descriptor usage[] =
     {NEW_CAR_MIN,  0,"", "new_car_min", Arg::Required, "  \t--new_car_min=<arg>  \tProbabilidad minima de nuevo auto en ac abierto." },
     {NEW_CAR_MAX,  0,"", "new_car_max", Arg::Required, "  \t--new_car_max=<arg>  \tProbabilidad maxima de nuevo auto en ac abierto." },
     {OUT_FILE_NAME,  0,"", "out_file_name", Arg::Required, "  \t--out_file_name=<arg>  \tCambia el nombre del archivo de salida al especificado." },
+	{PATH,  0,"", "path", Arg::Required, "  \t--path=<arg>  \tRuta donde guardar archivos de salida." },
 	{SHOW_PROGRESS,  0,"", "show_progress", Arg::Required, "  \t--show_progress=<arg>  \tTrue o False. Muestra o no barra de progreso." },
     {TEST,    0,"", "test", Arg::None,    "  \t--test  \tRealiza pruebas para garantizar la fiabilidad de resultados." },
     {HELP,    0,"", "help", Arg::None,    "  \t--help  \tMuestra instrucciones detalladas de cada experimento." },
@@ -968,21 +999,21 @@ void describe_experiments()
                        "CA_OPEN               -> Descripcion: Automata celular con fronteras abiertas. Entran autos en\n"
                        "                                      la primera pos del AC.\n"
                        "                         Parametros relevantes: NEW_CAR_PROB, NEW_CAR_SPEED.\n"
-                       "CA_SMART              -> Descripcion: Automata celular circular con autos inteligentes."
-                       "                         Parametros relevantes: SMART_DENSITY.\n"
+                       "CA_AUTONOMOUS         -> Descripcion: Automata celular circular con vehiculos autonomos.\n"
+                       "                         Parametros relevantes: AUT_DENSITY.\n"
                        "CA_STOP               -> Descripcion: Automata celular circular con topes en la pista.\n"
                        "                         Parametros relevantes: STOP_DENSITY.\n"
                        "CA_SEMAPHORE          -> Descripcion: Automata celular circular con semaforos en la pista.\n"
                        "                         Parametros relevantes: SEMAPHORE_DENSITY, RANDOM_SEMAPHORES.\n"
 					   "CA_SIMPLE_JUNCTION    -> Descripcion: Automata celular abierto con unión simple y fronteras abiertas.\n"
-					   "                        Parametros relevantes: NEW_CAR_PROB, NEW_CAR_SPEED, TARGET_LANE.\n"
+					   "                         Parametros relevantes: NEW_CAR_PROB, NEW_CAR_SPEED, TARGET_LANE.\n"
                        "\n=== Experimentos de parametro fijo ===\n"
                        "PLOT_TRAFFIC          -> Descripcion: Evoluciona automata celular y grafica su representacion.\n"
                        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB.\n"
                        "MEASURE_OCUPANCY      -> Descripcion: Mide la ocupacion de cada casilla del automata celular.\n"
                        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB.\n"
                        "MEASURE_FLOW          -> Descripcion: Mide el flujo de cada casilla del automata celular.\n"
-                       "                        Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB.\n"
+                       "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB.\n"
                        "\n=== Experimentos de parametro variable ===\n"
                        "FLOW_VS_DENSITY       -> Descripcion: Mide el flujo de autos promedio respecto a los valores\n"
                        "                                      de densidad de autos especificados en un rango.\n"
@@ -997,20 +1028,32 @@ void describe_experiments()
                        "                                      probabilidad de descenso de velocidad especificados en un rango.\n"
                        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB_MIN,\n"
                        "                                                RAND_PROB_MAX, DT.\n"
-                       "FLOW_VS_SMART_CARS    -> Descripcion: Mide el flujo de autos promedio respecto a los valores\n"
-                       "                                      de densidad de autos inteligentes especificados en un rango.\n"
+                       "FLOW_VS_AUT_CARS      -> Descripcion: Mide el flujo de autos promedio respecto a los valores\n"
+                       "                                      de densidad de vehiculos autonomos especificados en un rango.\n"
                        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, \n"
-                       "                                                SMART_MIN, SMART_MAX, DT.\n"
-                       "FLOW_VS_STOP_DENSITY ->  Descripcion: Mide el flujo de autos promedio respecto a los valores\n"
+                       "                                                AUT_MIN, AUT_MAX, DT.\n"
+                       "FLOW_VS_STOP_DENSITY  -> Descripcion: Mide el flujo de autos promedio respecto a los valores\n"
                        "                                      densidad de topes especificados en un rango. Se usa el\n"
                        "                                      automata celular CA_STOP.\n"
                        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB,\n"
                        "                                                STOP_DENSITY_MIN, STOP_DENSITY_MAX, DT.\n"
                        "FLOW_VS_NEW_CAR       -> Descripcion: Mide el flujo de autos promedio respecto a los valores\n"
                        "                                      de probabilidad de aparicion de nuevo auto especificados\n"
-                       "                                      en un rango. Se usa el automata celular CA_OPEN.\n"
+                       "                                      en un rango. Se usa el automata celular CA_OPEN o.\n"
+    		           "                                      CA_SIMPLE_JUNCTION.\n"
                        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB,\n"
-                       "                                                NEW_CAR_MIN, NEW_CAR_MAX, DT.\n";
+                       "                                                NEW_CAR_MIN, NEW_CAR_MAX, DT.\n"
+					   "FLOW_PER_NEW_CAR      -> Descripcion: Mide el flujo/prob de autos promedio respecto a los valores\n"
+					   "                                      de probabilidad de aparicion de nuevo auto especificados\n"
+					   "                                      en un rango. Se usa el automata celular CA_OPEN.\n"
+					   "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB,\n"
+					   "                                                NEW_CAR_MIN, NEW_CAR_MAX, DT.\n"
+                       "FLOW_VS_SEMAPHORE_DENSITY  -> Descripcion: Mide el flujo de autos promedio respecto a los valores de\n"
+    		           "                              densidad de semaforos especificados en un rango. Se usa el automata\n"
+    		           "                              celular ca_semaphore.\n"
+    		           "                              Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB,\n"
+    		           "                                                     SEMAPHORE_DENSITY_MIN, SEMAPHORE_DENSITY_MIN,\n"
+    		           "                                                     RANDOM_SEMAPHORES, DT.";
     cout << text << endl;
 }
 
@@ -1020,17 +1063,17 @@ int main(int argc, char* argv[])
     int vmax = 5, vmax_min = 0, vmax_max = 20;
     double density = 0.2, rand_prob = 0.2;
     double dt = 0.1, dmin = 0.0, dmax = 1.0, rand_prob_min = 0.0, rand_prob_max = 1.0;
-    double smart_min = 0.0, smart_max = 1.0, new_car_min = 0.0, new_car_max = 1.0, stop_density_min = 0.0;
+    double aut_min = 0.0, aut_max = 1.0, new_car_min = 0.0, new_car_max = 1.0, stop_density_min = 0.0;
     double stop_density_max = 1.0, semaphore_density_min = 0.0, semaphore_density_max = 1.0;
     bool ocupancy_fixed = false, flow_fixed = false, flow_vs_density = false;
-    bool plot_traffic = false, flow_vs_vmax = false, flow_vs_rand_prob = false, flow_vs_smart_cars = false;
+    bool plot_traffic = false, flow_vs_vmax = false, flow_vs_rand_prob = false, flow_vs_aut_cars = false;
 	bool flow_vs_stop_density = false, flow_per_density = false, flow_vs_new_car = false, flow_per_new_car = false;
 	bool flow_vs_semaphore_density = false, random_semaphores = false, test = false, show_progress = true;
 	bool multilane = false;
     CA_TYPE ca_type = CIRCULAR_CA;
-    double new_car_prob = 0.1, smart_density = 0.1, stop_density = 0.1, semaphore_density = 0.1;
+    double new_car_prob = 0.1, aut_density = 0.1, stop_density = 0.1, semaphore_density = 0.1;
 	int new_car_speed = 1, target_lane = 0, lanes = 2;
-    string out_file_name = "";
+    string out_file_name = "", path = "";
 
     // Ejecuta parser de argumentos.
     argc -= (argc>0); argv += (argc>0);
@@ -1106,8 +1149,8 @@ int main(int argc, char* argv[])
             flow_vs_rand_prob = true;
             break;
 
-            case FLOW_VS_SMART_CARS:
-            flow_vs_smart_cars = true;
+            case FLOW_VS_AUT_CARS:
+            flow_vs_aut_cars = true;
             break;
 
             case FLOW_VS_STOP_DENSITY:
@@ -1138,8 +1181,8 @@ int main(int argc, char* argv[])
             ca_type = OPEN_CA;
             break;
 
-            case CA_SMART:
-            ca_type = SMART_CA;
+            case CA_AUTONOMOUS:
+            ca_type = AUTONOMOUS_CA;
             break;
 
             case CA_STOP:
@@ -1162,8 +1205,8 @@ int main(int argc, char* argv[])
 			new_car_speed = aux_string_to_num<int>(opt.arg);
 			break;
 
-            case SMART_DENSITY:
-            smart_density = aux_string_to_num<double>(opt.arg);
+            case AUT_DENSITY:
+            aut_density = aux_string_to_num<double>(opt.arg);
             break;
 
             case STOP_DENSITY:
@@ -1175,7 +1218,7 @@ int main(int argc, char* argv[])
             break;
 
             case RANDOM_SEMAPHORES:
-            random_semaphores = true;
+            random_semaphores = aux_string_to_bool(opt.arg);
             break;
 
 			case TARGET_LANE:
@@ -1206,12 +1249,12 @@ int main(int argc, char* argv[])
             vmax_max = aux_string_to_num<int>(opt.arg);
             break;
 
-            case SMART_MIN:
-            smart_min = aux_string_to_num<double>(opt.arg);
+            case AUT_MIN:
+            aut_min = aux_string_to_num<double>(opt.arg);
             break;
 
-            case SMART_MAX:
-            smart_max = aux_string_to_num<double>(opt.arg);
+            case AUT_MAX:
+            aut_max = aux_string_to_num<double>(opt.arg);
             break;
 
             case STOP_DENSITY_MIN:
@@ -1250,6 +1293,10 @@ int main(int argc, char* argv[])
             out_file_name = opt.arg;
             break;
 
+            case PATH:
+            path = opt.arg;
+            break;
+
             case SHOW_PROGRESS:
 			show_progress = aux_string_to_bool(opt.arg);
             break;
@@ -1265,14 +1312,14 @@ int main(int argc, char* argv[])
 
     // Verifica opciones.
     if ((ocupancy_fixed || flow_fixed) && (flow_vs_density || flow_vs_vmax || flow_vs_rand_prob ||
-		flow_vs_smart_cars || flow_vs_stop_density || flow_vs_new_car || flow_per_new_car 
+		flow_vs_aut_cars || flow_vs_stop_density || flow_vs_new_car || flow_per_new_car
 		|| flow_vs_semaphore_density))
     {
         cout << "Opciones incompatibles." << endl;
         return 1;
     }
     if (!(ocupancy_fixed || flow_fixed || flow_vs_density || flow_per_density || flow_vs_vmax 
-		|| flow_vs_rand_prob || flow_vs_smart_cars || flow_vs_new_car || flow_per_new_car 
+		|| flow_vs_rand_prob || flow_vs_aut_cars || flow_vs_new_car || flow_per_new_car
 		|| flow_vs_stop_density || flow_vs_semaphore_density
         || test))
     {
@@ -1284,12 +1331,12 @@ int main(int argc, char* argv[])
 	Args args;			// Parámetro extra en el constructor de CA.
 	if (ca_type == OPEN_CA)
 		args = Args({ new_car_prob }, { new_car_speed });
-    if (ca_type == SMART_CA)
-		args = Args({ smart_density });
+    if (ca_type == AUTONOMOUS_CA)
+		args = Args({ aut_density });
     if (ca_type == STOP_CA)
 		args = Args({ stop_density });
     if (ca_type == SEMAPHORE_CA)
-		args = Args({ semaphore_density }, { random_semaphores });
+		args = Args({ semaphore_density }, {}, { random_semaphores });
 	if (ca_type == SIMPLE_JUNCTION_CA)
 		args = Args({ new_car_prob }, { new_car_speed, target_lane });
 	if (ca_type == CIRCULAR_MULTILANE_CA)
@@ -1311,18 +1358,18 @@ int main(int argc, char* argv[])
 			if (plot_traffic)
 			{
 				cout << "Creando mapas." << endl;
-				ca->DrawHistory(out_file_name);
-				ca->DrawFlowHistory(out_file_name);
+				ca->DrawHistory(path, out_file_name);
+				ca->DrawFlowHistory(path, out_file_name);
 			}
 			if (ocupancy_fixed)
 			{
 				cout << "Midiendo ocupacion." << endl;
-				ex_ocupancy_fixed(ca, out_file_name);
+				ex_ocupancy_fixed(ca, path, out_file_name);
 			}
 			if (flow_fixed)
 			{
 				cout << "Midiendo flujo." << endl;
-				ex_flow_fixed(ca, out_file_name);
+				ex_flow_fixed(ca, path, out_file_name);
 			}
 			delete_ca();
 		}
@@ -1332,56 +1379,56 @@ int main(int argc, char* argv[])
 			{
 				cout << "Midiendo flujo vs densidad." << endl;
 				ex_flow_vs_density(ca_type, size, iterations, vmax, dmin, dmax, dt, rand_prob,
-					               args, false, show_progress, out_file_name);
+					               args, false, show_progress, path, out_file_name);
 			}
 			if (flow_per_density)
 			{
 				cout << "Midiendo flujo/densidad vs densidad." << endl;
 				ex_flow_vs_density(ca_type, size, iterations, vmax, dmin, dmax, dt, rand_prob,
-				            	   args, true, show_progress, out_file_name);
+				            	   args, true, show_progress, path, out_file_name);
 			}
 			if (flow_vs_vmax)
 			{
 				cout << "Midiendo flujo vs vmax." << endl;
 				ex_flow_vs_vmax(ca_type, size, iterations, vmax_min, vmax_max, (int)dt, density,
-					            rand_prob, args, show_progress, out_file_name);
+					            rand_prob, args, show_progress, path, out_file_name);
 			}
 			if (flow_vs_rand_prob)
 			{
 				cout << "Midiendo flujo vs rand_prob." << endl;
 				ex_flow_vs_rand_prob(ca_type, size, iterations, vmax, density, rand_prob_min,
-					                 rand_prob_max, dt, args, show_progress, out_file_name);
+					                 rand_prob_max, dt, args, show_progress, path, out_file_name);
 			}
-			if (flow_vs_smart_cars)
+			if (flow_vs_aut_cars)
 			{
 				cout << "Midiendo flujo vs densidad de autos inteligentes." << endl;
-				ex_flow_vs_smart_cars(size, iterations, vmax, density, rand_prob, smart_min,
-					                  smart_max, dt, show_progress, out_file_name);
+				ex_flow_vs_aut_cars(size, iterations, vmax, density, rand_prob, aut_min,
+					                aut_max, dt, show_progress, path, out_file_name);
 			}
 			if (flow_vs_stop_density)
 			{
 				cout << "Midiendo flujo vs densidad de topes." << endl;
 				ex_flow_vs_stop_density(size, iterations, vmax, density, rand_prob, stop_density_min,
-					                    stop_density_max, dt, show_progress, out_file_name);
+					                    stop_density_max, dt, show_progress, path, out_file_name);
 			}
 			if (flow_vs_new_car)
 			{
 				cout << "Midiendo flujo vs probabilidad de nuevo auto." << endl;
 				ex_flow_vs_new_car_prob(ca_type, size, iterations, vmax, density, rand_prob, new_car_min,
-					                    new_car_max, dt, args, false, show_progress, out_file_name);
+					                    new_car_max, dt, args, false, show_progress, path, out_file_name);
 			}
 			if (flow_per_new_car)
 			{
 				cout << "Midiendo flujo/probabilidad vs probabilidad de nuevo auto." << endl;
 				ex_flow_vs_new_car_prob(ca_type, size, iterations, vmax, density, rand_prob, new_car_min,
-					                    new_car_max, dt, args, true, show_progress, out_file_name);
+					                    new_car_max, dt, args, true, show_progress, path, out_file_name);
 			}
 			if (flow_vs_semaphore_density)
 			{
 				cout << "Midiendo flujo vs densidad de semaforos." << endl;
 				ex_flow_vs_semaphore_density(size, iterations, vmax, density, rand_prob, semaphore_density_min,
 					                         semaphore_density_max, dt, random_semaphores, show_progress,
-											 out_file_name);
+											 path, out_file_name);
 			}
 		}
 	}
@@ -1395,8 +1442,8 @@ int main(int argc, char* argv[])
 			if (plot_traffic)
 			{
 				cout << "Creando mapas." << endl;
-				ca->DrawHistory();
-				ca->DrawFlowHistory();
+				ca->DrawHistory(path, out_file_name);
+				ca->DrawFlowHistory(path, out_file_name);
 			}
 		}
 		else
@@ -1405,7 +1452,7 @@ int main(int argc, char* argv[])
 			{
 				cout << "Midiendo flujo vs densidad." << endl;
 				ex_multilane_flow_vs_density(ca_type, size, lanes, iterations, vmax, dmin, dmax, dt, rand_prob,
-					                         args, false, show_progress, out_file_name);
+					                         args, false, show_progress, path, out_file_name);
 			}
 		}
 	}
