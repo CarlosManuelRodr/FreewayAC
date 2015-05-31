@@ -1,6 +1,9 @@
 #include "CellularAutomata.h"
 #include <limits>
 #include <algorithm>
+#include <cctype>
+#include <iomanip>
+#include <sstream>
 using namespace std;
 
 /****************************
@@ -22,6 +25,14 @@ void aux_random_seed()
 int aux_random(int i)
 {
     return m_irand() % i;
+}
+bool aux_string_to_bool(std::string str)
+{
+	std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+	std::istringstream is(str);
+	bool b;
+	is >> std::boolalpha >> b;
+	return b;
 }
 void aux_progress_bar(double progress)
 {
@@ -172,11 +183,11 @@ CellularAutomata::CellularAutomata(const unsigned &size, const double &density, 
 
     // Coloca autos al azar.
     vector<unsigned> car_positions;
-    for (unsigned i=0; i<m_size; ++i)
+    for (unsigned i = 0; i < m_size; ++i)
         car_positions.push_back(i);
 
     random_shuffle(car_positions.begin(), car_positions.end(), aux_random);
-    for (unsigned i=0; i<vehicles; ++i)
+    for (unsigned i = 0; i < vehicles; ++i)
         m_ca[car_positions[i]] = 1;
 
     m_ca_history.push_back(m_ca);
@@ -202,7 +213,7 @@ CellularAutomata::~CellularAutomata() {}
 void CellularAutomata::Print()
 {
     // Imprime valores del automata celular en la terminal.
-    for (unsigned i=0; i<m_ca.size(); ++i)
+    for (unsigned i = 0; i < m_ca.size(); ++i)
     {
         if (m_ca[i] == -1)
             cout << "-";
@@ -213,9 +224,9 @@ void CellularAutomata::Print()
 }
 void CellularAutomata::PrintHistory()
 {
-    for (unsigned i=0; i<m_ca_history.size(); i++)
+    for (unsigned i = 0; i < m_ca_history.size(); ++i)
     {
-        for (unsigned j=0; j<m_size; j++)
+        for (unsigned j = 0; j < m_size; ++j)
         {
             if (j != m_size -1)
             {
@@ -244,9 +255,9 @@ void CellularAutomata::DrawHistory(string out_file_name)
     unsigned width = m_size;
     BMPWriter writer(out_file_name.c_str(), width, height);
     BMPPixel* bmpData = new BMPPixel[width];
-    for (int i=height-1; i>=0; i--)     // Los archivos BMP se escriben de abajo a arriba.
+    for (int i = height-1; i >= 0; --i)     // Los archivos BMP se escriben de abajo a arriba.
     {
-        for (unsigned j=0; j<width; ++j)
+        for (unsigned j = 0; j < width; ++j)
         {
             BMPPixel color;
             if (m_ca_history[i][j] == -1)
@@ -269,7 +280,7 @@ void CellularAutomata::DrawFlowHistory(string out_file_name)
     unsigned width = m_size;
     BMPWriter writer(out_file_name.c_str(), width, height);
     BMPPixel* bmpData = new BMPPixel[width];
-    for (int i=height-1; i>=0; i--)
+    for (int i = height-1; i >= 0; --i)
     {
         for (unsigned j=0; j<width; ++j)
         {
@@ -288,7 +299,7 @@ void CellularAutomata::DrawFlowHistory(string out_file_name)
 void CellularAutomata::Step()
 {
     // Iterar sobre AC hasta encotrar vehiculo.
-    for (unsigned i=0; i<m_ca.size(); ++i)
+    for (unsigned i = 0; i < m_ca.size(); ++i)
     {
         if (m_ca[i] != -1)
         {
@@ -321,7 +332,7 @@ void CellularAutomata::Move()
 {
 	m_ca_flow_temp.assign(m_size, 0);
 	m_ca_temp.assign(m_size, -1);
-	for (unsigned i = 0; i<m_ca.size(); ++i)
+	for (unsigned i = 0; i < m_ca.size(); ++i)
 	{
 		if (m_ca[i] != -1)
 		{
@@ -332,7 +343,7 @@ void CellularAutomata::Move()
 				At(i + m_ca[i], CA_TEMP) = m_ca[i];
 
 			// Marca las casillas donde hay flujo de autos.
-			for (unsigned j = i; j<i + m_ca[i]; ++j)
+			for (unsigned j = i; j < i + m_ca[i]; ++j)
 				At(j, CA_FLOW_TEMP) = 1;
 		}
 	}
@@ -341,7 +352,7 @@ void CellularAutomata::Move()
 }
 void CellularAutomata::Evolve(const unsigned &iter)
 {
-    for (unsigned i=0; i<iter; ++i)
+    for (unsigned i = 0; i < iter; ++i)
         Step();
 }
 unsigned CellularAutomata::GetSize()
@@ -355,7 +366,7 @@ unsigned CellularAutomata::GetHistorySize()
 unsigned CellularAutomata::CountCars()
 {
     unsigned count = 0;
-    for (unsigned i=0; i<m_ca.size(); i++)
+    for (unsigned i = 0; i < m_ca.size(); ++i)
     {
         if (m_ca[i] != -1)
             count++;
@@ -460,7 +471,7 @@ int &CircularCA::At(const unsigned &i, const unsigned &j, const CAS &ca)
 void CircularCA::Evolve(const unsigned &iter)
 {
     unsigned cars = CountCars();
-    for (unsigned i=0; i<iter; ++i)
+    for (unsigned i = 0; i < iter; ++i)
         Step();
 
     if (cars != CountCars())
@@ -532,7 +543,7 @@ int &OpenCA::At(const unsigned &i, const unsigned &j, const CAS &ca)
 void OpenCA::Step()
 {
 	// Iterar sobre AC hasta encotrar vehiculo.
-	for (unsigned i = 0; i<m_ca.size(); ++i)
+	for (unsigned i = 0; i < m_ca.size(); ++i)
 	{
 		if (m_ca[i] != -1)
 		{
@@ -589,14 +600,14 @@ SmartCA::SmartCA(const unsigned &size, const double &density, const int &vmax, c
     // Selecciona autos inteligentes.
     unsigned smart_car_number = (unsigned)(((double)size)*l_smart_density);
     vector<int> smart_car_positions;
-    for (unsigned i=0; i<m_size; ++i)
+    for (unsigned i = 0; i < m_size; ++i)
     {
         if (m_ca[i] != -1)
             smart_car_positions.push_back(i);
     }
 
     random_shuffle(smart_car_positions.begin(), smart_car_positions.end(), aux_random);
-    for (unsigned i=0; i<smart_car_positions.size() && i<smart_car_number; ++i)
+    for (unsigned i = 0; i < smart_car_positions.size() && i < smart_car_number; ++i)
         m_smart_cars.push_back(smart_car_positions[i]);
 }
 SmartCA::SmartCA(const vector<int> &ca, vector<int> smart_cars, const vector<bool> &rand_values,
@@ -609,7 +620,7 @@ void SmartCA::Move()
 {
     m_ca_flow_temp.assign(m_size, 0);
     m_ca_temp.assign(m_size, -1);
-    for (unsigned i=0; i<m_ca.size(); ++i)
+    for (unsigned i = 0; i < m_ca.size(); ++i)
     {
         if (m_ca[i] != -1)
         {
@@ -621,7 +632,7 @@ void SmartCA::Move()
             At(i+m_ca[i], CA_TEMP) = m_ca[i];
 
             // Marca las casillas donde hay flujo de autos.
-            for (unsigned j=i; j<i+m_ca[i]; ++j)
+            for (unsigned j = i; j < i+m_ca[i]; ++j)
                 At(j, CA_FLOW_TEMP) = 1;
         }
     }
@@ -631,7 +642,7 @@ void SmartCA::Move()
 void SmartCA::Step()
 {
     // Iterar sobre AC hasta encotrar vehiculo.
-    for (unsigned i=0; i<m_ca.size(); ++i)
+    for (unsigned i = 0; i < m_ca.size(); ++i)
     {
         if (m_ca[i] != -1)
         {
@@ -733,17 +744,17 @@ StreetStopCA::StreetStopCA(const unsigned &size, const double &density, const in
 
     // Coloca topes.
     vector<unsigned> stop_positions;
-    for (unsigned i=0; i<m_size; ++i)
+    for (unsigned i = 0; i < m_size; ++i)
         stop_positions.push_back(i);
 
     random_shuffle(stop_positions.begin(), stop_positions.end(), aux_random);
-    for (unsigned i=0; i<stops; ++i)
+    for (unsigned i = 0; i < stops; ++i)
         m_stop_pos.push_back(stop_positions[i]);
 }
 void StreetStopCA::Step()
 {
     // Iterar sobre AC hasta encotrar vehiculo.
-    for (unsigned i=0; i<m_ca.size(); ++i)
+    for (unsigned i = 0; i < m_ca.size(); ++i)
     {
         if (m_ca[i] != -1)
         {
@@ -780,7 +791,7 @@ int StreetStopCA::NextStopDist(const int &pos)
     if (!m_stop_pos.empty())
     {
         vector<unsigned> dist;
-        for (unsigned i=0; i<m_stop_pos.size(); ++i)
+        for (unsigned i = 0; i < m_stop_pos.size(); ++i)
         {
             int tmp_dist = pos - m_stop_pos[i];
             if (tmp_dist < 0)
@@ -802,9 +813,9 @@ void StreetStopCA::DrawHistory(string out_file_name)
     unsigned width = m_size;
     BMPWriter writer(out_file_name.c_str(), width, height);
     BMPPixel* bmpData = new BMPPixel[width];
-    for (int i=height-1; i>=0; i--)
+    for (int i = height-1; i >= 0; i--)
     {
-        for (unsigned j=0; j<width; ++j)
+        for (unsigned j = 0; j < width; ++j)
         {
             BMPPixel color;
             if (aux_is_in(m_stop_pos, j))
@@ -853,11 +864,11 @@ SemaphoreCA::SemaphoreCA(const unsigned &size, const double &density, const int 
     if (random_semaphores)
     {
         vector<unsigned> semaphore_positions;
-        for (unsigned i=0; i<m_size; ++i)
+        for (unsigned i = 0; i < m_size; ++i)
             semaphore_positions.push_back(i);
 
         random_shuffle(semaphore_positions.begin(), semaphore_positions.end(), aux_random);
-        for (unsigned i=0; i<semaphores; ++i)
+        for (unsigned i = 0; i < semaphores; ++i)
         {
             m_semaphore_pos.push_back(semaphore_positions[i]);
             m_semaphore_value.push_back(aux_random(m_semaphore_init));
@@ -868,7 +879,7 @@ SemaphoreCA::SemaphoreCA(const unsigned &size, const double &density, const int 
         if (semaphores != 0)
         {
             int semaphore_dt = size/semaphores;
-            for (unsigned i=0; i<size; i += semaphore_dt)
+            for (unsigned i = 0; i < size; i += semaphore_dt)
             {
                 m_semaphore_pos.push_back(i);
                 m_semaphore_value.push_back(aux_random(m_semaphore_init));
@@ -880,7 +891,7 @@ SemaphoreCA::SemaphoreCA(const unsigned &size, const double &density, const int 
 void SemaphoreCA::Step()
 {
     // Iterar sobre AC hasta encotrar vehiculo.
-    for (unsigned i=0; i<m_ca.size(); ++i)
+    for (unsigned i = 0; i < m_ca.size(); ++i)
     {
         if (m_ca[i] != -1)
         {
@@ -907,7 +918,7 @@ void SemaphoreCA::Step()
     }
 
     // Itera semáforos.
-    for (unsigned i=0; i<m_semaphore_value.size(); i++)
+    for (unsigned i = 0; i < m_semaphore_value.size(); i++)
     {
         m_semaphore_value[i]--;
         if (m_semaphore_value[i] < 0)
@@ -924,7 +935,7 @@ int SemaphoreCA::NextSemaphoreDist(const int &pos)
     if (!m_semaphore_pos.empty())
     {
         vector<unsigned> dist;
-        for (unsigned i=0; i<m_semaphore_pos.size(); ++i)
+        for (unsigned i = 0; i < m_semaphore_pos.size(); ++i)
         {
             if (m_semaphore_value[i] >= m_semaphore_open)
             {
@@ -952,9 +963,9 @@ void SemaphoreCA::DrawHistory(string out_file_name)
     unsigned width = m_size;
     BMPWriter writer(out_file_name.c_str(), width, height);
     BMPPixel* bmpData = new BMPPixel[width];
-    for (int i=height-1; i>=0; i--)
+    for (int i = height-1; i >= 0; i--)
     {
-        for (unsigned j=0; j<width; ++j)
+        for (unsigned j = 0; j < width; ++j)
         {
             BMPPixel color;
             int s_pos = aux_find_pos(m_semaphore_pos, j);
@@ -1080,34 +1091,42 @@ CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &dens
 	                        const double &rand_prob, Args args)
 {
     delete_ca();
-    switch(ca)
-    {
-    case CIRCULAR_CA:
-        cellularautomata = circularca = new CircularCA(size, density, vmax, rand_prob);
-        break;
-    case OPEN_CA:
-		cellularautomata = openca = new OpenCA(size, density, vmax, rand_prob, args.GetDouble(), 
-			                                   args.GetInt());
-        break;
-    case SMART_CA:
-		cellularautomata = smartca = new SmartCA(size, density, vmax, rand_prob, args.GetDouble());
-        break;
-    case STOP_CA:
-		cellularautomata = streetstopca = new StreetStopCA(size, density, vmax, rand_prob, args.GetDouble());
-        break;
-    case SEMAPHORE_CA:
-		cellularautomata = semaphoreca = new SemaphoreCA(size, density, vmax, rand_prob, args.GetDouble(), 
-			                                             args.GetBool());
-        break;
-	case SIMPLE_JUNCTION_CA:
-		cellularautomata = simplejunctionca = new SimpleJunctionCA(size, density, vmax, rand_prob,
-			                                                       args.GetDouble(), args.GetInt(0), args.GetInt(1));
-		break;
-	default:
-		cout << "Error: No se puede crear AC especificado en create_ca." << endl;
-		break;
-    };
-    return cellularautomata;
+	try
+	{
+		switch (ca)
+		{
+		case CIRCULAR_CA:
+			cellularautomata = circularca = new CircularCA(size, density, vmax, rand_prob);
+			break;
+		case OPEN_CA:
+			cellularautomata = openca = new OpenCA(size, density, vmax, rand_prob, args.GetDouble(),
+				args.GetInt());
+			break;
+		case SMART_CA:
+			cellularautomata = smartca = new SmartCA(size, density, vmax, rand_prob, args.GetDouble());
+			break;
+		case STOP_CA:
+			cellularautomata = streetstopca = new StreetStopCA(size, density, vmax, rand_prob, args.GetDouble());
+			break;
+		case SEMAPHORE_CA:
+			cellularautomata = semaphoreca = new SemaphoreCA(size, density, vmax, rand_prob, args.GetDouble(),
+				args.GetBool());
+			break;
+		case SIMPLE_JUNCTION_CA:
+			cellularautomata = simplejunctionca = new SimpleJunctionCA(size, density, vmax, rand_prob,
+				args.GetDouble(), args.GetInt(0), args.GetInt(1));
+			break;
+		default:
+			cout << "Error: No se puede crear AC especificado en create_ca." << endl;
+			break;
+		};
+		return cellularautomata;
+	}
+	catch (std::bad_alloc&)
+	{
+		cout << "Fatal: Memoria insuficiente." << endl;
+		return NULL;
+	}
 }
 void delete_ca()
 {
@@ -1164,16 +1183,14 @@ CellularAutomataML::CellularAutomataML(const unsigned &size, const unsigned &lan
     m_lanes = lanes;
     m_vmax = vmax;
     m_rand_prob = rand_prob;
-
     m_ca.assign(size, CAElement(lanes));
     m_ca_temp.assign(size, CAElement(lanes));
     m_ca_history.clear();
     m_ca_flow_history.clear();
 
-
     // Verifica argumentos.
     double l_density = density;
-    if (l_density <= 0.0 || l_density >= 1.0)
+    if (l_density < 0.0 || l_density > 1.0)
     {
         l_density = 0.1;
         cout << "Densidad invalida. Cambiando a density=" << l_density << "." << endl;
@@ -1183,7 +1200,7 @@ CellularAutomataML::CellularAutomataML(const unsigned &size, const unsigned &lan
         m_vmax = 1;
         cout << "Velocidad limite invalida. Cambiando a vmax=" << m_vmax << "." << endl;
     }
-    if (m_rand_prob < 0.0 || m_rand_prob >= 1.0)
+    if (m_rand_prob < 0.0 || m_rand_prob > 1.0)
     {
         m_rand_prob = 0.0;
         cout << "Probabilidad de frenado invalida. Cambiando a rand_prob=" << m_rand_prob << "." << endl;
@@ -1191,31 +1208,27 @@ CellularAutomataML::CellularAutomataML(const unsigned &size, const unsigned &lan
     unsigned vehicles = (unsigned)(((double)size)*density);
 
     // Asigna semilla a numeros aleatorios.
-    unsigned seed = static_cast<unsigned int>(time(NULL));
-    m_drand.seed(seed);
-    m_irand.seed(seed);
+	aux_random_seed();
 
     // Coloca autos al azar.
-    for (unsigned i=0; i<vehicles; ++i)
-    {
-        unsigned pos, lane;
-        do
-        {
-            pos = m_irand() % m_ca.size();
-            lane = m_irand() % m_lanes;
-        }
-        while (m_ca[pos][lane] != -1);
-        m_ca[pos][lane] = 1;
-    }
-    m_ca_history.push_back(m_ca);
+	for (unsigned i = 0; i < m_lanes; ++i)
+	{
+		vector<unsigned> car_positions;
+		for (unsigned j = 0; j < m_size; ++j)
+			car_positions.push_back(j);
+
+		random_shuffle(car_positions.begin(), car_positions.end(), aux_random);
+		for (unsigned j = 0; j < vehicles; ++j)
+			m_ca[car_positions[j]][i] = 1;
+	}
 }
 CellularAutomataML::~CellularAutomataML() {}
 void CellularAutomataML::Print()
 {
     // Imprime valores del automata celular en la terminal.
-    for (unsigned i=0; i<m_lanes; ++i)
+    for (unsigned i = 0; i < m_lanes; ++i)
     {
-        for (unsigned j=0; j<m_ca.size(); ++j)
+        for (unsigned j = 0; j < m_ca.size(); ++j)
         {
             if (m_ca[j][i] == -1)
                 cout << "-";
@@ -1224,7 +1237,7 @@ void CellularAutomataML::Print()
         }
         cout << endl;
     }
-    for (unsigned i=0; i<m_ca.size(); ++i)
+    for (unsigned i = 0; i < m_ca.size(); ++i)
         cout << ".";
     cout << endl;
 }
@@ -1245,11 +1258,11 @@ void CellularAutomataML::DrawHistory(string out_file_name)
     BMPPixel* bmpData = new BMPPixel[width];
     BMPPixel color;
 
-    for (int i=height-1; i>=0; i--)
+    for (int i = height-1; i >= 0; i--)
     {
-        for (unsigned l=0; l<m_lanes; ++l)
+        for (unsigned l = 0; l < m_lanes; ++l)
         {
-            for (unsigned j=0; j<width; ++j)
+            for (unsigned j = 0; j < width; ++j)
             {
                 if (m_ca_history[i][j][l] == -1)
                     color = BMPPixel((char)255, (char)255, (char)255);
@@ -1260,12 +1273,15 @@ void CellularAutomataML::DrawHistory(string out_file_name)
             writer.WriteLine(bmpData);
         }
 
-        for (unsigned j=0; j<width; ++j)
-        {
-            color = BMPPixel((char)0, (char)255, (char)0);
-            bmpData[j] = color;
-        }
-        writer.WriteLine(bmpData);
+		if (m_lanes > 1)
+		{
+			for (unsigned j = 0; j < width; ++j)
+			{
+				color = BMPPixel((char)0, (char)255, (char)0);
+				bmpData[j] = color;
+			}
+			writer.WriteLine(bmpData);
+		}
     }
     writer.CloseBMP();
     delete[] bmpData;
@@ -1287,13 +1303,13 @@ void CellularAutomataML::DrawFlowHistory(string out_file_name)
     BMPPixel* bmpData = new BMPPixel[width];
     BMPPixel color;
 
-    for (int i=height-1; i>=0; i--)
+    for (int i = height-1; i >= 0; i--)
     {
-        for (unsigned l=0; l<m_lanes; ++l)
+        for (unsigned l = 0; l < m_lanes; ++l)
         {
-            for (unsigned j=0; j<width; ++j)
+            for (unsigned j = 0; j < width; ++j)
             {
-                if (m_ca_flow_history[i][j][l] == -1)
+                if (m_ca_flow_history[i][j][l] == 0)
                     color = BMPPixel((char)255, (char)255, (char)255);
                 else
                     color = BMPPixel(0, 0, (char)(255.0*(double)m_ca_flow_history[i][j][l]/(double)m_vmax));
@@ -1302,38 +1318,69 @@ void CellularAutomataML::DrawFlowHistory(string out_file_name)
             writer.WriteLine(bmpData);
         }
 
-        for (unsigned j=0; j<width; ++j)
-        {
-            color = BMPPixel((char)0, (char)255, (char)0);
-            bmpData[j] = color;
-        }
-        writer.WriteLine(bmpData);
+		if (m_lanes > 1)
+		{
+			for (unsigned j = 0; j < width; ++j)
+			{
+				color = BMPPixel((char)0, (char)255, (char)0);
+				bmpData[j] = color;
+			}
+			writer.WriteLine(bmpData);
+		}
     }
     writer.CloseBMP();
     delete[] bmpData;
+}
+bool CellularAutomataML::Randomization(const double &prob)
+{
+	double l_prob;
+	if (prob < 0)
+		l_prob = m_rand_prob;
+	else
+		l_prob = prob;
+
+	// Si está en modo de prueba toma los valores aleatorios de la lista.
+	if (m_test)
+	{
+		if (m_rand_values.size() != 0)
+		{
+			bool ret = m_rand_values[0];
+			m_rand_values.erase(m_rand_values.begin());
+			return ret;
+		}
+		else
+			return false;
+	}
+	else
+	{
+		if (m_drand() <= l_prob)
+			return true;
+		else
+			return false;
+	}
 }
 void CellularAutomataML::Step()
 {
     // Primero hace los cambios de carril.
     if (m_lanes > 1)
     {
-        for (unsigned i=0; i<m_ca.size(); ++i)
+        for (unsigned i = 0; i < m_ca.size(); ++i)
         {
-            for (unsigned j=0; j<m_lanes; ++j)
+            for (unsigned j = 0; j < m_lanes; ++j)
             {
                 // Si no puede acelerar
                 if (!((At(i, j) < m_vmax) && (NextCarDist(i, j) > (At(i, j) + 1))))
                 {
 					// Intenta cambiar de carril.
 					bool left = false, right = false;
-					for (int k=(int)j-1; k<=(int)j+1 && k<(int)m_lanes; k++)
+					for (int k = (int)j-1; k <= (int)j+1 && k < (int)m_lanes; k++)
 					{
 						// Evita carril inexistente, el mismo y carril ocupado.
 						if (k<0 || (unsigned)k==j || At(i, k) != -1) continue;
 
 						// Busca auto anterior y verifica si puede cambiarse sin chocar.
 						int v, s=0;
-						for (int l=i-1; s<=m_vmax; ++s, l--)
+						for (int l = i-1; s <= m_vmax; ++s, l--)
 						{
 							// Verifica posibilidad de choque.
 							v = At(l, k);
@@ -1388,9 +1435,9 @@ void CellularAutomataML::Step()
     }
 
     // Iterar sobre AC.
-    for (unsigned i=0; i<m_ca.size(); ++i)
+    for (unsigned i = 0; i < m_ca.size(); ++i)
     {
-        for (unsigned j=0; j<m_lanes; ++j)
+        for (unsigned j = 0; j < m_lanes; ++j)
         {
             // Encuentra vehículo.
             if (At(i, j) != -1)
@@ -1410,7 +1457,8 @@ void CellularAutomataML::Step()
                 }
 
                 // Aleatoriedad.
-                if ((At(i, j) > 0) && (m_drand() <= m_rand_prob))
+				bool rnd = Randomization();
+                if ((At(i, j) > 0) && rnd)
                     At(i, j)--;
             }
         }
@@ -1422,7 +1470,7 @@ void CellularAutomataML::Step()
 }
 void CellularAutomataML::Evolve(const unsigned &iter)
 {
-    for (unsigned i=0; i<iter; ++i)
+    for (unsigned i = 0; i < iter; ++i)
     {
         Step();
     }
@@ -1435,12 +1483,16 @@ unsigned CellularAutomataML::GetHistorySize()
 {
     return m_ca_history.size();
 }
+unsigned CellularAutomataML::GetLanes()
+{
+	return m_lanes;
+}
 unsigned CellularAutomataML::CountCars()
 {
     unsigned count = 0;
-    for (unsigned i=0; i<m_ca.size(); ++i)
+    for (unsigned i = 0; i < m_ca.size(); ++i)
     {
-    	for (unsigned j=0; j<m_lanes; ++j)
+    	for (unsigned j = 0; j < m_lanes; ++j)
     	{
 			if (m_ca[i][j] != -1)
 				count++;
@@ -1452,25 +1504,33 @@ int &CellularAutomataML::At(const int &i, const unsigned &lane, const CAS &ca)
 {
     return At(i, lane, 0, ca);
 }
+int CellularAutomataML::GetAt(const unsigned &i, const unsigned &lane, const CAS &ca)
+{
+	return At(i, lane, ca);
+}
+int CellularAutomataML::GetAt(const unsigned &i, const unsigned &lane, const unsigned &j, const CAS &ca)
+{
+	return At(i, lane, j, ca);
+}
 int CellularAutomataML::NextCarDist(const int &pos, const unsigned &lane)
 {
     int dist = 1;
-    while ((At(pos+dist, lane) == -1)  && (dist < 2*(int)m_size))
+    while ((At(pos+dist, lane) == -1) && (dist < 2*(int)m_size))
         dist++;
     return dist;
 }
 void CellularAutomataML::Move()
 {
     m_ca_flow_temp.assign(m_size, CAElement(m_lanes, 0));
-    for (unsigned i=0; i<m_ca_temp.size(); ++i)
+    for (unsigned i = 0; i < m_ca_temp.size(); ++i)
     {
-        for (unsigned j=0; j<m_lanes; ++j)
+        for (unsigned j = 0; j < m_lanes; ++j)
             m_ca_temp[i][j] = -1;
     }
 
-    for (unsigned i=0; i<m_ca.size(); ++i)
+    for (unsigned i = 0; i < m_ca.size(); ++i)
     {
-        for (unsigned j=0; j<m_lanes; ++j)
+        for (unsigned j = 0; j < m_lanes; ++j)
         {
             if (m_ca[i][j] != -1)
             {
@@ -1478,7 +1538,7 @@ void CellularAutomataML::Move()
                 At(i+m_ca[i][j], j, CA_TEMP) = m_ca[i][j];
 
                 // Marca las casillas donde hay flujo de autos.
-                for (unsigned k=i; k<i+m_ca[i][j]; ++k)
+                for (unsigned k = i; k < i+m_ca[i][j]; ++k)
                     At(k, j, CA_FLOW_TEMP) = 1;
             }
         }
@@ -1531,7 +1591,7 @@ int &CircularCAML::At(const int &i, const unsigned &lane, const unsigned &j, con
 void CircularCAML::Evolve(const unsigned &iter)
 {
     unsigned cars = CountCars();
-    for (unsigned i=0; i<iter; ++i)
+    for (unsigned i = 0; i < iter; ++i)
         Step();
 
     if (cars != CountCars())
@@ -1550,21 +1610,29 @@ CircularCAML* circularcaml = NULL;
 CellularAutomataML* create_multilane_ca(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density, 
                              	        const int &vmax, const double &rand_prob, Args args)
 {
-	delete_ca();
-	switch (ca)
+	delete_multilane_ca();
+	try
 	{
-	case CIRCULAR_MULTILANE_CA:
-		cellularautomataml = circularcaml = new CircularCAML(size, lanes, density, vmax, rand_prob);
-		break;
-	default:
-		cout << "Error: No se puede crear AC especificado en create_multilane_ca." << endl;
-		break;
-	};
-	return cellularautomataml;
+		switch (ca)
+		{
+		case CIRCULAR_MULTILANE_CA:
+			cellularautomataml = circularcaml = new CircularCAML(size, lanes, density, vmax, rand_prob);
+			break;
+		default:
+			cout << "Error: No se puede crear AC especificado en create_multilane_ca." << endl;
+			break;
+		};
+		return cellularautomataml;
+	}
+	catch (std::bad_alloc&)
+	{
+		cout << "Fatal: Memoria insuficiente." << endl;
+		return NULL;
+	}
 }
 void delete_multilane_ca()
 {
-	if (circularca != NULL)
-		delete circularca;
-	circularca = NULL;
+	if (circularcaml != NULL)
+		delete circularcaml;
+	circularcaml = NULL;
 }

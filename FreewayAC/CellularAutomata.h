@@ -43,6 +43,12 @@ void aux_random_seed();
 int aux_random(int i);
 
 /**
+* @brief Convierte cadena de texto a booleano. 
+* @param str Texto a convertir. Acepta valores "true" o "false".
+*/
+bool aux_string_to_bool(std::string str);
+
+/**
 * @brief Informa si find_val está dentro de v.
 * @param v Vector dónde buscar.
 * @param find_val Valor a buscar.
@@ -204,8 +210,6 @@ protected:
     std::vector<int> m_ca_temp, m_ca_flow_temp;                         ///< Variable temporal para operaciones con AC.
     std::vector< std::vector<int> > m_ca_history, m_ca_flow_history;    ///< Lista con valores históricos de AC.
     std::vector<bool> m_rand_values;                                    ///< Lista con valores aleatorios para usar en modo de prueba.
-    MTRand m_drand;              ///< Generador de aleatorios (flotantes) entre 0 y 1.
-    MTRand_int32 m_irand;        ///< Generador de enteros aleatorios.
 
 	// Conexión de carriles.
 	CellularAutomata* m_connect; ///< Puntero al AC al cual se va a conectar.
@@ -250,12 +254,12 @@ public:
     ///@param ca Tipo de autómata celular.
     virtual int &At(const unsigned &i, const unsigned &j, const CAS &ca) = 0;
 
-	///@brief Similar a AC pero sólo devuelve el valor y en AC multicarril puede apuntar a un carril en específico.
+	///@brief Similar a AC pero sólo devuelve el valor y en AC de uniones puede apuntar a un carril en específico.
 	///@param i Posición dentro del AC.
 	///@param ca Tipo de AC.
 	int GetAt(const unsigned &i, const CAS &ca = CA);
 
-	///@brief Similar a AC pero sólo devuelve el valor y en AC multicarril puede apuntar a un carril en específico.
+	///@brief Similar a AC pero sólo devuelve el valor y en AC de uniones puede apuntar a un carril en específico.
 	///@param i Posición dentro del AC.
 	///@param j Posición temporal del AC.
 	///@param ca Tipo de autómata celular.
@@ -585,6 +589,7 @@ public:
 class CellularAutomataML
 {
 protected:
+	bool m_test;				 ///< Modo de prueba.
 	int m_vmax;                  ///< Valor máximo de la velocidad.
     unsigned m_lanes;			 ///< Número de carriles.
 	double m_rand_prob;          ///< Valor de la probabilidad de descenso de velocidad.
@@ -592,8 +597,7 @@ protected:
 	std::vector<CAElement> m_ca;    ///< Automata celular. -1 para casillas sin auto, y valores >= 0 indican velocidad del auto en esa casilla.
 	std::vector<CAElement> m_ca_temp, m_ca_flow_temp;                         ///< Variable temporal para operaciones con AC.
 	std::vector< std::vector<CAElement> > m_ca_history, m_ca_flow_history;    ///< Lista con valores históricos de AC.
-	MTRand m_drand;              ///< Generador de aleatorios (flotantes) entre 0 y 1.
-	MTRand_int32 m_irand;        ///< Generador de enteros aleatorios.
+	std::vector<bool> m_rand_values;                                    ///< Lista con valores aleatorios para usar en modo de prueba.
 
 public:
 	///@brief Constructor.
@@ -623,6 +627,17 @@ public:
 	///@param ca Tipo de autómata celular.
 	virtual int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca) = 0;
 
+	///@brief Similar a AC pero sólo devuelve el valor y en AC de uniones puede apuntar a un carril en específico.
+	///@param i Posición dentro del AC.
+	///@param ca Tipo de AC.
+	int GetAt(const unsigned &i, const unsigned &lane, const CAS &ca = CA);
+
+	///@brief Similar a AC pero sólo devuelve el valor y en AC de uniones puede apuntar a un carril en específico.
+	///@param i Posición dentro del AC.
+	///@param j Posición temporal del AC.
+	///@param ca Tipo de autómata celular.
+	virtual int GetAt(const unsigned &i, const unsigned &lane, const unsigned &j, const CAS &ca);
+
 	///@brief Devuelve la distancia al auto más próximo desde la posición pos.
 	///@param pos Posición desde dónde iniciar la búsqueda.
 	virtual int NextCarDist(const int &pos, const unsigned &lane);
@@ -635,10 +650,15 @@ public:
     ///@param out_file_name Ruta del archivo de salida.
     void DrawFlowHistory(std::string out_file_name = "");
 
+	///@brief Devuelve valores verdaderos con probabilidad prob. Si se usa en prueba usa valores de lista.
+	///@param prob Probabilidad de obtener valor verdadero. Por defecto se utiliza m_rand_prob.
+	bool Randomization(const double &prob = -1.0);
+
     void Print();			    ///< Escribe línea de autómata celular en la terminal.
     unsigned GetSize();		    ///< Devuelve tamaño del AC.
     unsigned GetHistorySize();  ///< Devuelve tamaño de la lista histórica de evolución del AC.
-    unsigned CountCars();           ///< Cuenta la cantidad de autos en AC.
+	unsigned GetLanes();        ///< Devuelve el número de carriles.
+    unsigned CountCars();       ///< Cuenta la cantidad de autos en AC.
     virtual void Step();        ///< Aplica reglas de evolución temporal del AC.
     virtual void Move();        ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
 };

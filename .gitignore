@@ -64,3 +64,5 @@ build/
 /Release/
 /Release/
 /Release/
+/FreewayAC/*.bmp
+/FreewayAC/*.csv

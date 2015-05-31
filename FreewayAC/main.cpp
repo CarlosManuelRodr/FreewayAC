@@ -23,10 +23,10 @@ void ex_ocupancy_fixed(CellularAutomata *ca, string out_file_name = "")
     unsigned height = ca->GetHistorySize();
     unsigned width = ca->GetSize();
 
-    for (unsigned i=0; i<width; ++i)
+    for (unsigned i = 0; i < width; ++i)
     {
         int sum = 0;
-        for (unsigned j=1; j<height; ++j)
+        for (unsigned j = 1; j < height; ++j)
         {
             if (ca->GetAt(i, j, CA_HISTORY) != -1)
                 sum++;
@@ -61,10 +61,10 @@ void ex_flow_fixed(CellularAutomata *ca, string out_file_name = "")
     unsigned height = ca->GetHistorySize();
     unsigned width = ca->GetSize();
 
-    for (unsigned i=0; i<width; ++i)
+    for (unsigned i = 0; i < width; ++i)
     {
         int sum = 0;
-        for (unsigned j=1; j<height; ++j)
+        for (unsigned j = 1; j < height; ++j)
         {
             if ((ca->GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca->GetAt(i+1, j, CA_FLOW_HISTORY) != 0)) 
                 sum++;
@@ -110,7 +110,7 @@ void ex_flow_vs_density(const CA_TYPE &type, const unsigned &size, const unsigne
     vector<double> flow;
     CellularAutomata* ca;
 
-    for (double d=density_min; d<=density_max; d+=dt)
+    for (double d = density_min; d <= density_max; d += dt)
     {
         // Reporta progreso.
     	if (show_progress)
@@ -128,13 +128,13 @@ void ex_flow_vs_density(const CA_TYPE &type, const unsigned &size, const unsigne
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
         tmp_flow.assign(size, 0.0);
-        unsigned height = iterations;
-        unsigned width = size;
+		unsigned height = ca->GetHistorySize();
+		unsigned width = ca->GetSize();
 
-        for (unsigned i=0; i<width; ++i)
+        for (unsigned i = 0; i < width; ++i)
         {
             int sum = 0;
-            for (unsigned j=0; j<height; ++j)
+            for (unsigned j = 1; j < height; ++j)
             {
                 if ((ca->GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca->GetAt(i+1, j, CA_FLOW_HISTORY) != 0))
                     sum++;
@@ -144,7 +144,7 @@ void ex_flow_vs_density(const CA_TYPE &type, const unsigned &size, const unsigne
 
         // Obtiene el promedio de todos los flujos.
         double mean = 0;
-        for (unsigned i=0; i<tmp_flow.size(); ++i)
+        for (unsigned i = 0; i < tmp_flow.size(); ++i)
             mean += tmp_flow[i];
         mean /= (double)tmp_flow.size();
         if (per_density) mean /= d;
@@ -176,6 +176,99 @@ void ex_flow_vs_density(const CA_TYPE &type, const unsigned &size, const unsigne
 }
 
 /**
+* @brief Mide el flujo promedio de todas las casillas respecto a densidad de autos.
+* @param type Tipo de AC.
+* @param size Tamaño de AC.
+* @param iterations Número de iteraciones para evolucionar AC.
+* @param vmax Velocidad máxima de autos.
+* @param density_min Densidad mínima.
+* @param density_max Densidad máxima.
+* @param dt Intervalo entre densidades.
+* @param rand_prob Probabilidad de descenso de velocidad.
+* @param extra1 Parámetro extra que puede requerir el AC según el tipo.
+* @param extra2 Parámetro extra que puede requerir el AC según el tipo.
+* @param per_density Realizar el experimento midiendo el flujo/densidad en vez de flujo.
+* @param out_file_name Nombre opcional para el archivo de salida.
+*/
+void ex_multilane_flow_vs_density(const CA_TYPE &type, const unsigned &size, const unsigned &lanes, const unsigned &iterations, 
+	                             const int &vmax, const double &density_min, const double &density_max, const double &dt, 
+								 const double &rand_prob, Args args, const bool &per_density, const bool &show_progress = true, 
+								 string out_file_name = "")
+{
+	vector<double> density;
+	vector<double> flow;
+	CellularAutomataML* ca;
+
+	for (double d = density_min; d <= density_max; d += dt)
+	{
+		// Reporta progreso.
+		if (show_progress)
+		{
+			if (d + dt > density_max)
+				aux_progress_bar(1.0);
+			else
+				aux_progress_bar(d / density_max);
+		}
+
+		// Evoluciona el sistema.
+		ca = create_multilane_ca(type, size, lanes, d, vmax, rand_prob, args);
+		ca->Evolve(iterations);
+
+		// Obtiene flujo en cada posición.
+		vector<double> tmp_flow;
+		tmp_flow.assign(size, 0.0);
+		unsigned height = ca->GetHistorySize();
+		unsigned width = ca->GetSize();
+		unsigned lane_num = ca->GetLanes();
+
+		for (unsigned i = 0; i < width; ++i)
+		{
+			int sum = 0;
+			for (unsigned j = 0; j<lane_num; ++j)
+			{
+				for (unsigned k=1; k<height; ++k)
+				{
+					if ((ca->GetAt(i, j, k, CA_FLOW_HISTORY) != 0) && (ca->GetAt(i + 1, j, k, CA_FLOW_HISTORY) != 0))
+						sum++;
+				}
+			}
+			tmp_flow[i] = (double)sum / ((double)height*(double)lane_num);
+		}
+
+		// Obtiene el promedio de todos los flujos.
+		double mean = 0;
+		for (unsigned i = 0; i < tmp_flow.size(); ++i)
+			mean += tmp_flow[i];
+		mean /= (double)tmp_flow.size();
+		if (per_density) mean /= d;
+
+		// Asigna valores.
+		density.push_back(d);
+		flow.push_back(mean);
+	}
+
+	// Escribe a CSV.
+	if (out_file_name.empty())
+	{
+		if (per_density)
+			out_file_name = "flow_per_density_multilane.csv";
+		else
+			out_file_name = "flow_vs_density_multilane.csv";
+	}
+
+	ofstream file(out_file_name.c_str(), ofstream::out);
+	for (unsigned i = 0; i < flow.size(); ++i)
+	{
+		if (i - flow.size() != 0)
+			file << density[i] << ", " << flow[i] << endl;
+		else
+			file << density[i] << ", " << flow[i];
+	}
+	file.close();
+	delete_ca();
+}
+
+/**
 * @brief Mide el flujo promedio de todas las casillas respecto a velocidad máxima autos.
 * @param type Tipo de AC.
 * @param size Tamaño de AC.
@@ -191,13 +284,13 @@ void ex_flow_vs_density(const CA_TYPE &type, const unsigned &size, const unsigne
 */
 void ex_flow_vs_vmax(const CA_TYPE &type, const unsigned &size, const unsigned &iterations, const int &vmax_min,
                      const int &vmax_max, const int &dt, const double &density, const double &rand_prob,
-					 Args args, const bool &show_progress = true, string out_file_name = "")
+		  			 Args args, const bool &show_progress = true, string out_file_name = "")
 {
     vector<double> vmax;
     vector<double> flow;
     CellularAutomata* ca;
 
-    for (int v=vmax_min; v<=vmax_max; v+=dt)
+    for (int v = vmax_min; v <= vmax_max; v += dt)
     {
         // Reporta progreso.
     	if (show_progress)
@@ -215,13 +308,13 @@ void ex_flow_vs_vmax(const CA_TYPE &type, const unsigned &size, const unsigned &
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
         tmp_flow.assign(size, 0.0);
-        unsigned height = iterations;
-        unsigned width = size;
+		unsigned height = ca->GetHistorySize();
+		unsigned width = ca->GetSize();
 
-        for (unsigned i=0; i<width; ++i)
+        for (unsigned i = 0; i < width; ++i)
         {
             int sum = 0;
-            for (unsigned j=0; j<height; ++j)
+            for (unsigned j = 1; j < height; ++j)
             {
                 if ((ca->GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca->GetAt(i+1, j, CA_FLOW_HISTORY) != 0))
                     sum++;
@@ -231,7 +324,7 @@ void ex_flow_vs_vmax(const CA_TYPE &type, const unsigned &size, const unsigned &
 
         // Obtiene el promedio de todos los flujos.
         double mean = 0;
-        for (unsigned i=0; i<tmp_flow.size(); ++i)
+        for (unsigned i = 0; i < tmp_flow.size(); ++i)
             mean += tmp_flow[i];
         mean /= (double)tmp_flow.size();
 
@@ -277,7 +370,7 @@ void ex_flow_vs_rand_prob(const CA_TYPE &type, const unsigned &size, const unsig
     vector<double> flow;
     CellularAutomata* ca;
 
-    for (double r=rand_prob_min; r<=rand_prob_max; r+=dt)
+    for (double r = rand_prob_min; r <= rand_prob_max; r += dt)
     {
         // Reporta progreso.
     	if (show_progress)
@@ -295,13 +388,13 @@ void ex_flow_vs_rand_prob(const CA_TYPE &type, const unsigned &size, const unsig
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
         tmp_flow.assign(size, 0.0);
-        unsigned height = iterations;
-        unsigned width = size;
+		unsigned height = ca->GetHistorySize();
+		unsigned width = ca->GetSize();
 
-        for (unsigned i=0; i<width; ++i)
+        for (unsigned i = 0; i < width; ++i)
         {
             int sum = 0;
-            for (unsigned j=0; j<height; ++j)
+            for (unsigned j = 1; j < height; ++j)
             {
                 if ((ca->GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca->GetAt(i+1, j, CA_FLOW_HISTORY) != 0))
                     sum++;
@@ -311,7 +404,7 @@ void ex_flow_vs_rand_prob(const CA_TYPE &type, const unsigned &size, const unsig
 
         // Obtiene el promedio de todos los flujos.
         double mean = 0;
-        for (unsigned i=0; i<tmp_flow.size(); ++i)
+        for (unsigned i = 0; i < tmp_flow.size(); ++i)
             mean += tmp_flow[i];
         mean /= (double)tmp_flow.size();
 
@@ -355,7 +448,7 @@ void ex_flow_vs_smart_cars(const unsigned &size, const unsigned &iterations, con
     vector<double> flow;
     CellularAutomata* ca;
 
-    for (double s=smart_car_density_min; s<=smart_car_density_max; s+=dt)
+    for (double s = smart_car_density_min; s <= smart_car_density_max; s += dt)
     {
         // Reporta progreso.
     	if (show_progress)
@@ -373,13 +466,13 @@ void ex_flow_vs_smart_cars(const unsigned &size, const unsigned &iterations, con
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
         tmp_flow.assign(size, 0.0);
-        unsigned height = iterations;
-        unsigned width = size;
+		unsigned height = ca->GetHistorySize();
+		unsigned width = ca->GetSize();
 
-        for (unsigned i=0; i<width; ++i)
+        for (unsigned i = 0; i < width; ++i)
         {
             int sum = 0;
-            for (unsigned j=0; j<height; ++j)
+            for (unsigned j = 1; j < height; ++j)
             {
                 if ((ca->GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca->GetAt(i+1, j, CA_FLOW_HISTORY) != 0))
                     sum++;
@@ -389,7 +482,7 @@ void ex_flow_vs_smart_cars(const unsigned &size, const unsigned &iterations, con
 
         // Obtiene el promedio de todos los flujos.
         double mean = 0;
-        for (unsigned i=0; i<tmp_flow.size(); ++i)
+        for (unsigned i = 0; i < tmp_flow.size(); ++i)
             mean += tmp_flow[i];
         mean /= (double)tmp_flow.size();
 
@@ -440,7 +533,7 @@ void ex_flow_vs_new_car_prob(const CA_TYPE &type, const unsigned &size, const un
     vector<double> flow;
     CellularAutomata* ca;
 
-    for (double s=new_car_prob_min; s<=new_car_prob_max; s+=dt)
+    for (double s = new_car_prob_min; s <= new_car_prob_max; s += dt)
     {
         // Reporta progreso.
     	if (show_progress)
@@ -459,13 +552,13 @@ void ex_flow_vs_new_car_prob(const CA_TYPE &type, const unsigned &size, const un
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
         tmp_flow.assign(size, 0.0);
-        unsigned height = iterations;
-        unsigned width = size;
+		unsigned height = ca->GetHistorySize();
+		unsigned width = ca->GetSize();
 
-        for (unsigned i=0; i<width; ++i)
+        for (unsigned i = 0; i < width; ++i)
         {
             int sum = 0;
-            for (unsigned j=0; j<height; ++j)
+            for (unsigned j = 1; j < height; ++j)
             {
                 if ((ca->GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca->GetAt(i+1, j, CA_FLOW_HISTORY) != 0))
                     sum++;
@@ -475,7 +568,7 @@ void ex_flow_vs_new_car_prob(const CA_TYPE &type, const unsigned &size, const un
 
         // Obtiene el promedio de todos los flujos.
         double mean = 0;
-        for (unsigned i=0; i<tmp_flow.size(); ++i)
+        for (unsigned i = 0; i < tmp_flow.size(); ++i)
             mean += tmp_flow[i];
         mean /= (double)tmp_flow.size();
 		if (per_prob)
@@ -527,7 +620,7 @@ void ex_flow_vs_stop_density(const unsigned &size, const unsigned &iterations, c
     vector<double> flow;
     CellularAutomata* ca;
 
-    for (double d=stop_density_min; d<=stop_density_max; d+=dt)
+    for (double d = stop_density_min; d <= stop_density_max; d += dt)
     {
         // Reporta progreso.
     	if (show_progress)
@@ -545,13 +638,13 @@ void ex_flow_vs_stop_density(const unsigned &size, const unsigned &iterations, c
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
         tmp_flow.assign(size, 0.0);
-        unsigned height = iterations;
-        unsigned width = size;
+		unsigned height = ca->GetHistorySize();
+		unsigned width = ca->GetSize();
 
-        for (unsigned i=0; i<width; ++i)
+        for (unsigned i = 0; i < width; ++i)
         {
             int sum = 0;
-            for (unsigned j=0; j<height; ++j)
+            for (unsigned j = 1; j < height; ++j)
             {
                 if ((ca->GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca->GetAt(i+1, j, CA_FLOW_HISTORY) != 0))
                     sum++;
@@ -561,7 +654,7 @@ void ex_flow_vs_stop_density(const unsigned &size, const unsigned &iterations, c
 
         // Obtiene el promedio de todos los flujos.
         double mean = 0;
-        for (unsigned i=0; i<tmp_flow.size(); ++i)
+        for (unsigned i = 0; i < tmp_flow.size(); ++i)
             mean += tmp_flow[i];
         mean /= (double)tmp_flow.size();
 
@@ -606,7 +699,7 @@ void ex_flow_vs_semaphore_density(const unsigned &size, const unsigned &iteratio
     vector<double> flow;
     CellularAutomata* ca;
 
-    for (double d=semaphore_density_min; d<=semaphore_density_max; d+=dt)
+    for (double d = semaphore_density_min; d <= semaphore_density_max; d += dt)
     {
         // Reporta progreso.
     	if (show_progress)
@@ -624,13 +717,13 @@ void ex_flow_vs_semaphore_density(const unsigned &size, const unsigned &iteratio
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
         tmp_flow.assign(size, 0.0);
-        unsigned height = iterations;
-        unsigned width = size;
+		unsigned height = ca->GetHistorySize();
+		unsigned width = ca->GetSize();
 
-        for (unsigned i=0; i<width; ++i)
+        for (unsigned i = 0; i < width; ++i)
         {
             int sum = 0;
-            for (unsigned j=0; j<height; ++j)
+            for (unsigned j = 1; j < height; ++j)
             {
                 if ((ca->GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca->GetAt(i+1, j, CA_FLOW_HISTORY) != 0))
                     sum++;
@@ -640,7 +733,7 @@ void ex_flow_vs_semaphore_density(const unsigned &size, const unsigned &iteratio
 
         // Obtiene el promedio de todos los flujos.
         double mean = 0;
-        for (unsigned i=0; i<tmp_flow.size(); ++i)
+        for (unsigned i = 0; i < tmp_flow.size(); ++i)
             mean += tmp_flow[i];
         mean /= (double)tmp_flow.size();
 
@@ -817,7 +910,7 @@ const option::Descriptor usage[] =
 	{FLOW_PER_NEW_CAR, 0, "", "flow_per_new_car", Arg::None,
 	 "  \t--flow_per_new_car  \tFlujo/probabilidad respecto a probabilidad de nuevo auto en ac abierto." },
     {FLOW_VS_SEMAPHORE_DENSITY,  0,"","flow_vs_semaphore_density", Arg::None, 
-     "  \t--flow_vs_new_car  \tFlujo respecto a densidad de semaforos en un rango especificado por semaphore_density_min y semaphore_density_max." },
+     "  \t--flow_vs_semaphore_density  \tFlujo respecto a densidad de semaforos en un rango especificado por semaphore_density_min y semaphore_density_max." },
     {CA_CIRCULAR,  0,"","ca_circular", Arg::None, "  \t--ca_circular  \tAutomata celular circular." },
 	{CA_MULTILANE_CIRCULAR, 0, "", "ca_multilane_circular", Arg::None, 
 	"  \t--ca_multilane_circular  \tAutomata celular multicarril circular." },
@@ -920,7 +1013,6 @@ void describe_experiments()
                        "                                                NEW_CAR_MIN, NEW_CAR_MAX, DT.\n";
     cout << text << endl;
 }
-
 
 int main(int argc, char* argv[])
 {
@@ -1159,7 +1251,7 @@ int main(int argc, char* argv[])
             break;
 
             case SHOW_PROGRESS:
-            show_progress = aux_string_to_num<bool>(opt.arg);
+			show_progress = aux_string_to_bool(opt.arg);
             break;
 
             case TEST:
@@ -1305,6 +1397,15 @@ int main(int argc, char* argv[])
 				cout << "Creando mapas." << endl;
 				ca->DrawHistory();
 				ca->DrawFlowHistory();
+			}
+		}
+		else
+		{
+			if (flow_vs_density)
+			{
+				cout << "Midiendo flujo vs densidad." << endl;
+				ex_multilane_flow_vs_density(ca_type, size, lanes, iterations, vmax, dmin, dmax, dt, rand_prob,
+					                         args, false, show_progress, out_file_name);
 			}
 		}
 	}

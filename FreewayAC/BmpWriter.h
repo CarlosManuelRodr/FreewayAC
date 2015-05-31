@@ -10,10 +10,7 @@
 #define __bmpWriter
 
 #include <fstream>
-
-typedef short unsigned int bmp_uint16;
-typedef unsigned int bmp_uint32;
-typedef int bmp_int32;
+#include <cstdint>
 
 /**
 * @struct BMPHeader
@@ -21,11 +18,11 @@ typedef int bmp_int32;
 */
 struct BMPHeader
 {
-    bmp_uint16 identifier;
-    bmp_uint32 size;
-    bmp_uint16 appSpecific1;
-    bmp_uint16 appSpecific2;
-    bmp_uint32 bitmapData;
+    uint16_t identifier;
+    uint32_t size;
+    uint16_t appSpecific1;
+    uint16_t appSpecific2;
+    uint32_t bitmapData;
 };
 
 /**
@@ -34,17 +31,17 @@ struct BMPHeader
 */
 struct DIBHeader
 {
-    bmp_uint32 headerSize;
-    bmp_int32 width;
-    bmp_int32 height;
-    bmp_uint16 nPlanes;
-    bmp_uint16 colorDepth;
-    bmp_uint32 compression;
-    bmp_uint32 bmpBytes;
-    bmp_int32 hRes;
-    bmp_int32 vRes;
-    bmp_uint32 nColors;
-    bmp_uint32 nImpColors;
+    uint32_t headerSize;
+    int32_t width;
+    int32_t height;
+    uint16_t nPlanes;
+    uint16_t colorDepth;
+    uint32_t compression;
+    uint32_t bmpBytes;
+    int32_t hRes;
+    int32_t vRes;
+    uint32_t nColors;
+    uint32_t nImpColors;
 };
 
 /**
@@ -54,7 +51,7 @@ struct DIBHeader
 class BMPPixel
 {
 public:
-    char r, g, b;
+	char r, g, b;
     BMPPixel();
     BMPPixel(char mR, char mG, char mB);
     bool operator==(const BMPPixel &other);

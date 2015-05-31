@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[   2075339,      34940]
-NotebookOptionsPosition[   2072258,      34841]
-NotebookOutlinePosition[   2072599,      34856]
-CellTagsIndexPosition[   2072556,      34853]
+NotebookDataLength[   2080161,      35048]
+NotebookOptionsPosition[   2076955,      34945]
+NotebookOutlinePosition[   2077296,      34960]
+CellTagsIndexPosition[   2077253,      34957]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -34837,6 +34837,110 @@ rzn8o/ObF+D/AOvXrtA=
 Cell[BoxData["0.9442788178178176`"], "Output",
  CellChangeTimes->{{3.6419542254592686`*^9, 3.6419542414311824`*^9}, {
    3.641955092363853*^9, 3.6419551018473954`*^9}, 3.641956194843911*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", " ", 
+   RowBox[{"2", " ", "Lane", " ", "Circular"}], " ", "*)"}], 
+  "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"data", " ", "=", " ", 
+     RowBox[{
+     "Import", "[", 
+      "\"\<C:\\\\Users\\\\Carlos\\\\Documents\\\\Maestria\\\\Sistemas Din\
+\[AAcute]micos\\\\FreewayAC\\\\Release\\\\flow_vs_density_multilane.csv\>\"", 
+      "]"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{"ListPlot", "[", 
+    RowBox[{"data", ",", " ", 
+     RowBox[{"AxesLabel", "\[Rule]", 
+      RowBox[{"{", 
+       RowBox[{"\"\<Densidad\>\"", ",", " ", "\"\<Flujo\>\""}], "}"}]}]}], 
+    "]"}]}]}]], "Input",
+ CellChangeTimes->{
+  3.6420497911562257`*^9, {3.6420504471557465`*^9, 3.642050456756296*^9}}],
+
+Cell[BoxData[
+ GraphicsBox[{{}, 
+   {RGBColor[0.368417, 0.506779, 0.709798], PointSize[0.01388888888888889], 
+    AbsoluteThickness[1.6], PointBox[CompressedData["
+1:eJxd1gk01WkfB/De3kJaJN6aKWkdtE2rtwhfozeVmEoppISYkVFMzZQtN8uU
+tE6aoUwz2dostywpV65rKftdXLu4uJeL24iTGqJx3Z9xzvs/x3Eez/N/nuf3
+/fy4FjmfsHadOGHChFcjX/Lv///4aSZvE/mewsyuy/ZOA1egGIfA9uHUM1FO
+scjUDu3ak3kFheGhi74feEjzEZAGPpu9yjQVt6JGHwz79dTFT39K6+9gTo3L
+4vhaFrr3yH9yFx+HnDOO2rDp/TjE8C9EBWjnQbU61stY9R4id+eKJqsX0H4P
+wEopDi3OKcQyh6ucd3qJSNBd+ZbxpIj2T8amvkcGpmtKEDfydnUsE+z28+qc
+2DI67zFkywx0+7nlWD/6pOLN4Tc3Yifw6Pw0bGDZBb+34SHvnd7ICelYPtcj
+8Bs/Pt3nKRiM9GPVIXxYKw5EzxrZ7cFHArrfMxgusfALXl0Jka98w+eY/7O9
+XlR0Jd2XhYSzr/fFcSrhLb+eVzZ2DwVv/0lLSPd/Ac/9AckZzkIoFNgwiLRi
+OP0lpHrYkJSJ7GVOQmwfPSAXOUJDb4PDQqovF2ZPGFMangshP23kSGhMt+7R
+/F5I9eZBuiOqkqtUhdFyqvNw0sWXM0utiurPx41PRU3ZsVVYIL+OdgH2O9+5
+mdYipDwKUPifOdvEOlVwG30KobW1aq6FTEj5vIRHsAYvJUkI+W6ayS/huDRN
+7HBRSHm9wvHdg0m/6QnRL9/u3StoORhKjFyElF8Rmhm/JB+ZJ8RoPMbFGMrW
+1N6QNZZnMbiZXguXTq3E6PVCSxB2q6Nvj/lYvqX4aoZFpPugAGWlow+W/DS/
+MC5HQHmXYUtyZerCCAFGy9Usx8fhsnANRwHlX47JF23zmXl8jG7nUIEgQzHv
+MpNPHlwsb236xmHTmD8XT1UuvZtuyScfLkSBK2ofq/OpPi6s6vY1LrnNIy8e
+omezOlZs51G9PEzMumXkqs8jPx7Uzi05p3SbS/Xzsc6oP9X2Ipc8+UjIfNid
+tZhLefBhwmzNMZ3JJV8BCjkzDQKMKygfAY5cd0S+UgV5C3BWX1lF0lFGeVXi
+wrO4Y1lTysm/Ejv6VfS3PCyl/CoRxjs59VBYKfWDEKvsGRnCxBLKc6TvvnuF
+9RdKqD+EmBXMLr67tZjyrcKXNu7hHv7F1C9VWH3/RJTAdez3tQompu/FpT8W
+Uf9UY41lgqr5F0WUfzVMfGzv65e9pH6qRmBTjo93y0vyqEGOU8xXqncKyaMG
+3kXe904xC8mjBof2LkxN7Sggj5Exu2TaPNcC8qhF4IbodRub8smjFr0+BXuv
+bsgnj1o4Ww74LTPKJ486HA9lzt1pm0cedTCbst7zUzGHPOqwpmZ6/WxXDnnU
+w8Q+em3pFA551EN6ZOj3PP9c8qjH0ZTTgawDueTRgPoBKTzOjv09bEDfZis3
+VhKbPBpwcJp2QsDJHPJoxGJ9mfMt6QvyaMQyv50Gjt3Z5NGI/IpAtcNZLPJ4
+jVlhZiXPA1nk8RoZQQlf7DfPIo/XEN6s6DXKzCKPJqTnOd7Q73xGHk3Q67v6
+Yocgkzya4KLLmnTPJJM8mlGX5LpOq+Ip1dNM+2aQTzOMV7gXbNTMoPqa0TO4
+cfXX/unk1YwIq2ecLIc0qrcZEh+v01XHU8mvGZMeaG6ee/4J1S+Cz+ILfV4T
+U8lThKBLDNVt155QHiIMnD3GOnWDSb4i6O5Mej9PxqR8RPh8/1tzyfUU8hbh
+kvzjzDeZ8mpBYHyfyC4okfxbYKHc9UlL8ojya8FFox3P3XqTqB9a4BpWvi58
+dyLV3YKD/qqMt9MeUn+0IMzBSykw5z7l24o/vH70iJp2j/qlFUlNlpZznOMp
+71ZEhB2cvJYbT/3Tiq69V4pahmMp/1Z4TxS4NyrFUz+1wsLUkhNqFEMebdgT
+76aWNjGWPNpgE9O9Sux/lzzaYOASqZFWdJc82jDBpiGz4GM0ebRBrdd3zTKT
+O+TRhlCVTSHL9W+TRxsG/ndn6aH1UeQhxq4zU74OWBhFHmK4xag8qK/9lTzE
++DJx3p9XLt0kDzGUdTZeTNSPIA8x3IdW/evDvQjyECPXtondZn6dPCRwyh1i
+KCtdIw8JzpkZB0wavkYeEshP92m/Rh4SLLqe8VZ3eTh5SHDcmmc7uDmcPCSI
+mbGiofd6CHm040S/crHn4FnyaAdHU8z/EHqePNphx550vLEsmDzaEfTy6enp
+A0Hk0Y5/ZwSrD05ikEc7ItgSLSMNX/LogF+/Q4JOrh95dKBnXZ65XY4PeXQg
+khPsVp39A3l0QJhyysRoJ4M8OpD03YLeXx6dII8OCEJkui7+Z8ijA/JP461p
+nuQhhdKMb6WqGd7kIcUVU1ayI9ODPKQo3+A0WPTZCfKQot5a2cc48ih5SGHA
+//wzHzsX8pBil51VtcahA+TRicodGc+jZx0hj04IS+1Vtw86kkcnsn4dbNMz
+3Ucenfj5jI/hgQhr8uiESsqhOi9bC/LoxHBkVcLjbHPy6IKOYclKs8dbyaML
+K508L/3WY0YeXXCfb2M18weQRxfUW/VTOhP/Sx5deBG31n6bzRby6ILtsP9B
+5j5d8uim91eTRzd2MjdF/yU0Io9uMH73Fplu1yGPbqpvAXmMvf/JROExvl7h
+0Y13QbtO9i5eQh4yWq9GHjK8/bb1QvqHNhOFhwwxOgP+EerK5CHDR89d12re
+aJOHDJdl6X+8L+SaKDzG1ys83vwzr/B4g7H/5xUeY/NsE4XH+LzCY3ys8Bhf
+r/D48595hcf4WOExPlZ4jI8VHuNjhcf4+G+pp/03
+     "]]}, {}},
+  AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+  Axes->{True, True},
+  AxesLabel->{
+    FormBox["\"Densidad\"", TraditionalForm], 
+    FormBox["\"Flujo\"", TraditionalForm]},
+  AxesOrigin->{0, 0},
+  DisplayFunction->Identity,
+  Frame->{{False, False}, {False, False}},
+  FrameLabel->{{None, None}, {None, None}},
+  FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+  GridLines->{None, None},
+  GridLinesStyle->Directive[
+    GrayLevel[0.5, 0.4]],
+  ImageSize->{574., Automatic},
+  Method->{},
+  PlotRange->{{0, 0.995}, {0, 0.353744}},
+  PlotRangeClipping->True,
+  PlotRangePadding->{{
+     Scaled[0.02], 
+     Scaled[0.02]}, {
+     Scaled[0.02], 
+     Scaled[0.05]}},
+  Ticks->{Automatic, Automatic}]], "Output",
+ CellChangeTimes->{
+  3.6420497932113433`*^9, {3.6420499373045845`*^9, 3.6420499416398325`*^9}, 
+   3.6420503851912026`*^9, 3.6420504576583476`*^9}]
 }, Open  ]]
 },
 WindowSize->{740, 702},
@@ -34941,6 +35045,10 @@ Cell[CellGroupData[{
 Cell[2055188, 34532, 1223, 29, 172, "Input"],
 Cell[2056414, 34563, 15635, 271, 336, "Output"],
 Cell[2072052, 34836, 190, 2, 31, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2072279, 34843, 741, 20, 132, "Input"],
+Cell[2073023, 34865, 3916, 77, 358, "Output"]
 }, Open  ]]
 }
 ]
