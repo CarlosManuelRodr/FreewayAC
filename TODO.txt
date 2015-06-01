@@ -1,5 +1,4 @@
 ﻿- Implementar decisión de carril en unión.
-- void SimpleJunctionCA::DrawHistory(string out_file_name) carril 1 debe guardar en path.
-- Estoy usando bien unsigned y int en cada caso?
 - Hacer variable la velocidad inicial.
-- Hacer robusto ante errores.
+- Informar si path es válido.
+- Threads?

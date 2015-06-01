@@ -13,11 +13,12 @@ STOP_DENSITY=0.1
 SEMAPHORE_DENSITY=0.1
 RANDOM_SEMAPHORES="False"
 TARGET_LANE=1
+LANES=2
 DT=0.005
 
 # Lee parametros.
-TEMP=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l: --long size:,iter:,density:,rand_prob:,new_car_prob:,new_car_speed:\
-,aut_density:,stop_density:,semaphore_density:,random_semaphores:,target_lane:,dt: -n 'ex_standard.sh' -- "$@"`
+TEMP=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m: --long size:,iter:,density:,rand_prob:,new_car_prob:,new_car_speed:\
+,aut_density:,stop_density:,semaphore_density:,random_semaphores:,target_lane:,lanes:,dt: -n 'ex_standard.sh' -- "$@"`
 eval set -- "$TEMP"
 
 # Extrae parametros.
@@ -78,7 +79,12 @@ while true ; do
                 "") shift 2 ;;
                 *) TARGET_LANE=$2 ; shift 2 ;;
             esac ;;
-        -l|--dt)
+        -l|--lanes)
+            case "$2" in
+                "") shift 2 ;;
+                *) LANES=$2 ; shift 2 ;;
+            esac ;;
+        -m|--dt)
             case "$2" in
                 "") shift 2 ;;
                 *) DT=$2 ; shift 2 ;;
@@ -100,6 +106,7 @@ echo "stop_density: $STOP_DENSITY"
 echo "semaphore_density: $SEMAPHORE_DENSITY"
 echo "random_semaphores: $RANDOM_SEMAPHORES"
 echo "target_lane: $TARGET_LANE"
+echo "lanes: $LANES"
 echo "dt: $DT"
 
 # Circular
@@ -107,7 +114,7 @@ echo "Circular CA"
 rm -rf "Circular"
 mkdir "Circular"
 cp "plot.m" "Circular/"
-../Release/Freeway --size=$SIZE --iter=$ITER --density=$DENSITY --rand_prob=$RAND_PROB --path="Circular/" --show_progress=false &
+../Release/Freeway --size=$SIZE --iter=$ITER --density=$DENSITY --rand_prob=$RAND_PROB --ca_circular --path="Circular/" --show_progress=false &
 ../Release/Freeway --size=$SIZE --iter=$ITER --rand_prob=$RAND_PROB --ca_circular --flow_vs_density --dmin=0.0 --dmax=1.0 --dt=$DT \
                    --path="Circular/" --show_progress=false &
 ../Release/Freeway --size=$SIZE --iter=$ITER --rand_prob=$RAND_PROB --ca_circular --flow_per_density --dmin=0.0 --dmax=1.0 --dt=$DT \
@@ -220,9 +227,28 @@ cp "plot.m" "SimpleJunction/"
 
 wait
 
+# Circular
+echo "Multilane Circular CA"
+rm -rf "MultilaneCircular"
+mkdir "MultilaneCircular"
+cp "plot.m" "MultilaneCircular/"
+../Release/Freeway --size=$SIZE --lanes=$LANES --iter=$ITER --density=$DENSITY --rand_prob=$RAND_PROB --ca_multilane_circular \
+                   --path="MultilaneCircular/" --show_progress=false &
+../Release/Freeway --size=$SIZE --lanes=$LANES --iter=$ITER --rand_prob=$RAND_PROB --ca_multilane_circular --flow_vs_density \
+                   --dmin=0.0 --dmax=1.0 --dt=$DT --path="MultilaneCircular/" --show_progress=false &
+../Release/Freeway --size=$SIZE --lanes=$LANES --iter=$ITER --rand_prob=$RAND_PROB --ca_multilane_circular --flow_per_density \
+                   --dmin=0.0 --dmax=1.0 --dt=$DT --path="MultilaneCircular/" --show_progress=false &
+#../Release/Freeway --size=$SIZE --iter=$ITER --density=$DENSITY --rand_prob=$RAND_PROB --ca_circular --flow_vs_vmax --vmax_min=1 \
+#                   --vmax_max=15 --dt=1 --path="MultilaneCircular/" --show_progress=false &
+#../Release/Freeway --size=$SIZE --iter=$ITER --density=$DENSITY --ca_circular --flow_vs_rand_prob --rand_prob_min=0.0 --rand_prob_max=1.0 \
+#                   --dt=$DT --path="MultilaneCircular/" --show_progress=false &
+
+wait
+
 math -script "Circular/plot.m"
 math -script "Open/plot.m"
 math -script "Autonomous/plot.m"
 math -script "Stop/plot.m"
 math -script "Semaphore/plot.m"
 math -script "SimpleJunction/plot.m"
+math -script "MultilaneCircular/plot.m"

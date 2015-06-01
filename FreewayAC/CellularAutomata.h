@@ -69,12 +69,12 @@ template <class N> bool aux_is_in(std::vector<N> &v, const N &find_val)
 */
 template <class N> bool aux_is_in(std::initializer_list<N> list, const N &find_val)
 {
-	std::vector<N> v = list;
-	typename std::vector<N>::iterator it = find(v.begin(), v.end(), find_val);
-	if (it != v.end())
-		return true;
-	else
-		return false;
+    std::vector<N> v = list;
+    typename std::vector<N>::iterator it = find(v.begin(), v.end(), find_val);
+    if (it != v.end())
+        return true;
+    else
+        return false;
 }
 
 /**
@@ -116,46 +116,46 @@ template <class N> N aux_string_to_num(const std::string &s)
 */
 class Args
 {
-	std::vector<double> m_double_args;
-	std::vector<int> m_int_args;
-	std::vector<bool> m_bool_args;
+    std::vector<double> m_double_args;
+    std::vector<int> m_int_args;
+    std::vector<bool> m_bool_args;
 public:
-	Args();
+    Args();
 
-	///@brief Constructor.
-	///@param d_args Argumentos del tipo double.
-	///@param i_args Argumentos del tipo int.
-	///@param b_args Argumentos del tipo bool.
-	Args(std::initializer_list<double> d_args, std::initializer_list<int> i_args = {},
-		 std::initializer_list<bool> b_args = {});
+    ///@brief Constructor.
+    ///@param d_args Argumentos del tipo double.
+    ///@param i_args Argumentos del tipo int.
+    ///@param b_args Argumentos del tipo bool.
+    Args(std::initializer_list<double> d_args, std::initializer_list<int> i_args = {},
+         std::initializer_list<bool> b_args = {});
 
-	///@brief Devuelve elemento double.
-	///@param i Indice del elemento a devolver.
-	double GetDouble(const unsigned &i = 0);
+    ///@brief Devuelve elemento double.
+    ///@param i Indice del elemento a devolver.
+    double GetDouble(const unsigned &i = 0);
 
-	///@brief Devuelve elemento int.
-	///@param i Indice del elemento a devolver.
-	int GetInt(const unsigned &i = 0);
+    ///@brief Devuelve elemento int.
+    ///@param i Indice del elemento a devolver.
+    int GetInt(const unsigned &i = 0);
 
-	///@brief Devuelve elemento bool.
-	///@param i Indice del elemento a devolver.
-	bool GetBool(const unsigned &i = 0);
+    ///@brief Devuelve elemento bool.
+    ///@param i Indice del elemento a devolver.
+    bool GetBool(const unsigned &i = 0);
 
-	///@brief Asigna elemento double.
-	///@param i Indice del elemento a devolver.
-	void SetDouble(const unsigned &i, double val);
+    ///@brief Asigna elemento double.
+    ///@param i Indice del elemento a devolver.
+    void SetDouble(const unsigned &i, double val);
 
-	///@brief Asigna elemento int.
-	///@param i Indice del elemento a devolver.
-	void SetInt(const unsigned &i, int val);
+    ///@brief Asigna elemento int.
+    ///@param i Indice del elemento a devolver.
+    void SetInt(const unsigned &i, int val);
 
-	///@brief Asigna elemento bool.
-	///@param i Indice del elemento a devolver.
-	void SetBool(const unsigned &i, bool val);
+    ///@brief Asigna elemento bool.
+    ///@param i Indice del elemento a devolver.
+    void SetBool(const unsigned &i, bool val);
 
-	///@brief Copia los valores del argumento.
-	///@param arg Objetivo a copiar.
-	void operator=(const Args &arg);
+    ///@brief Copia los valores del argumento.
+    ///@param arg Objetivo a copiar.
+    void operator=(const Args &arg);
 };
 
 ////////////////////////////////////
@@ -189,7 +189,8 @@ enum CAS
 */
 enum CA_TYPE
 {
-    CIRCULAR_CA, CIRCULAR_MULTILANE_CA, OPEN_CA, AUTONOMOUS_CA, STOP_CA, SEMAPHORE_CA, SIMPLE_JUNCTION_CA
+    CIRCULAR_CA, CIRCULAR_MULTILANE_CA, OPEN_CA, OPEN_MULTILANE_CA, AUTONOMOUS_CA, STOP_CA,
+    SEMAPHORE_CA, SIMPLE_JUNCTION_CA
 };
 
 /**
@@ -211,9 +212,9 @@ protected:
     std::vector< std::vector<int> > m_ca_history, m_ca_flow_history;    ///< Lista con valores históricos de AC.
     std::vector<bool> m_rand_values;                                    ///< Lista con valores aleatorios para usar en modo de prueba.
 
-	// Conexión de carriles.
-	CellularAutomata* m_connect; ///< Puntero al AC al cual se va a conectar.
-	unsigned m_connect_pos;      ///< Posición del AC objetivo donde se realiza la conexión.
+    // Conexión de carriles.
+    CellularAutomata* m_connect; ///< Puntero al AC al cual se va a conectar.
+    unsigned m_connect_pos;      ///< Posición del AC objetivo donde se realiza la conexión.
 
 public:
     ///@brief Constructor.
@@ -229,6 +230,7 @@ public:
     ///@param density Densidad de autos.
     ///@param vmax Velocidad máxima de los autos.
     CellularAutomata(const std::vector<int> &ca, const std::vector<bool> &rand_values, const int &vmax);
+
     virtual ~CellularAutomata();
 
     ///@brief Evoluciona (itera) el AC.
@@ -246,7 +248,7 @@ public:
     ///@brief Devuelve referencia a elemento del AC considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
     ///@param ca Tipo de AC.
-    int &At(const unsigned &i, const CAS &ca = CA);
+    int &At(const int &i, const CAS &ca = CA);
 
     ///@brief Devuelve referencia a  elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
@@ -254,25 +256,25 @@ public:
     ///@param ca Tipo de autómata celular.
     virtual int &At(const unsigned &i, const unsigned &j, const CAS &ca) = 0;
 
-	///@brief Similar a AC pero sólo devuelve el valor y en AC de uniones puede apuntar a un carril en específico.
-	///@param i Posición dentro del AC.
-	///@param ca Tipo de AC.
-	int GetAt(const unsigned &i, const CAS &ca = CA);
+    ///@brief Similar a AC pero sólo devuelve el valor y en AC de uniones puede apuntar a un carril en específico.
+    ///@param i Posición dentro del AC.
+    ///@param ca Tipo de AC.
+    int GetAt(const unsigned &i, const CAS &ca = CA);
 
-	///@brief Similar a AC pero sólo devuelve el valor y en AC de uniones puede apuntar a un carril en específico.
-	///@param i Posición dentro del AC.
-	///@param j Posición temporal del AC.
-	///@param ca Tipo de autómata celular.
-	virtual int GetAt(const unsigned &i, const unsigned &j, const CAS &ca);
+    ///@brief Similar a AC pero sólo devuelve el valor y en AC de uniones puede apuntar a un carril en específico.
+    ///@param i Posición dentro del AC.
+    ///@param j Posición temporal del AC.
+    ///@param ca Tipo de autómata celular.
+    virtual int GetAt(const unsigned &i, const unsigned &j, const CAS &ca);
 
-	///@brief Conecta AC con otro. El flujo de autos ocurre desde el que realiza la conexión al objetivo.
-	///@param connect Puntero a AC objetivo.
-	///@param connect_pos Posición del AC objetivo donde se realiza la conexión.
-	void Connect(CellularAutomata* connect, unsigned connect_pos);
+    ///@brief Conecta AC con otro. El flujo de autos ocurre desde el que realiza la conexión al objetivo.
+    ///@param connect Puntero a AC objetivo.
+    ///@param connect_pos Posición del AC objetivo donde se realiza la conexión.
+    void Connect(CellularAutomata* connect, unsigned connect_pos);
 
-	///@brief Dibuja mapa histórico del AC en formato BMP.
-	///@param path Ruta del archivo.
-	///@param out_file_name Nombre del archivo de salida.
+    ///@brief Dibuja mapa histórico del AC en formato BMP.
+    ///@param path Ruta del archivo.
+    ///@param out_file_name Nombre del archivo de salida.
     virtual void DrawHistory(std::string path = "", std::string out_file_name = "");
 
     ///@brief Dibuja mapa histórico del flujo de AC en formato BMP.
@@ -346,7 +348,7 @@ class OpenCA : public CellularAutomata
 protected:
     int m_empty;            ///< Se usa para devolver referencia de lugar vacío.
     double m_new_car_prob;  ///< Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
-	int m_new_car_speed;    ///< Velocidad de nuevo auto cuando ingresa a la pista.
+    int m_new_car_speed;    ///< Velocidad de nuevo auto cuando ingresa a la pista.
 public:
     ///@brief Constructor.
     ///@param size Tamaño del AC.
@@ -354,18 +356,18 @@ public:
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
     ///@param new_car_prob Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
-	///@param new_car_speed Velocidad de nuevo auto cuando ingresa a la pista.
+    ///@param new_car_speed Velocidad de nuevo auto cuando ingresa a la pista.
     OpenCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, 
-		   const double &new_car_prob, const int &new_car_speed);
+           const double &new_car_prob, const int &new_car_speed);
 
     ///@brief Constructor.
     ///@param ca Lista con valores de AC.
     ///@param rand_values Valores aleatorios en cada paso.
     ///@param density Densidad de autos.
     ///@param vmax Velocidad máxima de los autos.
-	///@param new_car_speed Velocidad de nuevo auto cuando ingresa a la pista.
-	OpenCA(const std::vector<int> &ca, const std::vector<bool> &rand_values, const int &vmax, 
-		   const int &new_car_speed);
+    ///@param new_car_speed Velocidad de nuevo auto cuando ingresa a la pista.
+    OpenCA(const std::vector<int> &ca, const std::vector<bool> &rand_values, const int &vmax, 
+           const int &new_car_speed);
 
     ///@brief Devuelve elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
@@ -374,7 +376,7 @@ public:
     using CellularAutomata::At;
     int &At(const unsigned &i, const unsigned &j, const CAS &ca);
 
-	void Step();	///< Aplica reglas de evolución temporal del AC.
+    void Step();    ///< Aplica reglas de evolución temporal del AC.
 };
 
 
@@ -400,16 +402,16 @@ public:
     ///@param rand_prob Probabilidad de descenso de velocidad.
     ///@param aut_density Densidad de autos autónomos respecto a número total de autos.
     AutonomousCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob,
-		         const double &aut_density);
+                 const double &aut_density);
 
-	///@brief Constructor.
-	///@param ca Lista con valores de AC.
-	///@param aut_cars Lista con posiciones de autos autónomos.
-	///@param rand_values Valores aleatorios en cada paso.
-	///@param density Densidad de autos.
-	///@param vmax Velocidad máxima de los autos.
-	AutonomousCA(const std::vector<int> &ca, std::vector<int> aut_cars, const std::vector<bool> &rand_values,
-		         const int &vmax);
+    ///@brief Constructor.
+    ///@param ca Lista con valores de AC.
+    ///@param aut_cars Lista con posiciones de autos autónomos.
+    ///@param rand_values Valores aleatorios en cada paso.
+    ///@param density Densidad de autos.
+    ///@param vmax Velocidad máxima de los autos.
+    AutonomousCA(const std::vector<int> &ca, std::vector<int> aut_cars, const std::vector<bool> &rand_values,
+                 const int &vmax);
 
     void Move();    ///< Mueve los autos con condiciones de frontera periódicas.
     void Step();    ///< Aplica reglas de evolución temporal del AC para autos normales e inteligentes.
@@ -444,8 +446,8 @@ public:
 
     ///@brief Dibuja mapa histórico del AC en formato BMP.
     ///@param path Ruta del archivo.
-	///@param out_file_name Nombre del archivo de salida.
-	void DrawHistory(std::string path = "", std::string out_file_name = "");
+    ///@param out_file_name Nombre del archivo de salida.
+    void DrawHistory(std::string path = "", std::string out_file_name = "");
 
     void Step();        ///< Aplica reglas de evolución temporal del AC con tope.
 };
@@ -485,8 +487,8 @@ public:
 
     ///@brief Dibuja mapa histórico del AC en formato BMP.
     ///@param path Ruta del archivo.
-	///@param out_file_name Nombre del archivo de salida.
-	void DrawHistory(std::string path = "", std::string out_file_name = "");
+    ///@param out_file_name Nombre del archivo de salida.
+    void DrawHistory(std::string path = "", std::string out_file_name = "");
 
     void Step();        ///< Aplica reglas de evolución temporal del AC con tope.
 };
@@ -504,34 +506,34 @@ public:
 class SimpleJunctionCA : public OpenCA
 {
 protected:
-	OpenCA *m_source;
-	int m_target_lane;
+    OpenCA *m_source;
+    int m_target_lane;
 public:
-	///@brief Constructor.
-	///@param size Tamaño del AC.
-	///@param density Densidad de autos.
-	///@param vmax Velocidad máxima de los autos.
-	///@param rand_prob Probabilidad de descenso de velocidad.
-	///@param return_lane Carril al que apunta la función At.
-	SimpleJunctionCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, 
-		             const double &new_car_prob, const int &new_car_speed, const int &target_lane = 0);
+    ///@brief Constructor.
+    ///@param size Tamaño del AC.
+    ///@param density Densidad de autos.
+    ///@param vmax Velocidad máxima de los autos.
+    ///@param rand_prob Probabilidad de descenso de velocidad.
+    ///@param return_lane Carril al que apunta la función At.
+    SimpleJunctionCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, 
+                     const double &new_car_prob, const int &new_car_speed, const int &target_lane = 0);
 
-	~SimpleJunctionCA();
+    ~SimpleJunctionCA();
 
-	///@brief Evoluciona (itera) el AC. Verifica si se conserva la cantidad de autos.
-	///@param iter Número de iteraciones.
-	void Evolve(const unsigned &iter);
+    ///@brief Evoluciona (itera) el AC. Verifica si se conserva la cantidad de autos.
+    ///@param iter Número de iteraciones.
+    void Evolve(const unsigned &iter);
 
-	///@brief Devuelve el valor de AC apuntando al carril m_target_lane.
-	///@param i Posición dentro del AC.
-	///@param j Posición temporal del AC.
-	///@param ca Tipo de autómata celular.
-	int GetAt(const unsigned &i, const unsigned &j, const CAS &ca);
+    ///@brief Devuelve el valor de AC apuntando al carril m_target_lane.
+    ///@param i Posición dentro del AC.
+    ///@param j Posición temporal del AC.
+    ///@param ca Tipo de autómata celular.
+    int GetAt(const unsigned &i, const unsigned &j, const CAS &ca);
 
     ///@brief Dibuja mapa histórico del AC en formato BMP.
-	///@param path Ruta del archivo.
-	///@param out_file_name Nombre del archivo de salida.
-	void DrawHistory(std::string path = "", std::string out_file_name = "");
+    ///@param path Ruta del archivo.
+    ///@param out_file_name Nombre del archivo de salida.
+    void DrawHistory(std::string path = "", std::string out_file_name = "");
 };
 
 
@@ -569,12 +571,10 @@ void delete_ca();
 //                                //
 ////////////////////////////////////
 
-class CAElement
+class CAElement : public std::vector<int>
 {
-    std::vector<int> m_lane;
 public:
     CAElement(const int lanes, const int def_val = -1);
-    int &operator[](const unsigned &iter);
 };
 
 /****************************
@@ -594,79 +594,97 @@ public:
 class CellularAutomataML
 {
 protected:
-	bool m_test;				 ///< Modo de prueba.
-	int m_vmax;                  ///< Valor máximo de la velocidad.
-    unsigned m_lanes;			 ///< Número de carriles.
-	double m_rand_prob;          ///< Valor de la probabilidad de descenso de velocidad.
-	unsigned m_size;             ///< Tamaño del autómata celular
-	std::vector<CAElement> m_ca;    ///< Automata celular. -1 para casillas sin auto, y valores >= 0 indican velocidad del auto en esa casilla.
-	std::vector<CAElement> m_ca_temp, m_ca_flow_temp;                         ///< Variable temporal para operaciones con AC.
-	std::vector< std::vector<CAElement> > m_ca_history, m_ca_flow_history;    ///< Lista con valores históricos de AC.
-	std::vector<bool> m_rand_values;                                    ///< Lista con valores aleatorios para usar en modo de prueba.
+    bool m_test;                 ///< Modo de prueba.
+    int m_vmax;                  ///< Valor máximo de la velocidad.
+    unsigned m_lanes;             ///< Número de carriles.
+    double m_rand_prob;          ///< Valor de la probabilidad de descenso de velocidad.
+    unsigned m_size;             ///< Tamaño del autómata celular
+    std::vector<CAElement> m_ca;    ///< Automata celular. -1 para casillas sin auto, y valores >= 0 indican velocidad del auto en esa casilla.
+    std::vector<CAElement> m_ca_temp, m_ca_flow_temp;                         ///< Variable temporal para operaciones con AC.
+    std::vector< std::vector<CAElement> > m_ca_history, m_ca_flow_history;    ///< Lista con valores históricos de AC.
+    std::vector<bool> m_rand_values;                                    ///< Lista con valores aleatorios para usar en modo de prueba.
+
+    // Conexión de carriles.
+    CellularAutomataML* m_connect; ///< Puntero al AC al cual se va a conectar.
+    unsigned m_connect_pos;      ///< Posición del AC objetivo donde se realiza la conexión.
 
 public:
-	///@brief Constructor.
-	///@param size Tamaño del AC.
-	///@param lanes Número de carriles.
-	///@param density Densidad de autos.
-	///@param vmax Velocidad máxima de los autos.
-	///@param rand_prob Probabilidad de descenso de velocidad.
+    ///@brief Constructor.
+    ///@param size Tamaño del AC.
+    ///@param lanes Número de carriles.
+    ///@param density Densidad de autos.
+    ///@param vmax Velocidad máxima de los autos.
+    ///@param rand_prob Probabilidad de descenso de velocidad.
     CellularAutomataML(const unsigned &size, const unsigned &lanes, const double &density, 
                        const int &vmax, const double &rand_prob);
+
+    ///@brief Constructor.
+    ///@param ca Lista con valores de AC.
+    ///@param rand_values Valores aleatorios en cada paso.
+    ///@param density Densidad de autos.
+    ///@param vmax Velocidad máxima de los autos.
+    CellularAutomataML(const std::vector<CAElement> &ca, const std::vector<bool> &rand_values, const int &vmax);
+
     virtual ~CellularAutomataML();
 
-	///@brief Evoluciona (itera) el AC.
-	///@param iter Número de iteraciones.
-	void Evolve(const unsigned &iter);
+    ///@brief Evoluciona (itera) el AC.
+    ///@param iter Número de iteraciones.
+    void Evolve(const unsigned &iter);
 
-	///@brief Devuelve referencia a elemento del AC considerando las condiciones de frontera.
-	///@param i Posición dentro del AC.
-	///@param lane Carril objetivo.
-	///@param ca Tipo de AC.
-	int &At(const int &i, const unsigned &lane, const CAS &ca = CA);
+    ///@brief Devuelve referencia a elemento del AC considerando las condiciones de frontera.
+    ///@param i Posición dentro del AC.
+    ///@param lane Carril objetivo.
+    ///@param ca Tipo de AC.
+    int &At(const int &i, const unsigned &lane, const CAS &ca = CA);
 
-	///@brief Devuelve referencia a  elemento de valores del autómata celular considerando las condiciones de frontera.
-	///@param i Posición dentro del AC.
-	///@param lane Carril objetivo.
-	///@param j Posición temporal del AC.
-	///@param ca Tipo de autómata celular.
-	virtual int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca) = 0;
+    ///@brief Devuelve referencia a  elemento de valores del autómata celular considerando las condiciones de frontera.
+    ///@param i Posición dentro del AC.
+    ///@param lane Carril objetivo.
+    ///@param j Posición temporal del AC.
+    ///@param ca Tipo de autómata celular.
+    virtual int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca) = 0;
 
-	///@brief Similar a AC pero sólo devuelve el valor y en AC de uniones puede apuntar a un carril en específico.
-	///@param i Posición dentro del AC.
-	///@param ca Tipo de AC.
-	int GetAt(const unsigned &i, const unsigned &lane, const CAS &ca = CA);
+    ///@brief Similar a AC pero sólo devuelve el valor y en AC de uniones puede apuntar a un carril en específico.
+    ///@param i Posición dentro del AC.
+    ///@param ca Tipo de AC.
+    int GetAt(const unsigned &i, const unsigned &lane, const CAS &ca = CA);
 
-	///@brief Similar a AC pero sólo devuelve el valor y en AC de uniones puede apuntar a un carril en específico.
-	///@param i Posición dentro del AC.
-	///@param j Posición temporal del AC.
-	///@param ca Tipo de autómata celular.
-	virtual int GetAt(const unsigned &i, const unsigned &lane, const unsigned &j, const CAS &ca);
+    ///@brief Similar a AC pero sólo devuelve el valor y en AC de uniones puede apuntar a un carril en específico.
+    ///@param i Posición dentro del AC.
+    ///@param j Posición temporal del AC.
+    ///@param ca Tipo de autómata celular.
+    virtual int GetAt(const unsigned &i, const unsigned &lane, const unsigned &j, const CAS &ca);
 
-	///@brief Devuelve la distancia al auto más próximo desde la posición pos.
-	///@param pos Posición desde dónde iniciar la búsqueda.
-	virtual int NextCarDist(const int &pos, const unsigned &lane);
+    ///@brief Conecta AC con otro. El flujo de autos ocurre desde el que realiza la conexión al objetivo.
+    ///@param connect Puntero a AC objetivo.
+    ///@param connect_pos Posición del AC objetivo donde se realiza la conexión.
+    void Connect(CellularAutomataML* connect, unsigned connect_pos);
 
-	///@brief Dibuja mapa histórico del AC en formato BMP.
-	///@param path Ruta del archivo.
-	///@param out_file_name Nombre del archivo de salida.
+    ///@brief Devuelve la distancia al auto más próximo desde la posición pos.
+    ///@param pos Posición desde dónde iniciar la búsqueda.
+    virtual int NextCarDist(const int &pos, const unsigned &lane);
+
+    ///@brief Dibuja mapa histórico del AC en formato BMP.
+    ///@param path Ruta del archivo.
+    ///@param out_file_name Nombre del archivo de salida.
     void DrawHistory(std::string path = "", std::string out_file_name = "");
 
     ///@brief Dibuja mapa histórico del flujo de AC en formato BMP.
     ///@param path Ruta del archivo.
-	///@param out_file_name Nombre del archivo de salida.
+    ///@param out_file_name Nombre del archivo de salida.
     void DrawFlowHistory(std::string path = "", std::string out_file_name = "");
 
-	///@brief Devuelve valores verdaderos con probabilidad prob. Si se usa en prueba usa valores de lista.
-	///@param prob Probabilidad de obtener valor verdadero. Por defecto se utiliza m_rand_prob.
-	bool Randomization(const double &prob = -1.0);
+    ///@brief Devuelve valores verdaderos con probabilidad prob. Si se usa en prueba usa valores de lista.
+    ///@param prob Probabilidad de obtener valor verdadero. Por defecto se utiliza m_rand_prob.
+    bool Randomization(const double &prob = -1.0);
 
-    void Print();			    ///< Escribe línea de autómata celular en la terminal.
-    unsigned GetSize();		    ///< Devuelve tamaño del AC.
+    void Print();                ///< Escribe línea de autómata celular en la terminal.
+    unsigned GetSize();            ///< Devuelve tamaño del AC.
     unsigned GetHistorySize();  ///< Devuelve tamaño de la lista histórica de evolución del AC.
-	unsigned GetLanes();        ///< Devuelve el número de carriles.
+    unsigned GetLanes();        ///< Devuelve el número de carriles.
     unsigned CountCars();       ///< Cuenta la cantidad de autos en AC.
     virtual void Step();        ///< Aplica reglas de evolución temporal del AC.
+    virtual void ChangeLanes(); ///< Aplica las reglas de cambio carril.
     virtual void Move();        ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
 };
 
@@ -684,26 +702,80 @@ public:
 class CircularCAML : public CellularAutomataML
 {
 public:
-	///@brief Constructor.
-	///@param size Tamaño del AC.
-	///@param lanes Número de carriles.
-	///@param density Densidad de autos.
-	///@param vmax Velocidad máxima de los autos.
-	///@param rand_prob Probabilidad de descenso de velocidad.
-    CircularCAML(const unsigned size, const unsigned int lanes, const double density, 
-                 const int vmax, const double rand_prob);
+    ///@brief Constructor.
+    ///@param size Tamaño del AC.
+    ///@param lanes Número de carriles.
+    ///@param density Densidad de autos.
+    ///@param vmax Velocidad máxima de los autos.
+    ///@param rand_prob Probabilidad de descenso de velocidad.
+    CircularCAML(const unsigned &size, const unsigned int &lanes, const double &density,
+                 const int &vmax, const double &rand_prob);
 
-	///@brief Devuelve referencia a  elemento de valores del autómata celular considerando las condiciones de frontera.
-	///@param i Posición dentro del AC.
-	///@param lane Carril objetivo.
-	///@param j Posición temporal del AC.
-	///@param ca Tipo de autómata celular.
+    ///@brief Constructor.
+    ///@param ca Lista con valores de AC.
+    ///@param rand_values Valores aleatorios en cada paso.
+    ///@param density Densidad de autos.
+    ///@param vmax Velocidad máxima de los autos.
+    CircularCAML(const std::vector<CAElement> &ca, const std::vector<bool> &rand_values, const int &vmax);
+
+    ///@brief Devuelve referencia a  elemento de valores del autómata celular considerando las condiciones de frontera.
+    ///@param i Posición dentro del AC.
+    ///@param lane Carril objetivo.
+    ///@param j Posición temporal del AC.
+    ///@param ca Tipo de autómata celular.
     using CellularAutomataML::At;
     int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca);
 
     ///@brief Evoluciona (itera) el AC. Verifica si se conserva la cantidad de autos.
-	///@param iter Número de iteraciones.
-	void Evolve(const unsigned &iter);
+    ///@param iter Número de iteraciones.
+    void Evolve(const unsigned &iter);
+};
+
+
+/****************************
+*                           *
+*       AC Abierto ML       *
+*                           *
+****************************/
+
+/**
+ * @class OpenCAML
+ * @brief AC multicarril con condiciones de frontera abiertas.
+ */
+class OpenCAML : public CellularAutomataML
+{
+protected:
+    int m_empty;            ///< Se usa para devolver referencia de lugar vacío.
+    double m_new_car_prob;  ///< Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
+    int m_new_car_speed;    ///< Velocidad de nuevo auto cuando ingresa a la pista.
+public:
+    ///@brief Constructor.
+    ///@param size Tamaño del AC.
+    ///@param density Densidad de autos.
+    ///@param vmax Velocidad máxima de los autos.
+    ///@param rand_prob Probabilidad de descenso de velocidad.
+    ///@param new_car_prob Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
+    ///@param new_car_speed Velocidad de nuevo auto cuando ingresa a la pista.
+    OpenCAML(const unsigned &size, const unsigned int &lanes, const double &density, const int &vmax,
+             const double &rand_prob, const double &new_car_prob, const int &new_car_speed);
+
+    ///@brief Constructor.
+    ///@param ca Lista con valores de AC.
+    ///@param rand_values Valores aleatorios en cada paso.
+    ///@param density Densidad de autos.
+    ///@param vmax Velocidad máxima de los autos.
+    ///@param new_car_speed Velocidad de nuevo auto cuando ingresa a la pista.
+    OpenCAML(const std::vector<CAElement> &ca, const std::vector<bool> &rand_values, const int &vmax,
+             const int &new_car_speed);
+
+    ///@brief Devuelve elemento de valores del autómata celular considerando las condiciones de frontera.
+    ///@param i Posición dentro del AC.
+    ///@param j Posición temporal del AC.
+    ///@param ca Tipo de autómata celular.
+    using CellularAutomataML::At;
+    int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca);
+
+    void Step();    ///< Aplica reglas de evolución temporal del AC.
 };
 
 /********************************
@@ -712,8 +784,23 @@ public:
 *                               *
 ********************************/
 
+/**
+* @brief Crea autómata celular multicarril con los parámetros especificados y devuelve puntero genérico.
+* @param ca Tipo de AC.
+* @param size Tamaño de AC.
+* @param lanes Número de carriles.
+* @param density Densidad de autos.
+* @param vmax Velocidad máxima.
+* @param rand_prob Probabilidad de descenso de velocidad.
+* @param args Argumentos extra que requieren algunos AC.
+* @return Puntero de clase base que apunta hacia el AC.
+*/
 CellularAutomataML* create_multilane_ca(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density,
-	                                    const int &vmax, const double &rand_prob, Args args);
+                                        const int &vmax, const double &rand_prob, Args args);
+
+/**
+* @brief Borra cualquier AC multicarril que haya sido creado anteriormente.
+*/
 void delete_multilane_ca();
 
 #endif

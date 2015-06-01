@@ -20,7 +20,10 @@ For[i = 1, i <= Length[files], i++,
      "Flujo vs densidad de semaforos"},
     "flow_vs_stop_density.csv",
     {"\!\(\*SubscriptBox[\(\[Rho]\), \(t\)]\)", "q", 
-     "Flujo vs densidad de topes"}
+     "Flujo vs densidad de topes"},
+    "flow_vs_aut_cars.csv",
+    {"\!\(\*SubscriptBox[\(\[Rho]\), \(t\)]\)", "q", 
+     "Flujo vs densidad vehiculos autonomos"}
     ];
   data =  Import[files[[i]]];
   plt = ListPlot[data, AxesLabel -> {lbl[[1]], lbl[[2]]}, 
