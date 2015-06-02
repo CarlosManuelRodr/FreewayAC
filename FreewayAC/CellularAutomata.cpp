@@ -276,7 +276,7 @@ void CellularAutomata::DrawHistory(string path, string out_file_name)
 void CellularAutomata::DrawFlowHistory(string path, string out_file_name)
 {
     if (out_file_name == "")
-            out_file_name = path + "ca_flow.bmp";
+        out_file_name = path + "ca_flow.bmp";
     else
         out_file_name = path + out_file_name;
 
@@ -1237,6 +1237,9 @@ CellularAutomataML::CellularAutomataML(const unsigned &size, const unsigned &lan
         for (unsigned j = 0; j < vehicles; ++j)
             m_ca[car_positions[j]][i] = 1;
     }
+
+	m_ca_history.push_back(m_ca);
+	//m_ca_flow_history.push_back(m_ca_flow_temp);
 }
 CellularAutomataML::CellularAutomataML(const vector<CAElement> &ca, const vector<bool> &rand_values,
                                        const int &vmax)
@@ -1320,7 +1323,7 @@ void CellularAutomataML::DrawHistory(string path, string out_file_name)
         {
             for (unsigned j = 0; j < width; ++j)
             {
-                color = BMPPixel((char)0, (char)255, (char)0);
+                color = BMPPixel((char)0, (char)182, (char)255);
                 bmpData[j] = color;
             }
             writer.WriteLine(bmpData);
@@ -1367,7 +1370,7 @@ void CellularAutomataML::DrawFlowHistory(string path, string out_file_name)
         {
             for (unsigned j = 0; j < width; ++j)
             {
-                color = BMPPixel((char)0, (char)255, (char)0);
+				color = BMPPixel((char)0, (char)182, (char)255);
                 bmpData[j] = color;
             }
             writer.WriteLine(bmpData);

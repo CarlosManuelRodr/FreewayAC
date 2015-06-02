@@ -1,7 +1,7 @@
 /**
 * @file BmpWriter.h
 * @brief Escritor de archivos BMP simple.
-* @author Carlos Manuel Rodriguez Martinez
+* @author Carlos Manuel Rodríguez Martínez
 * @date 7/18/2012
 */
 

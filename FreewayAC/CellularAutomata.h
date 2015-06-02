@@ -1,7 +1,7 @@
 /**
 * @file CellularAutomata.h
 * @brief Clases de autómatas celulares.
-* @author Carlos Manuel Rodriguez Martinez
+* @author Carlos Manuel Rodríguez Martínez
 * @date 18/05/2015
 */
 

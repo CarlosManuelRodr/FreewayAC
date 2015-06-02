@@ -1,4 +1,6 @@
-﻿- Implementar decisión de carril en unión.
+﻿- Función para revisar si está estancado.
+- Implementar decisión de carril en unión.
 - Hacer variable la velocidad inicial.
 - Informar si path es válido.
 - Threads?
+- Modernizar BMPWriter y matrix?
