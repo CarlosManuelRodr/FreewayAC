@@ -11,152 +11,12 @@
 
 #include <iostream>
 #include <vector>
-#include <ctime>
 #include <cstdlib>
 #include <fstream>
 #include <algorithm>
-#include <initializer_list>
 #include "BmpWriter.h"
-#include "mtrand.h"
+#include "Aux.h"
 
-/****************************
-*                           *
-*   Funciones auxiliares    *
-*                           *
-****************************/
-
-/**
-* @brief Muestra barra de progreso.
-* @param progress Valor fraccional del progreso.
-*/
-void aux_progress_bar(double progress);
-
-/**
-* @brief Da semilla a generadores de números aleatorios.
-*/
-void aux_random_seed();
-
-/**
-* @brief Devuelve número aleatorio entre 0 y i-1.
-* @param i Límite de número aleatorio.
-*/
-int aux_random(int i);
-
-/**
-* @brief Convierte cadena de texto a booleano. 
-* @param str Texto a convertir. Acepta valores "true" o "false".
-*/
-bool aux_string_to_bool(std::string str);
-
-/**
-* @brief Informa si find_val está dentro de v.
-* @param v Vector dónde buscar.
-* @param find_val Valor a buscar.
-*/
-template <class N> bool aux_is_in(std::vector<N> &v, const N &find_val)
-{
-    typename std::vector<N>::iterator it = find(v.begin(), v.end(), find_val);
-    if (it != v.end())
-        return true;
-    else
-        return false;
-}
-
-/**
-* @brief Informa si find_val está dentro de lista.
-* @param list Lista dónde buscar.
-* @param find_val Valor a buscar.
-*/
-template <class N> bool aux_is_in(std::initializer_list<N> list, const N &find_val)
-{
-    std::vector<N> v = list;
-    typename std::vector<N>::iterator it = find(v.begin(), v.end(), find_val);
-    if (it != v.end())
-        return true;
-    else
-        return false;
-}
-
-/**
-* @brief Informa la posición dentro de v donde se encuentra find_val.
-* @param v Vector dónde buscar.
-* @param find_val Valor a buscar.
-* @return La posición ó -1 en caso de que no se encuentre.
-*/
-template <class N> int aux_find_pos(std::vector<N> &v, const N &find_val)
-{
-    typename std::vector<N>::iterator it = find(v.begin(), v.end(), find_val);
-    if (it != v.end())
-        return distance(v.begin(), it);
-    else
-        return -1;
-}
-
-/**
-* @brief Convierte cadena de texto a número.
-*/
-template <class N> N aux_string_to_num(const std::string &s)
-{
-    std::istringstream i(s);
-    N x;
-    if (!(i >> x))
-        return 0;
-    return static_cast<N>(x);
-}
-
-/****************************
-*                           *
-*        Argumentos         *
-*                           *
-****************************/
-
-/**
-* @class Args
-* @brief Clase para pasar una cantidad de argumentos variable a una función.
-*/
-class Args
-{
-    std::vector<double> m_double_args;
-    std::vector<int> m_int_args;
-    std::vector<bool> m_bool_args;
-public:
-    Args();
-
-    ///@brief Constructor.
-    ///@param d_args Argumentos del tipo double.
-    ///@param i_args Argumentos del tipo int.
-    ///@param b_args Argumentos del tipo bool.
-    Args(std::initializer_list<double> d_args, std::initializer_list<int> i_args = {},
-         std::initializer_list<bool> b_args = {});
-
-    ///@brief Devuelve elemento double.
-    ///@param i Indice del elemento a devolver.
-    double GetDouble(const unsigned &i = 0);
-
-    ///@brief Devuelve elemento int.
-    ///@param i Indice del elemento a devolver.
-    int GetInt(const unsigned &i = 0);
-
-    ///@brief Devuelve elemento bool.
-    ///@param i Indice del elemento a devolver.
-    bool GetBool(const unsigned &i = 0);
-
-    ///@brief Asigna elemento double.
-    ///@param i Indice del elemento a devolver.
-    void SetDouble(const unsigned &i, double val);
-
-    ///@brief Asigna elemento int.
-    ///@param i Indice del elemento a devolver.
-    void SetInt(const unsigned &i, int val);
-
-    ///@brief Asigna elemento bool.
-    ///@param i Indice del elemento a devolver.
-    void SetBool(const unsigned &i, bool val);
-
-    ///@brief Copia los valores del argumento.
-    ///@param arg Objetivo a copiar.
-    void operator=(const Args &arg);
-};
 
 ////////////////////////////////////
 //                                //
@@ -287,6 +147,7 @@ public:
     unsigned GetSize();             ///< Devuelve tamaño del AC.
     unsigned GetHistorySize();      ///< Devuelve tamaño de la lista histórica de evolución del AC.
     unsigned CountCars();           ///< Cuenta la cantidad de autos en AC.
+    bool IsFluxHalted();        ///< Informa si el flujo está estancado.
     void PrintHistory();            ///< Escribe los valores históricos del AC en la terminal.
     virtual void Step();            ///< Aplica reglas de evolución temporal del AC.
     virtual void Move();            ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
@@ -555,7 +416,7 @@ public:
 * @return Puntero de clase base que apunta hacia el AC.
 */
 CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax, 
-                            const double &rand_prob, Args args);
+                            const double &rand_prob, Args args, const int &custom_random_seed = -1);
 
 /**
 * @brief Borra cualquier AC que haya sido creado anteriormente.
@@ -796,7 +657,7 @@ public:
 * @return Puntero de clase base que apunta hacia el AC.
 */
 CellularAutomataML* create_multilane_ca(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density,
-                                        const int &vmax, const double &rand_prob, Args args);
+                                        const int &vmax, const double &rand_prob, Args args, const int &custom_random_seed = -1);
 
 /**
 * @brief Borra cualquier AC multicarril que haya sido creado anteriormente.

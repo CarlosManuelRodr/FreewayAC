@@ -1,7 +1,7 @@
 /**
 * @file Plotter.h
 * @brief Graficador interno. Escribe archivos en BMP.
-* @author Carlos Manuel Rodríguez Martínez
+* @author Carlos Manuel Rodrï¿½guez Martï¿½nez
 * @date 1/06/2015
 */
 
@@ -10,6 +10,8 @@
 
 #include <vector>
 #include <algorithm>
+#include <iostream>
+#include <fstream>
 
 /****************************
 *                           *
@@ -44,7 +46,7 @@ public:
 
     ~Matrix();
 
-    // ## Asignación de valores. ##
+    // ## Asignaciï¿½n de valores. ##
 
     ///@brief Crea matriz sin especificar elementos.
     int SetMatrix(unsigned int rows, unsigned int cols);
@@ -59,7 +61,7 @@ public:
     void SetElement(unsigned int i, unsigned int j, T val);
 
 
-    // ## Obtención de valores. ##
+    // ## Obtenciï¿½n de valores. ##
     T** GetMatrix();
     std::vector<T> GetRow(unsigned int row);
     unsigned int GetColumns();
@@ -213,7 +215,7 @@ template <class T> unsigned int Matrix<T>::GetRows()
 }
 template <class T> T Matrix<T>::Maximum()
 {
-	vector<T> tmp;
+	std::vector<T> tmp;
 	for (unsigned i = 0; i < m_nrows; i++)
 		tmp.push_back(max_element(m_matrix[i], m_matrix[i] + m_ncols));
 	return max_element(tmp.begin(), tmp.end());
@@ -242,19 +244,72 @@ enum STYLES
 	PASTEL,
 	PSYCH_EXPERIENCE,
 	VIVID_COLORS,
+	BINARY_COLORS,
 	NONE
 };
 
 /****************************
 *                           *
-*  Funciones para graficar  *
+*  Funciones para exportar  *
 *                           *
 ****************************/
 
-void Plot(std::vector<int> &data, const std::string &filename, const unsigned &height = 30, 
-	      const bool &normalize = false, const STYLES &style = SUMMER_DAY);
+template <class N> int export_csv(std::vector<N> &data, const std::string &filename)
+{
+	std::ofstream file(filename.c_str(), std::ofstream::out);
+	if (file.is_open())
+	{
+		for (unsigned i = 0; i < data.size(); ++i)
+		{
+			if (i - data.size() != 0)
+				file << i << ", " << data[i] << std::endl;
+			else
+				file << i << ", " << data[i];
+		}
+		file.close();
+		return 0;
+	}
+	else
+	{
+		std::cout << "Error: No se pudo crear archivo de salida." << std::endl;
+		return 1;
+	}
+}
 
-void Plot(Matrix<int> &data, const std::string &filename, const bool &normalize = false, 
-	      const STYLES &style = SUMMER_DAY);
+template <class N> int export_csv(std::vector<N> &data_1, std::vector<N> &data_2, const std::string &filename)
+{
+	if (data_1.size() == data_2.size())
+	{
+		std::ofstream file(filename.c_str(), std::ofstream::out);
+		if (file.is_open())
+		{
+			for (unsigned i = 0; i < data_1.size(); ++i)
+			{
+				if (i - data_1.size() != 0)
+					file << data_1[i] << ", " << data_2[i] << std::endl;
+				else
+					file << data_1[i] << ", " << data_2[i];
+			}
+			file.close();
+			return 0;
+		}
+		else
+		{
+			std::cout << "Error: No se pudo crear archivo de salida." << std::endl;
+			return 1;
+		}
+	}
+	else
+	{
+		std::cout << "Error: Vectores de datos no coinciden en tamaÃ±o." << std::endl;
+		return 1;
+	}
+}
+
+int export_plot(std::vector<int> &data, const std::string &filename, const unsigned &height = 30,
+	             const bool &normalize = false, const STYLES &style = SUMMER_DAY);
+
+int export_plot(Matrix<int> &data, const std::string &filename, const bool &normalize = false,
+	             const STYLES &style = SUMMER_DAY);
 
 #endif

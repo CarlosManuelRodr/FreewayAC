@@ -1,133 +1,10 @@
-#include "CellularAutomata.h"
 #include <limits>
 #include <algorithm>
 #include <cctype>
-#include <iomanip>
-#include <sstream>
+#include <vector>
+#include "CellularAutomata.h"
 using namespace std;
 
-/****************************
-*                           *
-*   Funciones auxiliares    *
-*                           *
-****************************/
-
-MTRand m_drand;            // Generador de aleatorios (flotantes) entre 0 y 1.
-MTRand_int32 m_irand;      // Generador de enteros aleatorios.
-
-void aux_random_seed()
-{
-    // Asigna semilla a numeros aleatorios.
-    unsigned seed = static_cast<unsigned int>(time(NULL));
-    m_drand.seed(seed);
-    m_irand.seed(seed);
-}
-int aux_random(int i)
-{
-    return m_irand() % i;
-}
-bool aux_string_to_bool(std::string str)
-{
-    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
-    std::istringstream is(str);
-    bool b;
-    is >> std::boolalpha >> b;
-    return b;
-}
-void aux_progress_bar(double progress)
-{
-    int barWidth = 35;
-
-    cout << "[";
-    int pos = (int)(barWidth * progress);
-    for (int i = 0; i < barWidth; ++i)
-    {
-        if (i < pos) cout << "=";
-        else if (i == pos) cout << ">";
-        else cout << " ";
-    }
-    cout << "] " << int(progress * 100.0) << " %\r";
-    cout.flush();
-    if (progress == 1.0)
-        cout << endl;
-}
-
-/****************************
-*                           *
-*        Argumentos         *
-*                           *
-****************************/
-Args::Args()
-{
-    m_double_args.push_back(0.0);
-    m_int_args.push_back(0);
-    m_bool_args.push_back(false);
-}
-Args::Args(initializer_list<double> d_args, std::initializer_list<int> i_args, 
-           initializer_list<bool> b_args)
-{
-    m_double_args = d_args;
-    m_int_args = i_args;
-    m_bool_args = b_args;
-}
-double Args::GetDouble(const unsigned &i)
-{
-    if (i < m_double_args.size())
-        return m_double_args[i];
-    else
-
-    {
-        cout << "Error: Argumento double faltante. Indice: " << i << "." << endl;
-        return 0.0;
-    }
-}
-int Args::GetInt(const unsigned &i)
-{
-    if (i < m_int_args.size())
-        return m_int_args[i];
-    else
-    {
-        cout << "Error: Argumento int faltante. Indice: " << i << "." << endl;
-        return 0;
-    }
-}
-bool Args::GetBool(const unsigned &i)
-{
-    if (i < m_bool_args.size())
-        return m_bool_args[i];
-    else
-    {
-        cout << "Error: Argumento bool faltante. Indice: " << i << "." << endl;
-        return false;
-    }
-}
-void Args::SetDouble(const unsigned &i, double val)
-{
-    if (i < m_double_args.size())
-        m_double_args[i] = val;
-    else
-        cout << "Error: Asignacion double invalida. Indice: " << i << ", valor: " << val << "." << endl;
-}
-void Args::SetInt(const unsigned &i, int val)
-{
-    if (i < m_int_args.size())
-        m_int_args[i] = val;
-    else
-        cout << "Error: Asignacion int invalida. Indice: " << i << ", valor: " << val << "." << endl;
-}
-void Args::SetBool(const unsigned &i, bool val)
-{
-    if (i < m_bool_args.size())
-        m_bool_args[i] = val;
-    else
-        cout << "Error: Asignacion bool invalida. Indice: " << i << ", valor: " << val << "." << endl;
-}
-void Args::operator=(const Args &arg)
-{
-    m_double_args = arg.m_double_args;
-    m_int_args = arg.m_int_args;
-    m_bool_args = arg.m_bool_args;
-}
 
 ////////////////////////////////////
 //                                //
@@ -178,15 +55,12 @@ CellularAutomata::CellularAutomata(const unsigned &size, const double &density, 
     }
     unsigned vehicles = (unsigned)(((double)size)*l_density);
 
-    // Asigna semilla a numeros aleatorios.
-    aux_random_seed();
-
     // Coloca autos al azar.
     vector<unsigned> car_positions;
     for (unsigned i = 0; i < m_size; ++i)
         car_positions.push_back(i);
 
-    random_shuffle(car_positions.begin(), car_positions.end(), aux_random);
+    random_shuffle(car_positions.begin(), car_positions.end(), RandomGen::GetInt);
     for (unsigned i = 0; i < vehicles; ++i)
         m_ca[car_positions[i]] = 1;
 
@@ -377,6 +251,27 @@ unsigned CellularAutomata::CountCars()
     }
     return count;
 }
+bool CellularAutomata::IsFluxHalted()
+{
+	bool halted = true;
+	if (m_ca_flow_history.size() > 1)
+	{
+		for (unsigned i = 1; i < m_ca_flow_history.size() && halted; ++i)
+		{
+			for (unsigned j = 0; j < m_size; ++j)
+			{
+				if (m_ca_flow_history[i][j] != 0)
+				{
+					halted = false;
+					break;
+				}
+			}
+		}
+		return halted;
+	}
+	else
+		return false;
+}
 bool CellularAutomata::Randomization(const double &prob)
 {
     double l_prob;
@@ -399,7 +294,7 @@ bool CellularAutomata::Randomization(const double &prob)
     }
     else
     {
-        if (m_drand() <= l_prob)
+        if (RandomGen::GetDouble() <= l_prob)
             return true;
         else
             return false;
@@ -610,7 +505,7 @@ AutonomousCA::AutonomousCA(const unsigned &size, const double &density, const in
             aut_car_positions.push_back(i);
     }
 
-    random_shuffle(aut_car_positions.begin(), aut_car_positions.end(), aux_random);
+    random_shuffle(aut_car_positions.begin(), aut_car_positions.end(), RandomGen::GetInt);
     for (unsigned i = 0; i < aut_car_positions.size() && i < aut_car_number; ++i)
         m_aut_cars.push_back(aut_car_positions[i]);
 }
@@ -751,7 +646,7 @@ StreetStopCA::StreetStopCA(const unsigned &size, const double &density, const in
     for (unsigned i = 0; i < m_size; ++i)
         stop_positions.push_back(i);
 
-    random_shuffle(stop_positions.begin(), stop_positions.end(), aux_random);
+    random_shuffle(stop_positions.begin(), stop_positions.end(), RandomGen::GetInt);
     for (unsigned i = 0; i < stops; ++i)
         m_stop_pos.push_back(stop_positions[i]);
 }
@@ -873,11 +768,11 @@ SemaphoreCA::SemaphoreCA(const unsigned &size, const double &density, const int 
         for (unsigned i = 0; i < m_size; ++i)
             semaphore_positions.push_back(i);
 
-        random_shuffle(semaphore_positions.begin(), semaphore_positions.end(), aux_random);
+        random_shuffle(semaphore_positions.begin(), semaphore_positions.end(), RandomGen::GetInt);
         for (unsigned i = 0; i < semaphores; ++i)
         {
             m_semaphore_pos.push_back(semaphore_positions[i]);
-            m_semaphore_value.push_back(aux_random(m_semaphore_init));
+            m_semaphore_value.push_back(RandomGen::GetInt(m_semaphore_init));
         }
     }
     else
@@ -888,7 +783,7 @@ SemaphoreCA::SemaphoreCA(const unsigned &size, const double &density, const int 
             for (unsigned i = 0; i < size; i += semaphore_dt)
             {
                 m_semaphore_pos.push_back(i);
-                m_semaphore_value.push_back(aux_random(m_semaphore_init));
+                m_semaphore_value.push_back(RandomGen::GetInt(m_semaphore_init));
             }
         }
     }
@@ -1104,9 +999,14 @@ SemaphoreCA* semaphoreca = nullptr;
 SimpleJunctionCA* simplejunctionca = nullptr;
 
 CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax, 
-                            const double &rand_prob, Args args)
+                            const double &rand_prob, Args args, const int &custom_random_seed)
 {
     delete_ca();
+    if (custom_random_seed != -1)
+    	RandomGen::Seed(custom_random_seed);
+    else
+    	RandomGen::Seed();
+
     try
     {
         switch (ca)
@@ -1223,9 +1123,6 @@ CellularAutomataML::CellularAutomataML(const unsigned &size, const unsigned &lan
     }
     unsigned vehicles = (unsigned)(((double)size)*density);
 
-    // Asigna semilla a numeros aleatorios.
-    aux_random_seed();
-
     // Coloca autos al azar.
     for (unsigned i = 0; i < m_lanes; ++i)
     {
@@ -1233,7 +1130,7 @@ CellularAutomataML::CellularAutomataML(const unsigned &size, const unsigned &lan
         for (unsigned j = 0; j < m_size; ++j)
             car_positions.push_back(j);
 
-        random_shuffle(car_positions.begin(), car_positions.end(), aux_random);
+        random_shuffle(car_positions.begin(), car_positions.end(), RandomGen::GetInt);
         for (unsigned j = 0; j < vehicles; ++j)
             m_ca[car_positions[j]][i] = 1;
     }
@@ -1401,7 +1298,7 @@ bool CellularAutomataML::Randomization(const double &prob)
     }
     else
     {
-        if (m_drand() <= l_prob)
+        if (RandomGen::GetDouble() <= l_prob)
             return true;
         else
             return false;
@@ -1464,7 +1361,7 @@ void CellularAutomataML::ChangeLanes()
                         // Si ambos están disponibles apaga uno al azar.
                         if (left && right)
                         {
-                            int select = m_irand() % 2;
+                            int select = RandomGen::GetInt(2);
                             if (select == 1) right = false;
                             else left = false;
                         }
@@ -1786,9 +1683,14 @@ CircularCAML* circularcaml = nullptr;
 OpenCAML* opencaml = nullptr;
 
 CellularAutomataML* create_multilane_ca(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density, 
-                                         const int &vmax, const double &rand_prob, Args args)
+                                         const int &vmax, const double &rand_prob, Args args, const int &custom_random_seed)
 {
     delete_multilane_ca();
+    if (custom_random_seed != -1)
+    	RandomGen::Seed(custom_random_seed);
+    else
+    	RandomGen::Seed();
+
     try
     {
         switch (ca)

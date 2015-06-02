@@ -1,5 +1,5 @@
-#include "Plotter.h"
 #include "BmpWriter.h"
+#include "Export.h"
 #include <cmath>
 using namespace std;
 
@@ -18,14 +18,14 @@ class Palette
     unsigned m_palette_size;
 	vector<BMPPixel> m_color_palette;
 
-	///@brief Distribución normal. Se usa para calcular el color.
-	///@param x Posición.
+	///@brief DistribuciÃ³n normal. Se usa para calcular el color.
+	///@param x PosiciÃ³n.
 	///@param mean Media.
-	///@param std_dev Desviación estándar.
+	///@param std_dev DesviaciÃ³n estÃ¡ndar.
 	double NormalDist(unsigned x, double mean, double std_dev);
 
 	///@brief Calcula color con la paleta de colores del estilo seleccionado.
-	///@param color_num Número a convertir en color.
+	///@param color_num Nï¿½mero a convertir en color.
 	///@return Color de paleta.
 	BMPPixel CalcColor(unsigned color_num);
 
@@ -33,9 +33,11 @@ public:
     ///@brief Crea paleta. Por defecto usa estilo SUMMER_DAY.
     Palette();
 
-    ///@brief Asigna parámetros dependiendo del estilo.
+    ///@brief Asigna parÃ¡metros dependiendo del estilo.
     ///@param style Estilo seleccionado.
     void SetStyle(STYLES style);
+
+    unsigned GetPaletteSize();
 
 	BMPPixel operator[](const unsigned &i);
 };
@@ -63,7 +65,7 @@ BMPPixel Palette::CalcColor(unsigned color_num)
 }
 void Palette::SetStyle(STYLES style)
 {
-    // Asigna parámetros de cada estilo de color.
+    // Asigna parï¿½metros de cada estilo de color.
 	if (style != m_style)
 	{
 		switch (style)
@@ -176,6 +178,10 @@ void Palette::SetStyle(STYLES style)
 			m_color_palette.push_back(CalcColor(i));
 	}
 }
+unsigned Palette::GetPaletteSize()
+{
+	return m_palette_size;
+}
 BMPPixel Palette::operator[](const unsigned &i)
 {
 	return m_color_palette[i % m_palette_size];
@@ -183,31 +189,72 @@ BMPPixel Palette::operator[](const unsigned &i)
 
 /****************************
 *                           *
-*  Funciones para graficar  *
+*  Funciones para exportar  *
 *                           *
 ****************************/
 
-void Plot(std::vector<int> &data, const std::string &filename, const unsigned &height = 30,
-	const bool &normalize = false, const STYLES &style = SUMMER_DAY)
+const BMPPixel white(255, 255, 255);
+const BMPPixel black(0, 0, 0);
+
+int export_plot(vector<int> &data, const string &filename, const unsigned &height,
+	             const bool &normalize, const STYLES &style)
 {
 	Palette palette;
+	if (style != BINARY_COLORS)
+		palette.SetStyle(style);
+
 	unsigned width = data.size();
+	unsigned palette_size = palette.GetPaletteSize();
 
 	BMPWriter writer(filename.c_str(), width, height);
 	BMPPixel* bmpData = new BMPPixel[width];
 
-	for (unsigned i = 0; i < width; ++i)
-		bmpData[i] = palette[data[i]];
+	if (normalize)
+	{
+		unsigned max = *max_element(data.begin(), data.end());
+		for (unsigned i = 0; i < width; ++i)
+		{
+			if (style == BINARY_COLORS)
+			{
+				if (data[i] == 1)
+					bmpData[i] = black;
+				else
+					bmpData[i] = white;
+			}
+			else
+				bmpData[i] = palette[palette_size*((double)data[i]/(double)max)];
+		}
+	}
+	else
+	{
+		for (unsigned i = 0; i < width; ++i)
+		{
+			if (style == BINARY_COLORS)
+			{
+				if (data[i] == 1)
+					bmpData[i] = black;
+				else
+					bmpData[i] = white;
+			}
+			else
+				bmpData[i] = palette[data[i]];
+		}
+	}
 
 	for (int i = height - 1; i >= 0; i--)
 		writer.WriteLine(bmpData);
 
 	writer.CloseBMP();
 	delete[] bmpData;
+
+	return 0;
 }
-void Plot(Matrix<int> &data, const std::string &filename, const bool &normalize, const STYLES &style)
+int export_plot(Matrix<int> &data, const string &filename, const bool &normalize, const STYLES &style)
 {
 	Palette palette;
+	if (style != BINARY_COLORS)
+		palette.SetStyle(style);
+
 	unsigned width = data.GetColumns();
 	unsigned height = data.GetRows();
 
@@ -217,10 +264,20 @@ void Plot(Matrix<int> &data, const std::string &filename, const bool &normalize,
 	{
 		for (unsigned j = 0; j < width; ++j)
 		{
-			bmpData[j] = palette[data[i][j]];
+			if (style == BINARY_COLORS)
+			{
+				if (data[i][j] == 1)
+					bmpData[i] = black;
+				else
+					bmpData[i] = white;
+			}
+			else
+				bmpData[j] = palette[data[i][j]];
 		}
 		writer.WriteLine(bmpData);
 	}
 	writer.CloseBMP();
 	delete[] bmpData;
+
+	return 0;
 }

@@ -1,6 +1,7 @@
-﻿- Función para revisar si está estancado.
-- Implementar decisión de carril en unión.
+﻿- Implementar decisión de carril en unión.
 - Hacer variable la velocidad inicial.
 - Informar si path es válido.
+- Proveer más generadores de aleatorios.
 - Threads?
-- Modernizar BMPWriter y matrix?
+- Modernizar y añadir seguridad a BMPWriter y matrix.
+- Tabs, tabs, tabs....
