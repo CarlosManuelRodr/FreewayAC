@@ -28,6 +28,7 @@ template <class T> class Matrix
     T** m_matrix;
     unsigned int m_ncols;
     unsigned int m_nrows;
+    int m_status;
 
     void Deallocate();
 public:
@@ -66,7 +67,8 @@ public:
     std::vector<T> GetRow(unsigned int row);
     unsigned int GetColumns();
     unsigned int GetRows();
-	T Maximum();
+    T Maximum();
+    bool IsOk();
 
     ///@brief Acceso seguro a elementos.
     T At(unsigned int i, unsigned int j);
@@ -77,26 +79,27 @@ template <class T> Matrix<T>::Matrix()
 {
     m_ncols = 0;
     m_nrows = 0;
+    m_status = 0;
     m_matrix = nullptr;
 }
 template <class T> Matrix<T>::Matrix(const Matrix<T> &other)
 {
     m_matrix = nullptr;
-    this->SetMatrix(other.m_nrows, other.m_ncols, other.m_matrix);
+    m_status = this->SetMatrix(other.m_nrows, other.m_ncols, other.m_matrix);
 }
 template <class T> Matrix<T>::Matrix(unsigned int rows, unsigned int cols, T** inputMatrix)
 {
     m_matrix = nullptr;
     m_ncols = 0;
     m_nrows = 0;
-    this->SetMatrix(rows, cols, inputMatrix);
+    m_status = this->SetMatrix(rows, cols, inputMatrix);
 }
 template <class T> Matrix<T>::Matrix(unsigned int rows, unsigned int cols)
 {
     m_matrix = nullptr;
     m_ncols = 0;
     m_nrows = 0;
-    this->SetMatrix(rows, cols);
+    m_status = this->SetMatrix(rows, cols);
 }
 template <class T> Matrix<T>::~Matrix()
 {
@@ -215,10 +218,17 @@ template <class T> unsigned int Matrix<T>::GetRows()
 }
 template <class T> T Matrix<T>::Maximum()
 {
-	std::vector<T> tmp;
-	for (unsigned i = 0; i < m_nrows; i++)
-		tmp.push_back(max_element(m_matrix[i], m_matrix[i] + m_ncols));
-	return max_element(tmp.begin(), tmp.end());
+    std::vector<T> tmp;
+    for (unsigned i = 0; i < m_nrows; i++)
+        tmp.push_back(max_element(m_matrix[i], m_matrix[i] + m_ncols));
+    return max_element(tmp.begin(), tmp.end());
+}
+template <class T> bool Matrix<T>::IsOk()
+{
+    if (m_status == 0)
+        return true;
+    else
+        return false;
 }
 template <class T> T*& Matrix<T>::operator[](const unsigned int pos)
 {
@@ -237,15 +247,15 @@ template <class T> T*& Matrix<T>::operator[](const unsigned int pos)
 */
 enum STYLES
 {
-	SUMMER_DAY,
-	COOL_BLUE,
-	HARD_RED,
-	BLACK_AND_WHITE,
-	PASTEL,
-	PSYCH_EXPERIENCE,
-	VIVID_COLORS,
-	BINARY_COLORS,
-	NONE
+    SUMMER_DAY,
+    COOL_BLUE,
+    HARD_RED,
+    BLACK_AND_WHITE,
+    PASTEL,
+    PSYCH_EXPERIENCE,
+    VIVID_COLORS,
+    BINARY_COLORS,
+    NONE
 };
 
 /****************************
@@ -256,60 +266,60 @@ enum STYLES
 
 template <class N> int export_csv(std::vector<N> &data, const std::string &filename)
 {
-	std::ofstream file(filename.c_str(), std::ofstream::out);
-	if (file.is_open())
-	{
-		for (unsigned i = 0; i < data.size(); ++i)
-		{
-			if (i - data.size() != 0)
-				file << i << ", " << data[i] << std::endl;
-			else
-				file << i << ", " << data[i];
-		}
-		file.close();
-		return 0;
-	}
-	else
-	{
-		std::cout << "Error: No se pudo crear archivo de salida." << std::endl;
-		return 1;
-	}
+    std::ofstream file(filename.c_str(), std::ofstream::out);
+    if (file.is_open())
+    {
+        for (unsigned i = 0; i < data.size(); ++i)
+        {
+            if (i - data.size() != 0)
+                file << i << ", " << data[i] << std::endl;
+            else
+                file << i << ", " << data[i];
+        }
+        file.close();
+        return 0;
+    }
+    else
+    {
+        std::cout << "Error: No se pudo crear archivo de salida." << std::endl;
+        return 1;
+    }
 }
 
 template <class N> int export_csv(std::vector<N> &data_1, std::vector<N> &data_2, const std::string &filename)
 {
-	if (data_1.size() == data_2.size())
-	{
-		std::ofstream file(filename.c_str(), std::ofstream::out);
-		if (file.is_open())
-		{
-			for (unsigned i = 0; i < data_1.size(); ++i)
-			{
-				if (i - data_1.size() != 0)
-					file << data_1[i] << ", " << data_2[i] << std::endl;
-				else
-					file << data_1[i] << ", " << data_2[i];
-			}
-			file.close();
-			return 0;
-		}
-		else
-		{
-			std::cout << "Error: No se pudo crear archivo de salida." << std::endl;
-			return 1;
-		}
-	}
-	else
-	{
-		std::cout << "Error: Vectores de datos no coinciden en tamaño." << std::endl;
-		return 1;
-	}
+    if (data_1.size() == data_2.size())
+    {
+        std::ofstream file(filename.c_str(), std::ofstream::out);
+        if (file.is_open())
+        {
+            for (unsigned i = 0; i < data_1.size(); ++i)
+            {
+                if (i - data_1.size() != 0)
+                    file << data_1[i] << ", " << data_2[i] << std::endl;
+                else
+                    file << data_1[i] << ", " << data_2[i];
+            }
+            file.close();
+            return 0;
+        }
+        else
+        {
+            std::cout << "Error: No se pudo crear archivo de salida." << std::endl;
+            return 1;
+        }
+    }
+    else
+    {
+        std::cout << "Error: Vectores de datos no coinciden en tamaño." << std::endl;
+        return 1;
+    }
 }
 
 int export_plot(std::vector<int> &data, const std::string &filename, const unsigned &height = 30,
-	             const bool &normalize = false, const STYLES &style = SUMMER_DAY);
+                 const bool &normalize = false, const STYLES &style = SUMMER_DAY);
 
 int export_plot(Matrix<int> &data, const std::string &filename, const bool &normalize = false,
-	             const STYLES &style = SUMMER_DAY);
+                 const STYLES &style = SUMMER_DAY);
 
 #endif

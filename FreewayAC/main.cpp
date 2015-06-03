@@ -33,16 +33,16 @@ struct Arg: public option::Arg
 
 enum  OptionIndex { UNKNOWN, SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB,
 
-				    PLOT_TRAFFIC, MEASURE_OCUPANCY, MEASURE_FLOW,
+                    PLOT_TRAFFIC, MEASURE_OCUPANCY, MEASURE_FLOW,
                     FLOW_VS_DENSITY, FLOW_PER_DENSITY, FLOW_VS_VMAX, FLOW_VS_RAND_PROB, FLOW_VS_AUT_CARS,
                     FLOW_VS_STOP_DENSITY, FLOW_VS_NEW_CAR, FLOW_PER_NEW_CAR, FLOW_VS_SEMAPHORE_DENSITY, ESCAPE_TIME_VS_DENSITY,
-                    DISCHARGE_VS_DENSITY, DISCHARGE_VS_DENSITY_FRACTAL,
+                    DISCHARGE_VS_DENSITY, DISCHARGE_VS_DENSITY_FRACTAL, DIMENSION_VS_DENSITY,
 
                     CA_CIRCULAR, CA_MULTILANE_CIRCULAR, CA_OPEN, CA_MULTILANE_OPEN, CA_AUTONOMOUS, CA_STOP, CA_SEMAPHORE,
                     CA_SIMPLE_JUNCTION,
 
                     NEW_CAR_PROB, NEW_CAR_SPEED, AUT_DENSITY, STOP_DENSITY, SEMAPHORE_DENSITY, RANDOM_SEMAPHORES,
-                    TARGET_LANE, LANES, RANDOM_SEED,
+                    TARGET_LANE, LANES, RANDOM_SEED, RANDOM_GENERATOR, PARTITIONS,
 
                     DT, DMIN, DMAX, VMAX_MIN, VMAX_MAX, RAND_PROB_MIN, AUT_MIN, AUT_MAX,
                     STOP_DENSITY_MIN, STOP_DENSITY_MAX, NEW_CAR_MIN, NEW_CAR_MAX, RAND_PROB_MAX, SEMAPHORE_DENSITY_MIN,
@@ -88,6 +88,8 @@ const option::Descriptor usage[] =
     "  \t--discharge_vs_density  \tMide gasto vs densidad en un rango especificado por dmin, dmax y dt." },
     {DISCHARGE_VS_DENSITY_FRACTAL,  0,"","discharge_vs_density_fractal", Arg::None,
     "  \t--discharge_vs_density_fractal  \tCrea fractal de gasto vs densidad en un rango especificado por dmin, dmax y dt." },
+    {DIMENSION_VS_DENSITY,  0,"","dimension_vs_density", Arg::None,
+    "  \t--dimension_vs_density  \tMide dimension fractal vs densidad en un rango especificado por dmin, dmax y dt." },
 
     {CA_CIRCULAR,  0,"","ca_circular", Arg::None, "  \t--ca_circular  \tAutomata celular circular." },
     {CA_MULTILANE_CIRCULAR, 0, "", "ca_multilane_circular", Arg::None, 
@@ -117,6 +119,10 @@ const option::Descriptor usage[] =
      "  \t--lanes  \tNumero de carriles en AC multicarril." },
     {RANDOM_SEED, 0, "", "random_seed", Arg::Required,
     "  \t--random_seed  \tSemilla de generador de numeros aleatorios. Si no se especifica usa el tiempo del sistema." },
+    {RANDOM_GENERATOR, 0, "", "random_generator", Arg::Required,
+    "  \t--random_generator  \tTipo de generador de aletorios. Disponibles LCG, MT19937, RANLUX24, RANLUX48." },
+    {PARTITIONS, 0, "", "partitions", Arg::Required,
+    "  \t--partitions  \tNumero de particiones que se realizan sobre un intervalo para calcular dimension fractal." },
 
     {DT,  0,"", "dt", Arg::Required, "  \t--dt=<arg>  \tTamagno del intervalo en medicion con rango." },
     {DMIN,  0,"", "dmin", Arg::Required, "  \t--dmin=<arg>  \tDensidad minima en medicion con rango." },
@@ -154,8 +160,8 @@ void describe_experiments()
                        "                         Parametros relevantes: LANES.\n"
                        "CA_OPEN               -> Descripcion: Automata celular con fronteras abiertas. Entran autos en\n"
                        "                                      la primera pos del AC.\n"
-    		           "CA_MULTILANE_OPEN     -> Descripcion: Automata celular con fronteras abiertas. Entran autos en\n"
-    		                       "                          la primera pos del AC.\n"
+                       "CA_MULTILANE_OPEN     -> Descripcion: Automata celular con fronteras abiertas. Entran autos en\n"
+                                   "                          la primera pos del AC.\n"
                        "                         Parametros relevantes: NEW_CAR_PROB, NEW_CAR_SPEED, LANES.\n"
                        "CA_AUTONOMOUS         -> Descripcion: Automata celular circular con vehiculos autonomos.\n"
                        "                         Parametros relevantes: AUT_DENSITY.\n"
@@ -225,7 +231,7 @@ int main(int argc, char* argv[])
     bool plot_traffic = false, flow_vs_vmax = false, flow_vs_rand_prob = false, flow_vs_aut_cars = false;
     bool flow_vs_stop_density = false, flow_per_density = false, flow_vs_new_car = false, flow_per_new_car = false;
     bool flow_vs_semaphore_density = false, escape_time_vs_density = false, discharge_vs_density = false;
-    bool discharge_vs_density_fractal = false;
+    bool discharge_vs_density_fractal = false, dimension_vs_density = false, per_density = false, per_prob = false;
 
     bool random_semaphores = false, test = false, show_progress = true;
 
@@ -237,8 +243,8 @@ int main(int argc, char* argv[])
     bool debug = false;
     CA_TYPE ca_type = CIRCULAR_CA;
     double new_car_prob = 0.1, aut_density = 0.1, stop_density = 0.1, semaphore_density = 0.1;
-    int new_car_speed = 1, target_lane = 0, lanes = 2, random_seed = -1;
-    string out_file_name = "", path = "";
+    int new_car_speed = 1, target_lane = 0, lanes = 2, random_seed = -1, partitions = 50;
+    string random_generator = "", out_file_name = "", path = "";
 
     // Ejecuta parser de argumentos.
     argc -= (argc>0); argv += (argc>0);
@@ -346,6 +352,10 @@ int main(int argc, char* argv[])
             discharge_vs_density_fractal = true;
             break;
 
+            case DIMENSION_VS_DENSITY:
+            dimension_vs_density = true;
+            break;
+
             case CA_CIRCULAR:
             ca_type = CIRCULAR_CA;
             break;
@@ -359,8 +369,8 @@ int main(int argc, char* argv[])
             break;
 
             case CA_MULTILANE_OPEN:
-			ca_type = OPEN_MULTILANE_CA;
-			break;
+            ca_type = OPEN_MULTILANE_CA;
+            break;
 
             case CA_AUTONOMOUS:
             ca_type = AUTONOMOUS_CA;
@@ -412,6 +422,14 @@ int main(int argc, char* argv[])
 
             case RANDOM_SEED:
             random_seed = aux_string_to_num<int>(opt.arg);
+            break;
+
+            case RANDOM_GENERATOR:
+            random_generator = opt.arg;
+            break;
+
+            case PARTITIONS:
+            partitions = aux_string_to_num<int>(opt.arg);
             break;
 
             case DT:
@@ -501,16 +519,30 @@ int main(int argc, char* argv[])
 
     if (debug)
     {
-    	//ex_escape_time_vs_rand_prob(OPEN_CA, 500, 0.2, 5, 0.0, 1.0, 0.001, Args({ 0 }, { 1 }));
-    	//ex_escape_time_vs_vmax(OPEN_CA, 500, 0.2, 0, 20, 1, 0.2, Args({ 0 }, { 1 }));
-    	return 0;
+        aux_create_directory("Carpeta");
+        return 0;
     }
 
     // Verifica opciones.
+    if (!path.empty() && !df_directory_exist(path))
+    {
+    	cout << "Path no valido." << endl;
+    	return 1;
+    }
+
+    if(random_generator == "LCG")
+        RandomGen::SetAlgorithm(LCG);
+    else if (random_generator == "MT19937")
+        RandomGen::SetAlgorithm(MT19937);
+    else if (random_generator == "RANLUX24")
+        RandomGen::SetAlgorithm(RANLUX24);
+    else if (random_generator == "RANLUX24")
+        RandomGen::SetAlgorithm(RANLUX48);
+
     if ((ocupancy_fixed || flow_fixed) && (flow_vs_density || flow_vs_vmax || flow_vs_rand_prob ||
         flow_vs_aut_cars || flow_vs_stop_density || flow_vs_new_car || flow_per_new_car
         || flow_vs_semaphore_density || escape_time_vs_density || discharge_vs_density
-        || discharge_vs_density_fractal))
+        || discharge_vs_density_fractal || dimension_vs_density))
     {
         cout << "Opciones incompatibles." << endl;
         return 1;
@@ -518,10 +550,14 @@ int main(int argc, char* argv[])
     if (!(ocupancy_fixed || flow_fixed || flow_vs_density || flow_per_density || flow_vs_vmax 
         || flow_vs_rand_prob || flow_vs_aut_cars || flow_vs_new_car || flow_per_new_car
         || flow_vs_stop_density || flow_vs_semaphore_density || escape_time_vs_density
-        || discharge_vs_density || discharge_vs_density_fractal || test))
+        || discharge_vs_density || discharge_vs_density_fractal || dimension_vs_density || test))
     {
         plot_traffic = true;    // Opcion predeterminada.
     }
+    if (flow_per_density)
+        per_density = true;
+    if (flow_per_new_car)
+        per_prob = true;
     if (flow_vs_vmax && dt < 1)
         dt = 1.0;
 
@@ -540,9 +576,42 @@ int main(int argc, char* argv[])
         multilane = true;
     if (ca_type == OPEN_MULTILANE_CA)
     {
-    	multilane = true;
-    	args = Args({ new_car_prob }, { new_car_speed });
+        multilane = true;
+        args = Args({ new_car_prob }, { new_car_speed });
     }
+
+    ExParam param;
+    param.type = ca_type;
+    param.size = size;
+    param.iterations = iterations;
+    param.lanes = lanes;
+    param.vmax = vmax;
+    param.vmax_min = vmax_min;
+    param.vmax_max = vmax_max;
+    param.random_seed = random_seed;
+    param.partitions = partitions;
+    param.density = density;
+    param.density_min = dmin;
+    param.density_max = dmax;
+    param.rand_prob = rand_prob;
+    param.rand_prob_min = rand_prob_min;
+    param.rand_prob_max = rand_prob_max;
+    param.aut_car_density_min = aut_min;
+    param.aut_car_density_max = aut_max;
+    param.new_car_prob_min = new_car_min;
+    param.new_car_prob_max = new_car_max;
+    param.stop_density_min = stop_density_min;
+    param.stop_density_max = stop_density_max;
+    param.semaphore_density_min = semaphore_density_min;
+    param.semaphore_density_max = semaphore_density_max;
+    param.per_density = per_density;
+    param.per_prob = per_prob;
+    param.random_semaphores = random_semaphores;
+    param.show_progress = show_progress;
+    param.path = path;
+    param.out_file_name = out_file_name;
+    param.args = args;
+    param.dt = dt;
 
     // Realiza acciones.
     if (test)
@@ -556,24 +625,20 @@ int main(int argc, char* argv[])
     {
         if (ocupancy_fixed || flow_fixed || plot_traffic)
         {
-            cout << "Evolucionando automata." << endl;
-            CellularAutomata* ca = create_ca(ca_type, size, density, vmax, rand_prob, args);
-            ca->Evolve(iterations);
             if (plot_traffic)
             {
-                cout << "Creando mapas." << endl;
-                ca->DrawHistory(path, out_file_name);
-                ca->DrawFlowHistory(path, out_file_name);
+                cout << "Creando mapa de trafico." << endl;
+                r = ex_traffic_maps(param);
             }
             if (ocupancy_fixed)
             {
                 cout << "Midiendo ocupacion." << endl;
-                r = ex_ocupancy_fixed(ca, path, out_file_name);
+                r = ex_ocupancy_fixed(param);
             }
             if (flow_fixed)
             {
                 cout << "Midiendo flujo." << endl;
-                r = ex_flow_fixed(ca, path, out_file_name);
+                r = ex_flow_fixed(param);
             }
             delete_ca();
         }
@@ -582,75 +647,67 @@ int main(int argc, char* argv[])
             if (flow_vs_density)
             {
                 cout << "Midiendo flujo vs densidad." << endl;
-                r = ex_flow_vs_density(ca_type, size, iterations, vmax, dmin, dmax, dt, rand_prob,
-                                       args, false, random_seed, show_progress, path, out_file_name);
+                r = ex_flow_vs_density(param);
             }
             if (flow_per_density)
             {
                 cout << "Midiendo flujo/densidad vs densidad." << endl;
-                r = ex_flow_vs_density(ca_type, size, iterations, vmax, dmin, dmax, dt, rand_prob,
-                                       args, true, random_seed, show_progress, path, out_file_name);
+                r = ex_flow_vs_density(param);
             }
             if (flow_vs_vmax)
             {
                 cout << "Midiendo flujo vs vmax." << endl;
-                r = ex_flow_vs_vmax(ca_type, size, iterations, vmax_min, vmax_max, (int)dt, density,
-                                    rand_prob, args, random_seed, show_progress, path, out_file_name);
+                r = ex_flow_vs_vmax(param);
             }
             if (flow_vs_rand_prob)
             {
                 cout << "Midiendo flujo vs rand_prob." << endl;
-                r = ex_flow_vs_rand_prob(ca_type, size, iterations, vmax, density, rand_prob_min,
-                                         rand_prob_max, dt, args, random_seed, show_progress, path, out_file_name);
+                r = ex_flow_vs_rand_prob(param);
             }
             if (flow_vs_aut_cars)
             {
                 cout << "Midiendo flujo vs densidad de autos inteligentes." << endl;
-                r = ex_flow_vs_aut_cars(size, iterations, vmax, density, rand_prob, aut_min,
-                                        aut_max, dt, random_seed, show_progress, path, out_file_name);
+                r = ex_flow_vs_aut_cars(param);
             }
             if (flow_vs_stop_density)
             {
                 cout << "Midiendo flujo vs densidad de topes." << endl;
-                r = ex_flow_vs_stop_density(size, iterations, vmax, density, rand_prob, stop_density_min,
-                                            stop_density_max, dt, random_seed, show_progress, path, out_file_name);
+                r = ex_flow_vs_stop_density(param);
             }
             if (flow_vs_new_car)
             {
                 cout << "Midiendo flujo vs probabilidad de nuevo auto." << endl;
-                r = ex_flow_vs_new_car_prob(ca_type, size, iterations, vmax, density, rand_prob, new_car_min,
-                                            new_car_max, dt, args, false, random_seed, show_progress, path, out_file_name);
+                r = ex_flow_vs_new_car_prob(param);
             }
             if (flow_per_new_car)
             {
                 cout << "Midiendo flujo/probabilidad vs probabilidad de nuevo auto." << endl;
-                r = ex_flow_vs_new_car_prob(ca_type, size, iterations, vmax, density, rand_prob, new_car_min,
-                                            new_car_max, dt, args, true, random_seed, show_progress, path, out_file_name);
+                r = ex_flow_vs_new_car_prob(param);
             }
             if (flow_vs_semaphore_density)
             {
                 cout << "Midiendo flujo vs densidad de semaforos." << endl;
-                r = ex_flow_vs_semaphore_density(size, iterations, vmax, density, rand_prob, semaphore_density_min,
-                                                 semaphore_density_max, dt, random_semaphores, random_seed, show_progress,
-                                                 path, out_file_name);
+                r = ex_flow_vs_semaphore_density(param);
             }
             if (escape_time_vs_density)
             {
-            	cout << "Midiendo tiempo de escape vs densidad de autos." << endl;
-            	r = ex_escape_time_vs_density(ca_type, size, vmax, dmin, dmax, dt, rand_prob,
-            			                      args, random_seed, show_progress, path, out_file_name);
+                cout << "Midiendo tiempo de escape vs densidad de autos." << endl;
+                r = ex_escape_time_vs_density(param);
             }
             if (discharge_vs_density)
             {
-            	cout << "Midiendo gasto vs densidad de autos." << endl;
-				r = ex_discharge_vs_density(ca_type, size, vmax, dmin, dmax, dt, rand_prob,
-											args, random_seed, show_progress, path, out_file_name);
+                cout << "Midiendo gasto vs densidad de autos." << endl;
+                r = ex_discharge_vs_density(param);
             }
             if (discharge_vs_density_fractal)
             {
-            	cout << "Creando fractal de gasto vs densidad de autos." << endl;
-				r = ex_discharge_vs_density_fratal(ca_type, size, vmax, dmin, dmax, dt, rand_prob,
-											       args, random_seed, show_progress, path, out_file_name);
+                cout << "Creando fractal de gasto vs densidad de autos." << endl;
+                r = ex_discharge_vs_density_fratal(param);
+            }
+            if (dimension_vs_density)
+            {
+                cout << "Midiendo dimensión fractal vs densidad de autos." << endl;
+                r = ex_dimension_vs_density(param);
             }
         }
     }
@@ -664,8 +721,7 @@ int main(int argc, char* argv[])
             if (plot_traffic)
             {
                 cout << "Creando mapas." << endl;
-                ca->DrawHistory(path, out_file_name);
-                ca->DrawFlowHistory(path, out_file_name);
+                r = ca->DrawHistory(path, out_file_name);
             }
         }
         else
@@ -673,21 +729,19 @@ int main(int argc, char* argv[])
             if (flow_vs_density)
             {
                 cout << "Midiendo flujo vs densidad." << endl;
-                r = ex_multilane_flow_vs_density(ca_type, size, lanes, iterations, vmax, dmin, dmax, dt, rand_prob,
-                                                 args, false, random_seed, show_progress, path, out_file_name);
+                r = ex_multilane_flow_vs_density(param);
             }
             if (flow_per_density)
             {
                 cout << "Midiendo flujo por densidad." << endl;
-                r = ex_multilane_flow_vs_density(ca_type, size, lanes, iterations, vmax, dmin, dmax, dt, rand_prob,
-                                                 args, true, random_seed, show_progress, path, out_file_name);
+                r = ex_multilane_flow_vs_density(param);
             }
         }
     }
     if (r == 0)
-    	cout << "Hecho." << endl;
+        cout << "Hecho." << endl;
     else
-    	cout << "Error en la ejecucion." << endl;
+        cout << "Error en la ejecucion." << endl;
 
     return 0;
 }

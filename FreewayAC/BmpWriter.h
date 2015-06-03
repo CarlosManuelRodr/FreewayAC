@@ -11,6 +11,7 @@
 
 #include <fstream>
 #include <cstdint>
+#include <string>
 
 /**
 * @struct BMPHeader
@@ -77,12 +78,17 @@ public:
     ///@param filepath Ruta del archivo a guardar.
     ///@param width Tamaño horizontal de la imagen.
     ///@param height Tamaño vertical de la imagen.
-    BMPWriter(const char* filepath, unsigned int width, unsigned int height);
+    BMPWriter(std::string filepath, unsigned int width, unsigned int height);
     ~BMPWriter();
 
     ///@brief Writes BMP line.
     ///@param Array de pixeles a escribir. Las líneas se escriben de abajo a arriba.
     void WriteLine(BMPPixel* data);
+
+    ///@brief Return file status.
+    bool IsOpen();
+
+    ///@brief Close file.
     void CloseBMP();
 };
 

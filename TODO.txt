@@ -1,7 +1,3 @@
 ﻿- Implementar decisión de carril en unión.
 - Hacer variable la velocidad inicial.
-- Informar si path es válido.
-- Proveer más generadores de aleatorios.
 - Threads?
-- Modernizar y añadir seguridad a BMPWriter y matrix.
-- Tabs, tabs, tabs....

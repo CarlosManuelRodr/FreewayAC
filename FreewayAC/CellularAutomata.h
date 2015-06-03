@@ -15,7 +15,7 @@
 #include <fstream>
 #include <algorithm>
 #include "BmpWriter.h"
-#include "Aux.h"
+#include "Auxiliar.h"
 
 
 ////////////////////////////////////
@@ -135,12 +135,14 @@ public:
     ///@brief Dibuja mapa histórico del AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
-    virtual void DrawHistory(std::string path = "", std::string out_file_name = "");
+    ///@return 0 si se pudo crear archivo, 1 en caso de error.
+    virtual int DrawHistory(std::string path = "", std::string out_file_name = "");
 
     ///@brief Dibuja mapa histórico del flujo de AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
-    virtual void DrawFlowHistory(std::string path = "", std::string out_file_name = "");
+    ///@return 0 si se pudo crear archivo, 1 en caso de error.
+    virtual int DrawFlowHistory(std::string path = "", std::string out_file_name = "");
 
 
     void Print();                   ///< Escribe línea de autómata celular en la terminal.
@@ -308,7 +310,8 @@ public:
     ///@brief Dibuja mapa histórico del AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
-    void DrawHistory(std::string path = "", std::string out_file_name = "");
+    ///@return 0 si se pudo crear archivo, 1 en caso de error.
+    int DrawHistory(std::string path = "", std::string out_file_name = "");
 
     void Step();        ///< Aplica reglas de evolución temporal del AC con tope.
 };
@@ -349,7 +352,8 @@ public:
     ///@brief Dibuja mapa histórico del AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
-    void DrawHistory(std::string path = "", std::string out_file_name = "");
+    ///@return 0 si se pudo crear archivo, 1 en caso de error.
+    int DrawHistory(std::string path = "", std::string out_file_name = "");
 
     void Step();        ///< Aplica reglas de evolución temporal del AC con tope.
 };
@@ -394,7 +398,8 @@ public:
     ///@brief Dibuja mapa histórico del AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
-    void DrawHistory(std::string path = "", std::string out_file_name = "");
+    ///@return 0 si se pudo crear archivo, 1 en caso de error.
+    int DrawHistory(std::string path = "", std::string out_file_name = "");
 };
 
 
@@ -528,12 +533,14 @@ public:
     ///@brief Dibuja mapa histórico del AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
-    void DrawHistory(std::string path = "", std::string out_file_name = "");
+    ///@return 0 si se pudo crear archivo, 1 en caso de error.
+    int DrawHistory(std::string path = "", std::string out_file_name = "");
 
     ///@brief Dibuja mapa histórico del flujo de AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
-    void DrawFlowHistory(std::string path = "", std::string out_file_name = "");
+    ///@return 0 si se pudo crear archivo, 1 en caso de error.
+    int DrawFlowHistory(std::string path = "", std::string out_file_name = "");
 
     ///@brief Devuelve valores verdaderos con probabilidad prob. Si se usa en prueba usa valores de lista.
     ///@param prob Probabilidad de obtener valor verdadero. Por defecto se utiliza m_rand_prob.

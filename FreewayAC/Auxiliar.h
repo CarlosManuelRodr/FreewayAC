@@ -32,6 +32,8 @@ void aux_progress_bar(double val, double min, double max, double dt);
 */
 bool aux_string_to_bool(std::string str);
 
+void aux_create_directory(std::string directory_name);
+
 /**
 * @brief Informa si find_val está dentro de v.
 * @param v Vector dónde buscar.
@@ -90,8 +92,36 @@ template <class N> N aux_string_to_num(const std::string &s)
 
 template <class N> double aux_mean(std::vector<N> v)
 {
-	return (double)std::accumulate(v.begin(), v.end(), 0.0)/(double)v.size();
+    return (double)std::accumulate(v.begin(), v.end(), 0.0)/(double)v.size();
 }
+
+/*****************************
+*                            *
+*   Directorios y archivos   *
+*                            *
+*****************************/
+
+#if defined(__linux__) || defined(__APPLE__)
+    const std::string f_separator = "/";
+#elif defined(_WIN32)
+    const std::string f_separator = "\\";
+#endif
+
+bool df_directory_exist(std::string path);
+
+bool df_file_exist(std::string file_name);
+
+std::string df_get_app_folder();
+
+/****************************
+*                           *
+*    Llamadas al sistema    *
+*                           *
+****************************/
+
+void s_mkdir(const std::string arg);
+
+void s_rm(const std::string arg);
 
 /****************************
 *                           *
@@ -101,18 +131,20 @@ template <class N> double aux_mean(std::vector<N> v)
 
 enum RandomAlgorithm
 {
-	LCG, MT19937
+    LCG, MT19937, RANLUX24, RANLUX48
 };
 
 class RandomGen
 {
-	static RandomAlgorithm m_ra;
-	static std::mt19937 mt;
+    static RandomAlgorithm m_ra;
+    static std::mt19937 mt;
+    static std::ranlux24 rl24;
+    static std::ranlux48 rl48;
 public:
-	static void SetAlgorithm(RandomAlgorithm ra);
-	static void Seed(int seed = -1);
-	static int GetInt(int i);
-	static double GetDouble();
+    static void SetAlgorithm(RandomAlgorithm ra);
+    static void Seed(int seed = -1);
+    static int GetInt(int i);
+    static double GetDouble();
 };
 
 

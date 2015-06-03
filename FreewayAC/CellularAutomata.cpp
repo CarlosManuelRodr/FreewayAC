@@ -41,7 +41,7 @@ CellularAutomata::CellularAutomata(const unsigned &size, const double &density, 
     if (l_density < 0.0 || l_density > 1.0)
     {
         l_density = 0.1;
-        cout << "Aviso: Densidad invalida. Cambiando a density=" << l_density << "." << endl;
+        cout << "Aviso: Densidad invalida " << density << ". Cambiando a density=" << l_density << "." << endl;
     }
     if (m_vmax < 1)
     {
@@ -120,7 +120,7 @@ void CellularAutomata::PrintHistory()
         cout << endl;
     }
 }
-void CellularAutomata::DrawHistory(string path, string out_file_name)
+int CellularAutomata::DrawHistory(string path, string out_file_name)
 {
     if (out_file_name == "")
         out_file_name = path + "ca.bmp";
@@ -130,24 +130,30 @@ void CellularAutomata::DrawHistory(string path, string out_file_name)
     unsigned height = m_ca_history.size();
     unsigned width = m_size;
     BMPWriter writer(out_file_name.c_str(), width, height);
-    BMPPixel* bmpData = new BMPPixel[width];
-    for (int i = height-1; i >= 0; --i)     // Los archivos BMP se escriben de abajo a arriba.
+    if (writer.IsOpen())
     {
-        for (unsigned j = 0; j < width; ++j)
+        BMPPixel* bmpData = new BMPPixel[width];
+        for (int i = height-1; i >= 0; --i)     // Los archivos BMP se escriben de abajo a arriba.
         {
-            BMPPixel color;
-            if (m_ca_history[i][j] == -1)
-                color = BMPPixel((char)255, (char)255, (char)255);
-            else
-                color = BMPPixel(0, 0, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
-            bmpData[j] = color;
+            for (unsigned j = 0; j < width; ++j)
+            {
+                BMPPixel color;
+                if (m_ca_history[i][j] == -1)
+                    color = BMPPixel((char)255, (char)255, (char)255);
+                else
+                    color = BMPPixel(0, 0, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
+                bmpData[j] = color;
+            }
+            writer.WriteLine(bmpData);
         }
-        writer.WriteLine(bmpData);
+        writer.CloseBMP();
+        delete[] bmpData;
+        return 0;
     }
-    writer.CloseBMP();
-    delete[] bmpData;
+    else
+        return 1;
 }
-void CellularAutomata::DrawFlowHistory(string path, string out_file_name)
+int CellularAutomata::DrawFlowHistory(string path, string out_file_name)
 {
     if (out_file_name == "")
         out_file_name = path + "ca_flow.bmp";
@@ -157,22 +163,28 @@ void CellularAutomata::DrawFlowHistory(string path, string out_file_name)
     unsigned height = m_ca_flow_history.size();
     unsigned width = m_size;
     BMPWriter writer(out_file_name.c_str(), width, height);
-    BMPPixel* bmpData = new BMPPixel[width];
-    for (int i = height-1; i >= 0; --i)
+    if (writer.IsOpen())
     {
-        for (unsigned j=0; j<width; ++j)
+        BMPPixel* bmpData = new BMPPixel[width];
+        for (int i = height-1; i >= 0; --i)
         {
-            BMPPixel color;
-            if (m_ca_flow_history[i][j] == 0)
-                color = BMPPixel((char)255, (char)255, (char)255);
-            else
-                color = BMPPixel(0, 0, (char)(255.0*(double)m_ca_flow_history[i][j]/(double)m_vmax));
-            bmpData[j] = color;
+            for (unsigned j=0; j<width; ++j)
+            {
+                BMPPixel color;
+                if (m_ca_flow_history[i][j] == 0)
+                    color = BMPPixel((char)255, (char)255, (char)255);
+                else
+                    color = BMPPixel(0, 0, (char)(255.0*(double)m_ca_flow_history[i][j]/(double)m_vmax));
+                bmpData[j] = color;
+            }
+            writer.WriteLine(bmpData);
         }
-        writer.WriteLine(bmpData);
+        writer.CloseBMP();
+        delete[] bmpData;
+        return 0;
     }
-    writer.CloseBMP();
-    delete[] bmpData;
+    else
+        return 1;
 }
 void CellularAutomata::Step()
 {
@@ -703,7 +715,7 @@ int StreetStopCA::NextStopDist(const int &pos)
     else
         return numeric_limits<int>::max();
 }
-void StreetStopCA::DrawHistory(string path, string out_file_name)
+int StreetStopCA::DrawHistory(string path, string out_file_name)
 {
     if (out_file_name == "")
         out_file_name = path + "ca.bmp";
@@ -713,32 +725,38 @@ void StreetStopCA::DrawHistory(string path, string out_file_name)
     unsigned height = m_ca_history.size();
     unsigned width = m_size;
     BMPWriter writer(out_file_name.c_str(), width, height);
-    BMPPixel* bmpData = new BMPPixel[width];
-    for (int i = height-1; i >= 0; i--)
+    if (writer.IsOpen())
     {
-        for (unsigned j = 0; j < width; ++j)
+        BMPPixel* bmpData = new BMPPixel[width];
+        for (int i = height-1; i >= 0; i--)
         {
-            BMPPixel color;
-            if (aux_is_in(m_stop_pos, j))
+            for (unsigned j = 0; j < width; ++j)
             {
-                if (m_ca_history[i][j] == -1)
-                    color = BMPPixel((char)0, (char)255, (char)0);
+                BMPPixel color;
+                if (aux_is_in(m_stop_pos, j))
+                {
+                    if (m_ca_history[i][j] == -1)
+                        color = BMPPixel((char)0, (char)255, (char)0);
+                    else
+                        color = BMPPixel(0, (char)255, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
+                }
                 else
-                    color = BMPPixel(0, (char)255, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
+                {
+                    if (m_ca_history[i][j] == -1)
+                        color = BMPPixel((char)255, (char)255, (char)255);
+                    else
+                        color = BMPPixel(0, 0, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
+                }
+                bmpData[j] = color;
             }
-            else
-            {
-                if (m_ca_history[i][j] == -1)
-                    color = BMPPixel((char)255, (char)255, (char)255);
-                else
-                    color = BMPPixel(0, 0, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
-            }
-            bmpData[j] = color;
+            writer.WriteLine(bmpData);
         }
-        writer.WriteLine(bmpData);
+        writer.CloseBMP();
+        delete[] bmpData;
+        return 0;
     }
-    writer.CloseBMP();
-    delete[] bmpData;
+    else
+        return 1;
 }
 
 /****************************
@@ -855,7 +873,7 @@ int SemaphoreCA::NextSemaphoreDist(const int &pos)
     else
         return numeric_limits<int>::max();
 }
-void SemaphoreCA::DrawHistory(string path, string out_file_name)
+int SemaphoreCA::DrawHistory(string path, string out_file_name)
 {
     if (out_file_name == "")
         out_file_name = path + "ca.bmp";
@@ -865,43 +883,49 @@ void SemaphoreCA::DrawHistory(string path, string out_file_name)
     unsigned height = m_ca_history.size();
     unsigned width = m_size;
     BMPWriter writer(out_file_name.c_str(), width, height);
-    BMPPixel* bmpData = new BMPPixel[width];
-    for (int i = height-1; i >= 0; i--)
+    if (writer.IsOpen())
     {
-        for (unsigned j = 0; j < width; ++j)
+        BMPPixel* bmpData = new BMPPixel[width];
+        for (int i = height-1; i >= 0; i--)
         {
-            BMPPixel color;
-            int s_pos = aux_find_pos(m_semaphore_pos, j);
-            if (s_pos != -1)
+            for (unsigned j = 0; j < width; ++j)
             {
-                if (m_semaphore_val_hist[i][s_pos] < m_semaphore_open)
+                BMPPixel color;
+                int s_pos = aux_find_pos(m_semaphore_pos, j);
+                if (s_pos != -1)
                 {
-                    if (m_ca_history[i][j] == -1)
-                        color = BMPPixel((char)0, (char)255, (char)0);
+                    if (m_semaphore_val_hist[i][s_pos] < m_semaphore_open)
+                    {
+                        if (m_ca_history[i][j] == -1)
+                            color = BMPPixel((char)0, (char)255, (char)0);
+                        else
+                            color = BMPPixel((char)0, (char)255, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
+                    }
                     else
-                        color = BMPPixel((char)0, (char)255, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
+                    {
+                        if (m_ca_history[i][j] == -1)
+                            color = BMPPixel((char)255, (char)0, (char)0);
+                        else
+                            color = BMPPixel((char)255, (char)0, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
+                    }
                 }
                 else
                 {
                     if (m_ca_history[i][j] == -1)
-                        color = BMPPixel((char)255, (char)0, (char)0);
+                        color = BMPPixel((char)255, (char)255, (char)255);
                     else
-                        color = BMPPixel((char)255, (char)0, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
+                        color = BMPPixel((char)0, (char)0, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
                 }
+                bmpData[j] = color;
             }
-            else
-            {
-                if (m_ca_history[i][j] == -1)
-                    color = BMPPixel((char)255, (char)255, (char)255);
-                else
-                    color = BMPPixel((char)0, (char)0, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
-            }
-            bmpData[j] = color;
+            writer.WriteLine(bmpData);
         }
-        writer.WriteLine(bmpData);
+        writer.CloseBMP();
+        delete[] bmpData;
+        return 0;
     }
-    writer.CloseBMP();
-    delete[] bmpData;
+    else
+        return 1;
 }
 
 /****************************
@@ -937,7 +961,7 @@ void SimpleJunctionCA::Evolve(const unsigned &iter)
         this->Step();
     }
 }
-void SimpleJunctionCA::DrawHistory(string path, string out_file_name)
+int SimpleJunctionCA::DrawHistory(string path, string out_file_name)
 {
     if (out_file_name == "")
         out_file_name = path + "ca_junction.bmp";
@@ -948,32 +972,38 @@ void SimpleJunctionCA::DrawHistory(string path, string out_file_name)
     unsigned height = m_ca_history.size();
     unsigned width = m_size;
     BMPWriter writer(out_file_name.c_str(), width, height);
-    BMPPixel* bmpData = new BMPPixel[width];
-    for (int i = height - 1; i >= 0; i--)
+    if (writer.IsOpen())
     {
-        for (unsigned j = 0; j<width; ++j)
+        BMPPixel* bmpData = new BMPPixel[width];
+        for (int i = height - 1; i >= 0; i--)
         {
-            BMPPixel color;
-            if (j == m_size/2)
+            for (unsigned j = 0; j<width; ++j)
             {
-                if (m_ca_history[i][j] == -1)
-                    color = BMPPixel((char)0, (char)255, (char)0);
+                BMPPixel color;
+                if (j == m_size/2)
+                {
+                    if (m_ca_history[i][j] == -1)
+                        color = BMPPixel((char)0, (char)255, (char)0);
+                    else
+                        color = BMPPixel((char)0, (char)255, (char)(255.0*(double)m_ca_history[i][j] / (double)m_vmax));
+                }
                 else
-                    color = BMPPixel((char)0, (char)255, (char)(255.0*(double)m_ca_history[i][j] / (double)m_vmax));
+                {
+                    if (m_ca_history[i][j] == -1)
+                        color = BMPPixel((char)255, (char)255, (char)255);
+                    else
+                        color = BMPPixel((char)0, (char)0, (char)(255.0*(double)m_ca_history[i][j] / (double)m_vmax));
+                }
+                bmpData[j] = color;
             }
-            else
-            {
-                if (m_ca_history[i][j] == -1)
-                    color = BMPPixel((char)255, (char)255, (char)255);
-                else
-                    color = BMPPixel((char)0, (char)0, (char)(255.0*(double)m_ca_history[i][j] / (double)m_vmax));
-            }
-            bmpData[j] = color;
+            writer.WriteLine(bmpData);
         }
-        writer.WriteLine(bmpData);
+        writer.CloseBMP();
+        delete[] bmpData;
+        return 0;
     }
-    writer.CloseBMP();
-    delete[] bmpData;
+    else
+        return 1;
 }
 int SimpleJunctionCA::GetAt(const unsigned &i, const unsigned &j, const CAS &ca)
 {
@@ -1182,7 +1212,7 @@ void CellularAutomataML::Print()
         cout << ".";
     cout << endl;
 }
-void CellularAutomataML::DrawHistory(string path, string out_file_name)
+int CellularAutomataML::DrawHistory(string path, string out_file_name)
 {
     if (out_file_name == "")
         out_file_name = path + "ca.bmp";
@@ -1198,38 +1228,44 @@ void CellularAutomataML::DrawHistory(string path, string out_file_name)
     unsigned height =  m_ca_history.size();
     unsigned width = m_size;
     BMPWriter writer(out_file_name.c_str(), width, bmp_height);
-    BMPPixel* bmpData = new BMPPixel[width];
-    BMPPixel color;
-
-    for (int i = height-1; i >= 0; i--)
+    if (writer.IsOpen())
     {
-        for (unsigned l = 0; l < m_lanes; ++l)
-        {
-            for (unsigned j = 0; j < width; ++j)
-            {
-                if (m_ca_history[i][j][l] == -1)
-                    color = BMPPixel((char)255, (char)255, (char)255);
-                else
-                    color = BMPPixel(0, 0, (char)(255.0*(double)m_ca_history[i][j][l]/(double)m_vmax));
-                bmpData[j] = color;
-            }
-            writer.WriteLine(bmpData);
-        }
+        BMPPixel* bmpData = new BMPPixel[width];
+        BMPPixel color;
 
-        if (m_lanes > 1)
+        for (int i = height-1; i >= 0; i--)
         {
-            for (unsigned j = 0; j < width; ++j)
+            for (unsigned l = 0; l < m_lanes; ++l)
             {
-                color = BMPPixel((char)0, (char)182, (char)255);
-                bmpData[j] = color;
+                for (unsigned j = 0; j < width; ++j)
+                {
+                    if (m_ca_history[i][j][l] == -1)
+                        color = BMPPixel((char)255, (char)255, (char)255);
+                    else
+                        color = BMPPixel(0, 0, (char)(255.0*(double)m_ca_history[i][j][l]/(double)m_vmax));
+                    bmpData[j] = color;
+                }
+                writer.WriteLine(bmpData);
             }
-            writer.WriteLine(bmpData);
+
+            if (m_lanes > 1)
+            {
+                for (unsigned j = 0; j < width; ++j)
+                {
+                    color = BMPPixel((char)0, (char)182, (char)255);
+                    bmpData[j] = color;
+                }
+                writer.WriteLine(bmpData);
+            }
         }
+        writer.CloseBMP();
+        delete[] bmpData;
+        return 0;
     }
-    writer.CloseBMP();
-    delete[] bmpData;
+    else
+        return 1;
 }
-void CellularAutomataML::DrawFlowHistory(string path, string out_file_name)
+int CellularAutomataML::DrawFlowHistory(string path, string out_file_name)
 {
     if (out_file_name == "")
         out_file_name = path + "ca_flow.bmp";
@@ -1245,36 +1281,42 @@ void CellularAutomataML::DrawFlowHistory(string path, string out_file_name)
     unsigned height =  m_ca_flow_history.size();
     unsigned width = m_size;
     BMPWriter writer(out_file_name.c_str(), width, bmp_height);
-    BMPPixel* bmpData = new BMPPixel[width];
-    BMPPixel color;
-
-    for (int i = height-1; i >= 0; i--)
+    if (writer.IsOpen())
     {
-        for (unsigned l = 0; l < m_lanes; ++l)
-        {
-            for (unsigned j = 0; j < width; ++j)
-            {
-                if (m_ca_flow_history[i][j][l] == 0)
-                    color = BMPPixel((char)255, (char)255, (char)255);
-                else
-                    color = BMPPixel(0, 0, (char)(255.0*(double)m_ca_flow_history[i][j][l]/(double)m_vmax));
-                bmpData[j] = color;
-            }
-            writer.WriteLine(bmpData);
-        }
+        BMPPixel* bmpData = new BMPPixel[width];
+        BMPPixel color;
 
-        if (m_lanes > 1)
+        for (int i = height-1; i >= 0; i--)
         {
-            for (unsigned j = 0; j < width; ++j)
+            for (unsigned l = 0; l < m_lanes; ++l)
             {
-				color = BMPPixel((char)0, (char)182, (char)255);
-                bmpData[j] = color;
+                for (unsigned j = 0; j < width; ++j)
+                {
+                    if (m_ca_flow_history[i][j][l] == 0)
+                        color = BMPPixel((char)255, (char)255, (char)255);
+                    else
+                        color = BMPPixel(0, 0, (char)(255.0*(double)m_ca_flow_history[i][j][l]/(double)m_vmax));
+                    bmpData[j] = color;
+                }
+                writer.WriteLine(bmpData);
             }
-            writer.WriteLine(bmpData);
+
+            if (m_lanes > 1)
+            {
+                for (unsigned j = 0; j < width; ++j)
+                {
+                    color = BMPPixel((char)0, (char)182, (char)255);
+                    bmpData[j] = color;
+                }
+                writer.WriteLine(bmpData);
+            }
         }
+        writer.CloseBMP();
+        delete[] bmpData;
+        return 0;
     }
-    writer.CloseBMP();
-    delete[] bmpData;
+    else
+        return 1;
 }
 bool CellularAutomataML::Randomization(const double &prob)
 {

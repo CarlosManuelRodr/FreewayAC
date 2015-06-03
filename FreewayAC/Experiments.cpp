@@ -3,7 +3,59 @@
 #include <vector>
 #include "CellularAutomata.h"
 #include "Export.h"
+#include "Experiments.h"
 using namespace std;
+
+/****************************
+*                           *
+*          Medición         *
+*                           *
+****************************/
+
+double measure_fractal_dimension(std::vector<int> frac, int min_div, int max_div, int dt_div)
+{
+    // Conteo de cajas.
+    vector<double> log_epsilon, log_count;
+    for (int div = min_div; div <= max_div; div += dt_div)
+    {
+        double N = 0.0;
+        double epsilon = (double)frac.size()/(double)div;
+        for(int ex=0; ex<div; ++ex)
+        {
+            bool found = false;
+            for(int w=ex*epsilon; w<(ex+1)*epsilon && !found; ++w)
+            {
+                if ((unsigned)w < frac.size())
+                {
+                    if (frac[w] != 0)
+                    {
+                        N++;
+                        found = true;
+                        break;
+                    }
+                }
+                else
+                    break;
+            }
+        }
+        log_epsilon.push_back(log(1.0/epsilon));
+        log_count.push_back(log(N));
+    }
+
+    // Ajuste por mínimos cuadrados.
+    double size, sum_xy, sum_x, sum_y, sum_x_squared;
+    sum_xy = sum_x = sum_y = sum_x_squared = 0;
+    size = log_epsilon.size();
+    for(int i = 0; i < size; ++i)
+    {
+        sum_xy += log_epsilon[i]*log_count[i];
+        sum_x += log_epsilon[i];
+        sum_y += log_count[i];
+        sum_x_squared += pow(log_epsilon[i], 2.0);
+    }
+    double fit = (size*sum_xy - sum_x*sum_y)/(size*sum_x_squared - pow(sum_x,2.0));
+    return fit;
+}
 
 /****************************
 *                           *
@@ -11,8 +63,29 @@ using namespace std;
 *                           *
 ****************************/
 
-int ex_ocupancy_fixed(CellularAutomata *ca, string path, string out_file_name)
+int ex_traffic_maps(ExParam p)
 {
+    CellularAutomata* ca = create_ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.args);
+    ca->Evolve(p.iterations);
+    int r = ca->DrawHistory(p.path, p.out_file_name);
+    delete_ca();
+    return r;
+}
+
+int ex_flow_maps(ExParam p)
+{
+    CellularAutomata* ca = create_ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.args);
+    ca->Evolve(p.iterations);
+    int r = ca->DrawFlowHistory(p.path, p.out_file_name);
+    delete_ca();
+    return r;
+}
+
+int ex_ocupancy_fixed(ExParam p)
+{
+    CellularAutomata* ca = create_ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.args);
+    ca->Evolve(p.iterations);
+
     vector<double> ocupancy;
     ocupancy.assign(ca->GetSize(), 0.0);
     unsigned height = ca->GetHistorySize();
@@ -30,17 +103,21 @@ int ex_ocupancy_fixed(CellularAutomata *ca, string path, string out_file_name)
     }
 
     // Escribe a CSV.
-    if (out_file_name.empty())
-        out_file_name = path + "ocupancy.csv";
+    if (p.out_file_name.empty())
+        p.out_file_name = p.path + "ocupancy.csv";
     else
-        out_file_name = path + out_file_name;
+        p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(ocupancy, out_file_name);
+    int r = export_csv(ocupancy, p.out_file_name);
+    delete_ca();
     return r;
 }
 
-int ex_flow_fixed(CellularAutomata *ca, string path = "", string out_file_name = "")
+int ex_flow_fixed(ExParam p)
 {
+    CellularAutomata* ca = create_ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.args);
+    ca->Evolve(p.iterations);
+
     vector<double> flow;
     flow.assign(ca->GetSize(), 0.0);
     unsigned height = ca->GetHistorySize();
@@ -58,39 +135,37 @@ int ex_flow_fixed(CellularAutomata *ca, string path = "", string out_file_name =
     }
 
     // Escribe a CSV.
-    if (out_file_name.empty())
-        out_file_name = path + "flow.csv";
+    if (p.out_file_name.empty())
+        p.out_file_name = p.path + "flow.csv";
     else
-        out_file_name = path + out_file_name;
+        p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(flow, out_file_name);
+    int r = export_csv(flow, p.out_file_name);
+    delete_ca();
     return r;
 }
 
-int ex_flow_vs_density(const CA_TYPE &type, const unsigned &size, const unsigned &iterations, const int &vmax,
-                       const double &density_min, const double &density_max, const double &dt, const double &rand_prob,
-                       Args args, const bool &per_density, const int &random_seed, const bool &show_progress, string path,
-                       string out_file_name)
+int ex_flow_vs_density(ExParam p)
 {
     vector<double> density;
     vector<double> flow;
     CellularAutomata* ca;
 
-    for (double d = density_min; d <= density_max; d += dt)
+    for (double d = p.density_min; d <= p.density_max; d += p.dt)
     {
         // Reporta progreso.
-    	if (show_progress)
-    		aux_progress_bar(d, density_min, density_max, dt);
+        if (p.show_progress)
+            aux_progress_bar(d, p.density_min, p.density_max, p.dt);
 
         // Evoluciona el sistema.
-        ca = create_ca(type, size, d, vmax, rand_prob, args, random_seed);
+        ca = create_ca(p.type, p.size, d, p.vmax, p.rand_prob, p.args, p.random_seed);
         if (!ca)
-        	return 1;
-        ca->Evolve(iterations);
+            return 1;
+        ca->Evolve(p.iterations);
 
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
-        tmp_flow.assign(size, 0.0);
+        tmp_flow.assign(p.size, 0.0);
         unsigned height = ca->GetHistorySize();
         unsigned width = ca->GetSize();
 
@@ -107,7 +182,7 @@ int ex_flow_vs_density(const CA_TYPE &type, const unsigned &size, const unsigned
 
         // Obtiene el promedio de todos los flujos.
         double mean = aux_mean(tmp_flow);
-        if (per_density) mean /= d;
+        if (p.per_density) mean /= d;
 
         // Asigna valores.
         density.push_back(d);
@@ -115,45 +190,42 @@ int ex_flow_vs_density(const CA_TYPE &type, const unsigned &size, const unsigned
     }
 
     // Escribe a CSV.
-    if (out_file_name.empty())
+    if (p.out_file_name.empty())
     {
-        if (per_density)
-            out_file_name = path + "flow_per_density.csv";
+        if (p.per_density)
+            p.out_file_name = p.path + "flow_per_density.csv";
         else
-            out_file_name = path + "flow_vs_density.csv";
+            p.out_file_name = p.path + "flow_vs_density.csv";
     }
     else
-        out_file_name = path + out_file_name;
+        p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(density, flow, out_file_name);
+    int r = export_csv(density, flow, p.out_file_name);
     delete_ca();
     return r;
 }
 
-int ex_multilane_flow_vs_density(const CA_TYPE &type, const unsigned &size, const unsigned &lanes, const unsigned &iterations,
-                                 const int &vmax, const double &density_min, const double &density_max, const double &dt,
-                                 const double &rand_prob, Args args, const bool &per_density, const int &random_seed,
-                                 const bool &show_progress, string path, string out_file_name)
+int ex_multilane_flow_vs_density(ExParam p)
 {
     vector<double> density;
     vector<double> flow;
     CellularAutomataML* ca;
 
-    for (double d = density_min; d <= density_max; d += dt)
+    for (double d = p.density_min; d <= p.density_max; d += p.dt)
     {
         // Reporta progreso.
-    	if (show_progress)
-    		aux_progress_bar(d, density_min, density_max, dt);
+        if (p.show_progress)
+            aux_progress_bar(d, p.density_min, p.density_max, p.dt);
 
         // Evoluciona el sistema.
-        ca = create_multilane_ca(type, size, lanes, d, vmax, rand_prob, args, random_seed);
+        ca = create_multilane_ca(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.args, p.random_seed);
         if (!ca)
-			return 1;
-        ca->Evolve(iterations);
+            return 1;
+        ca->Evolve(p.iterations);
 
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
-        tmp_flow.assign(size, 0.0);
+        tmp_flow.assign(p.size, 0.0);
         unsigned height = ca->GetHistorySize();
         unsigned width = ca->GetSize();
         unsigned lane_num = ca->GetLanes();
@@ -174,7 +246,7 @@ int ex_multilane_flow_vs_density(const CA_TYPE &type, const unsigned &size, cons
 
         // Obtiene el promedio de todos los flujos.
         double mean = aux_mean(tmp_flow);
-        if (per_density) mean /= d;
+        if (p.per_density) mean /= d;
 
         // Asigna valores.
         density.push_back(d);
@@ -182,45 +254,42 @@ int ex_multilane_flow_vs_density(const CA_TYPE &type, const unsigned &size, cons
     }
 
     // Escribe a CSV.
-    if (out_file_name.empty())
+    if (p.out_file_name.empty())
     {
-        if (per_density)
-            out_file_name = path + "flow_per_density.csv";
+        if (p.per_density)
+            p.out_file_name = p.path + "flow_per_density.csv";
         else
-            out_file_name = path + "flow_vs_density.csv";
+            p.out_file_name = p.path + "flow_vs_density.csv";
     }
     else
-        out_file_name = path + out_file_name;
+        p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(density, flow, out_file_name);
+    int r = export_csv(density, flow, p.out_file_name);
     delete_ca();
     return r;
 }
 
-int ex_flow_vs_vmax(const CA_TYPE &type, const unsigned &size, const unsigned &iterations, const int &vmax_min,
-                    const int &vmax_max, const int &dt, const double &density, const double &rand_prob,
-                    Args args, const int &random_seed, const bool &show_progress, string path,
-                    string out_file_name)
+int ex_flow_vs_vmax(ExParam p)
 {
     vector<double> vmax;
     vector<double> flow;
     CellularAutomata* ca;
 
-    for (int v = vmax_min; v <= vmax_max; v += dt)
+    for (int v = p.vmax_min; v <= p.vmax_max; v += p.dt)
     {
         // Reporta progreso.
-    	if (show_progress)
-    		aux_progress_bar(v, vmax_min, vmax_max, dt);
+        if (p.show_progress)
+            aux_progress_bar(v, p.vmax_min, p.vmax_max, p.dt);
 
         // Evoluciona el sistema.
-        ca = create_ca(type, size, density, v, rand_prob, args, random_seed);
+        ca = create_ca(p.type, p.size, p.density, v, p.rand_prob, p.args, p.random_seed);
         if (!ca)
-			return 1;
-        ca->Evolve(iterations);
+            return 1;
+        ca->Evolve(p.iterations);
 
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
-        tmp_flow.assign(size, 0.0);
+        tmp_flow.assign(p.size, 0.0);
         unsigned height = ca->GetHistorySize();
         unsigned width = ca->GetSize();
 
@@ -241,40 +310,37 @@ int ex_flow_vs_vmax(const CA_TYPE &type, const unsigned &size, const unsigned &i
     }
 
     // Escribe a CSV.
-    if (out_file_name.empty())
-        out_file_name = path + "flow_vs_vmax.csv";
+    if (p.out_file_name.empty())
+        p.out_file_name = p.path + "flow_vs_vmax.csv";
     else
-        out_file_name = path + out_file_name;
+        p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(vmax, flow, out_file_name);
+    int r = export_csv(vmax, flow, p.out_file_name);
     delete_ca();
     return r;
 }
 
-int ex_flow_vs_rand_prob(const CA_TYPE &type, const unsigned &size, const unsigned &iterations, const int &vmax,
-                         const double &density, const double &rand_prob_min, const double &rand_prob_max,
-                         const double &dt, Args args, const int &random_seed, const bool &show_progress, string path,
-                         string out_file_name)
+int ex_flow_vs_rand_prob(ExParam p)
 {
     vector<double> rand_prob;
     vector<double> flow;
     CellularAutomata* ca;
 
-    for (double r = rand_prob_min; r <= rand_prob_max; r += dt)
+    for (double r = p.rand_prob_min; r <= p.rand_prob_max; r += p.dt)
     {
         // Reporta progreso.
-    	if (show_progress)
-    		aux_progress_bar(r, rand_prob_min, rand_prob_max, dt);
+        if (p.show_progress)
+            aux_progress_bar(r, p.rand_prob_min, p.rand_prob_max, p.dt);
 
         // Evoluciona el sistema.
-        ca = create_ca(type, size, density, vmax, r, args, random_seed);
+        ca = create_ca(p.type, p.size, p.density, p.vmax, r, p.args, p.random_seed);
         if (!ca)
-			return 1;
-        ca->Evolve(iterations);
+            return 1;
+        ca->Evolve(p.iterations);
 
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
-        tmp_flow.assign(size, 0.0);
+        tmp_flow.assign(p.size, 0.0);
         unsigned height = ca->GetHistorySize();
         unsigned width = ca->GetSize();
 
@@ -295,40 +361,37 @@ int ex_flow_vs_rand_prob(const CA_TYPE &type, const unsigned &size, const unsign
     }
 
     // Escribe a CSV.
-    if (out_file_name.empty())
-        out_file_name = path + "flow_vs_rand_prob.csv";
+    if (p.out_file_name.empty())
+        p.out_file_name = p.path + "flow_vs_rand_prob.csv";
     else
-        out_file_name = path + out_file_name;
+        p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(rand_prob, flow, out_file_name);
+    int r = export_csv(rand_prob, flow, p.out_file_name);
     delete_ca();
     return r;
 }
 
-int ex_flow_vs_aut_cars(const unsigned &size, const unsigned &iterations, const int &vmax, const double &density,
-                        const double &rand_prob, const double &aut_car_density_min, const double &aut_car_density_max,
-                        const double &dt, const int &random_seed, const bool &show_progress, string path,
-                        string out_file_name)
+int ex_flow_vs_aut_cars(ExParam p)
 {
     vector<double> aut_car_density;
     vector<double> flow;
     CellularAutomata* ca;
 
-    for (double s = aut_car_density_min; s <= aut_car_density_max; s += dt)
+    for (double s = p.aut_car_density_min; s <= p.aut_car_density_max; s += p.dt)
     {
         // Reporta progreso.
-    	if (show_progress)
-    		aux_progress_bar(s, aut_car_density_min, aut_car_density_max, dt);
+        if (p.show_progress)
+            aux_progress_bar(s, p.aut_car_density_min, p.aut_car_density_max, p.dt);
 
         // Evoluciona el sistema.
-        ca = create_ca(AUTONOMOUS_CA, size, density, vmax, rand_prob, Args({ s }), random_seed);
+        ca = create_ca(AUTONOMOUS_CA, p.size, p.density, p.vmax, p.rand_prob, Args({ s }), p.random_seed);
         if (!ca)
-			return 1;
-        ca->Evolve(iterations);
+            return 1;
+        ca->Evolve(p.iterations);
 
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
-        tmp_flow.assign(size, 0.0);
+        tmp_flow.assign(p.size, 0.0);
         unsigned height = ca->GetHistorySize();
         unsigned width = ca->GetSize();
 
@@ -349,22 +412,19 @@ int ex_flow_vs_aut_cars(const unsigned &size, const unsigned &iterations, const 
     }
 
     // Escribe a CSV.
-    if (out_file_name.empty())
-        out_file_name = path + "flow_vs_aut_cars.csv";
+    if (p.out_file_name.empty())
+        p.out_file_name = p.path + "flow_vs_aut_cars.csv";
     else
-        out_file_name = path + out_file_name;
+        p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(aut_car_density, flow, out_file_name);
+    int r = export_csv(aut_car_density, flow, p.out_file_name);
     delete_ca();
     return r;
 }
 
-int ex_flow_vs_new_car_prob(const CA_TYPE &type, const unsigned &size, const unsigned &iterations, const int &vmax,
-		                    const double &density, const double &rand_prob, const double &new_car_prob_min,
-		                    const double &new_car_prob_max, const double &dt, Args args, const bool &per_prob,
-		                    const int &random_seed, const bool &show_progress, string path, string out_file_name)
+int ex_flow_vs_new_car_prob(ExParam p)
 {
-    if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, type))
+    if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, p.type))
     {
         cout << "AC no valido para experimento seleccionado." << endl;
         return 1;
@@ -374,22 +434,22 @@ int ex_flow_vs_new_car_prob(const CA_TYPE &type, const unsigned &size, const uns
     vector<double> flow;
     CellularAutomata* ca;
 
-    for (double s = new_car_prob_min; s <= new_car_prob_max; s += dt)
+    for (double s = p.new_car_prob_min; s <= p.new_car_prob_max; s += p.dt)
     {
         // Reporta progreso.
-    	if (show_progress)
-    		aux_progress_bar(s, new_car_prob_min, new_car_prob_max, dt);
+        if (p.show_progress)
+            aux_progress_bar(s, p.new_car_prob_min, p.new_car_prob_max, p.dt);
 
         // Evoluciona el sistema.
-        args.SetDouble(0, s);
-        ca = create_ca(type, size, density, vmax, rand_prob, args, random_seed);
+        p.args.SetDouble(0, s);
+        ca = create_ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.args, p.random_seed);
         if (!ca)
-			return 1;
-        ca->Evolve(iterations);
+            return 1;
+        ca->Evolve(p.iterations);
 
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
-        tmp_flow.assign(size, 0.0);
+        tmp_flow.assign(p.size, 0.0);
         unsigned height = ca->GetHistorySize();
         unsigned width = ca->GetSize();
 
@@ -406,7 +466,7 @@ int ex_flow_vs_new_car_prob(const CA_TYPE &type, const unsigned &size, const uns
 
         // Obtiene el promedio de todos los flujos.
         double mean = aux_mean(tmp_flow);
-        if (per_prob)
+        if (p.per_prob)
             mean /= s;
 
         // Asigna valores.
@@ -415,45 +475,42 @@ int ex_flow_vs_new_car_prob(const CA_TYPE &type, const unsigned &size, const uns
     }
 
     // Escribe a CSV.
-    if (out_file_name.empty())
+    if (p.out_file_name.empty())
     {
-        if (per_prob)
-            out_file_name = path + "flow_per_new_car_prob.csv";
+        if (p.per_prob)
+            p.out_file_name = p.path + "flow_per_new_car_prob.csv";
         else
-            out_file_name = path + "flow_vs_new_car_prob.csv";
+            p.out_file_name = p.path + "flow_vs_new_car_prob.csv";
     }
     else
-        out_file_name = path + out_file_name;
+        p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(new_car_density, flow, out_file_name);
+    int r = export_csv(new_car_density, flow, p.out_file_name);
     delete_ca();
     return r;
 }
 
-int ex_flow_vs_stop_density(const unsigned &size, const unsigned &iterations, const int &vmax,
-                            const double &density, const double &rand_prob, const double &stop_density_min,
-                            const double &stop_density_max, const double &dt, const int &random_seed,
-                            const bool &show_progress, string path, string out_file_name)
+int ex_flow_vs_stop_density(ExParam p)
 {
     vector<double> stop_density;
     vector<double> flow;
     CellularAutomata* ca;
 
-    for (double d = stop_density_min; d <= stop_density_max; d += dt)
+    for (double d = p.stop_density_min; d <= p.stop_density_max; d += p.dt)
     {
         // Reporta progreso.
-    	if (show_progress)
-    		aux_progress_bar(d, stop_density_min, stop_density_max, dt);
+        if (p.show_progress)
+            aux_progress_bar(d, p.stop_density_min, p.stop_density_max, p.dt);
 
         // Evoluciona el sistema.
-        ca = create_ca(STOP_CA, size, density, vmax, rand_prob, Args({ d }), random_seed);
+        ca = create_ca(STOP_CA, p.size, p.density, p.vmax, p.rand_prob, Args({ d }), p.random_seed);
         if (!ca)
-			return 1;
-        ca->Evolve(iterations);
+            return 1;
+        ca->Evolve(p.iterations);
 
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
-        tmp_flow.assign(size, 0.0);
+        tmp_flow.assign(p.size, 0.0);
         unsigned height = ca->GetHistorySize();
         unsigned width = ca->GetSize();
 
@@ -474,40 +531,37 @@ int ex_flow_vs_stop_density(const unsigned &size, const unsigned &iterations, co
     }
 
     // Escribe a CSV.
-    if (out_file_name.empty())
-        out_file_name = path + "flow_vs_stop_density.csv";
+    if (p.out_file_name.empty())
+        p.out_file_name = p.path + "flow_vs_stop_density.csv";
     else
-        out_file_name = path + out_file_name;
+        p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(stop_density, flow, out_file_name);
+    int r = export_csv(stop_density, flow, p.out_file_name);
     delete_ca();
     return r;
 }
 
-int ex_flow_vs_semaphore_density(const unsigned &size, const unsigned &iterations, const int &vmax,
-                                 const double &density, const double &rand_prob, const double &semaphore_density_min,
-                                 const double &semaphore_density_max, const double &dt, const bool &random_semaphores,
-                                 const int &random_seed, const bool &show_progress, string path, string out_file_name)
+int ex_flow_vs_semaphore_density(ExParam p)
 {
     vector<double> semaphore_density;
     vector<double> flow;
     CellularAutomata* ca;
 
-    for (double d = semaphore_density_min; d <= semaphore_density_max; d += dt)
+    for (double d = p.semaphore_density_min; d <= p.semaphore_density_max; d += p.dt)
     {
         // Reporta progreso.
-    	if (show_progress)
-    		aux_progress_bar(d, semaphore_density_min, semaphore_density_max, dt);
+        if (p.show_progress)
+            aux_progress_bar(d, p.semaphore_density_min, p.semaphore_density_max, p.dt);
 
         // Evoluciona el sistema.
-        ca = create_ca(SEMAPHORE_CA, size, density, vmax, rand_prob, Args({ d }, {}, { random_semaphores }), random_seed);
+        ca = create_ca(SEMAPHORE_CA, p.size, p.density, p.vmax, p.rand_prob, Args({ d }, {}, { p.random_semaphores }), p.random_seed);
         if (!ca)
-			return 1;
-        ca->Evolve(iterations);
+            return 1;
+        ca->Evolve(p.iterations);
 
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
-        tmp_flow.assign(size, 0.0);
+        tmp_flow.assign(p.size, 0.0);
         unsigned height = ca->GetHistorySize();
         unsigned width = ca->GetSize();
 
@@ -528,23 +582,20 @@ int ex_flow_vs_semaphore_density(const unsigned &size, const unsigned &iteration
     }
 
     // Escribe a CSV.
-    if (out_file_name.empty())
-        out_file_name = path + "flow_vs_semaphore_density.csv";
+    if (p.out_file_name.empty())
+        p.out_file_name = p.path + "flow_vs_semaphore_density.csv";
     else
-        out_file_name = path + out_file_name;
+        p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(semaphore_density, flow, out_file_name);
+    int r = export_csv(semaphore_density, flow, p.out_file_name);
     delete_ca();
     return r;
 }
 
 
-int ex_escape_time_vs_density(const CA_TYPE &type, const unsigned &size, const int &vmax,
-		                      const double &density_min, const double &density_max, const double &dt,
-		                      const double &rand_prob, Args args, const int &random_seed,
-		                      const bool &show_progress, string path, string out_file_name)
+int ex_escape_time_vs_density(ExParam p)
 {
-	CA_TYPE ca_type = type;
+    CA_TYPE ca_type = p.type;
     if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, ca_type))
     {
         cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
@@ -555,29 +606,29 @@ int ex_escape_time_vs_density(const CA_TYPE &type, const unsigned &size, const i
     vector<double> escape_time;
     CellularAutomata* ca;
 
-    for (double d = density_min; d <= density_max; d += dt)
+    for (double d = p.density_min; d <= p.density_max; d += p.dt)
     {
         // Reporta progreso.
-    	if (show_progress)
-    		aux_progress_bar(d, density_min, density_max, dt);
+        if (p.show_progress)
+            aux_progress_bar(d, p.density_min, p.density_max, p.dt);
 
         // Evoluciona el sistema.
-        args.SetDouble(0, 0.0);
-        ca = create_ca(ca_type, size, d, vmax, rand_prob, args, random_seed);
+        p.args.SetDouble(0, 0.0);
+        ca = create_ca(ca_type, p.size, d, p.vmax, p.rand_prob, p.args, p.random_seed);
         if (!ca)
-			return 1;
+            return 1;
 
         int iter = 0;
         while (ca->CountCars() != 0)
         {
-        	ca->Step();
-        	iter++;
+            ca->Step();
+            iter++;
 
-        	if (ca->IsFluxHalted())
-			{
-				cout << "Error: Flujo detenido." << endl;
-				return 1;
-			}
+            if (ca->IsFluxHalted())
+            {
+                cout << "Error: Flujo detenido." << endl;
+                return 1;
+            }
         }
         densities.push_back(d);
         escape_time.push_back(iter);
@@ -589,12 +640,9 @@ int ex_escape_time_vs_density(const CA_TYPE &type, const unsigned &size, const i
     return r;
 }
 
-int ex_escape_time_vs_rand_prob(const CA_TYPE &type, const unsigned &size, const double &density, const int &vmax,
-		                        const double &rand_prob_min, const double &rand_prob_max, const double &dt,
-		                        Args args, const int &random_seed, const bool &show_progress, string path,
-		                        string out_file_name)
+int ex_escape_time_vs_rand_prob(ExParam p)
 {
-	CA_TYPE ca_type = type;
+    CA_TYPE ca_type = p.type;
     if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, ca_type))
     {
         cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
@@ -605,23 +653,23 @@ int ex_escape_time_vs_rand_prob(const CA_TYPE &type, const unsigned &size, const
     vector<double> escape_time;
     CellularAutomata* ca;
 
-    for (double ra = rand_prob_min; ra <= rand_prob_max; ra += dt)
+    for (double ra = p.rand_prob_min; ra <= p.rand_prob_max; ra += p.dt)
     {
         // Reporta progreso.
-        if (show_progress)
-        	aux_progress_bar(ra, rand_prob_min, rand_prob_max, dt);
+        if (p.show_progress)
+            aux_progress_bar(ra, p.rand_prob_min, p.rand_prob_max, p.dt);
 
         // Evoluciona el sistema.
-        args.SetDouble(0, 0.0);
-        ca = create_ca(ca_type, size, density, vmax, ra, args, random_seed);
+        p.args.SetDouble(0, 0.0);
+        ca = create_ca(ca_type, p.size, p.density, p.vmax, ra, p.args, p.random_seed);
         if (!ca)
-			return 1;
+            return 1;
 
         int iter = 0;
         while (ca->CountCars() != 0 && !ca->IsFluxHalted())
         {
-        	ca->Step();
-        	iter++;
+            ca->Step();
+            iter++;
         }
         rand_p.push_back(ra);
         escape_time.push_back(iter);
@@ -633,12 +681,9 @@ int ex_escape_time_vs_rand_prob(const CA_TYPE &type, const unsigned &size, const
     return r;
 }
 
-int ex_escape_time_vs_vmax(const CA_TYPE &type, const unsigned &size, const double &density, const int &vmax_min,
-                           const int &vmax_max, const int &dt, const double &rand_prob,
-		                   Args args, const int &random_seed, const bool &show_progress, string path,
-		                   string out_file_name)
+int ex_escape_time_vs_vmax(ExParam p)
 {
-	CA_TYPE ca_type = type;
+    CA_TYPE ca_type = p.type;
     if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, ca_type))
     {
         cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
@@ -649,23 +694,23 @@ int ex_escape_time_vs_vmax(const CA_TYPE &type, const unsigned &size, const doub
     vector<double> escape_time;
     CellularAutomata* ca;
 
-    for (int v = vmax_min; v <= vmax_max; v += dt)
+    for (int v = p.vmax_min; v <= p.vmax_max; v += p.dt)
     {
         // Reporta progreso.
-        if (show_progress)
-        	aux_progress_bar(v, vmax_min, vmax_max, dt);
+        if (p.show_progress)
+            aux_progress_bar(v, p.vmax_min, p.vmax_max, p.dt);
 
         // Evoluciona el sistema.
-        args.SetDouble(0, 0.0);
-        ca = create_ca(ca_type, size, density, v, rand_prob, args, random_seed);
+        p.args.SetDouble(0, 0.0);
+        ca = create_ca(ca_type, p.size, p.density, v, p.rand_prob, p.args, p.random_seed);
         if (!ca)
-			return 1;
+            return 1;
 
         int iter = 0;
         while (ca->CountCars() != 0 && !ca->IsFluxHalted())
         {
-        	ca->Step();
-        	iter++;
+            ca->Step();
+            iter++;
         }
         vel.push_back(v);
         escape_time.push_back(iter);
@@ -677,12 +722,9 @@ int ex_escape_time_vs_vmax(const CA_TYPE &type, const unsigned &size, const doub
     return r;
 }
 
-int ex_discharge_vs_density(const CA_TYPE &type, const unsigned &size, const int &vmax,
-		                    const double &density_min, const double &density_max, const double &dt,
-		                    const double &rand_prob, Args args, const int &random_seed,
-		                    const bool &show_progress, string path, string out_file_name)
+int ex_discharge_vs_density(ExParam p)
 {
-	CA_TYPE ca_type = type;
+    CA_TYPE ca_type = p.type;
     if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, ca_type))
     {
         cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
@@ -693,34 +735,34 @@ int ex_discharge_vs_density(const CA_TYPE &type, const unsigned &size, const int
     vector<double> escape_time;
     CellularAutomata* ca;
 
-    for (double d = density_min; d <= density_max; d += dt)
+    for (double d = p.density_min; d <= p.density_max; d += p.dt)
     {
         // Reporta progreso.
-    	if (show_progress)
-    		aux_progress_bar(d, density_min, density_max, dt);
+        if (p.show_progress)
+            aux_progress_bar(d, p.density_min, p.density_max, p.dt);
 
         // Evoluciona el sistema.
-        args.SetDouble(0, 0.0);
-        ca = create_ca(ca_type, size, d, vmax, rand_prob, args, random_seed);
+        p.args.SetDouble(0, 0.0);
+        ca = create_ca(ca_type, p.size, d, p.vmax, p.rand_prob, p.args, p.random_seed);
         if (!ca)
-			return 1;
+            return 1;
 
         int iter = 0;
         while (ca->CountCars() != 0)
         {
-        	ca->Step();
-        	iter++;
+            ca->Step();
+            iter++;
 
-        	if (ca->IsFluxHalted())
-			{
-				cout << "Error: Flujo detenido." << endl;
-				return 1;
-			}
+            if (ca->IsFluxHalted())
+            {
+                cout << "Error: Flujo detenido." << endl;
+                return 1;
+            }
         }
         if (iter != 0)
         {
-			densities.push_back(d);
-			escape_time.push_back((double)(ca->GetSize())*d/(double)iter);
+            densities.push_back(d);
+            escape_time.push_back((double)(ca->GetSize())*d/(double)iter);
         }
 
     }
@@ -730,12 +772,9 @@ int ex_discharge_vs_density(const CA_TYPE &type, const unsigned &size, const int
     return r;
 }
 
-int ex_discharge_vs_density_fratal(const CA_TYPE &type, const unsigned &size, const int &vmax,
-		                           const double &density_min, const double &density_max, const double &dt,
-		                           const double &rand_prob, Args args, const int &random_seed,
-		                           const bool &show_progress, string path, string out_file_name)
+int ex_discharge_vs_density_fratal(ExParam p)
 {
-	CA_TYPE ca_type = type;
+    CA_TYPE ca_type = p.type;
     if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, ca_type))
     {
         cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
@@ -745,46 +784,124 @@ int ex_discharge_vs_density_fratal(const CA_TYPE &type, const unsigned &size, co
     vector<double> escape_time;
     CellularAutomata* ca;
 
-    for (double d = density_min; d <= density_max; d += dt)
+    for (double d = p.density_min; d <= p.density_max; d += p.dt)
     {
         // Reporta progreso.
-    	if (show_progress)
-    		aux_progress_bar(d, density_min, density_max, dt);
+        if (p.show_progress)
+            aux_progress_bar(d, p.density_min, p.density_max, p.dt);
 
         // Evoluciona el sistema.
-        args.SetDouble(0, 0.0);
-        ca = create_ca(ca_type, size, d, vmax, rand_prob, args, random_seed);
+        p.args.SetDouble(0, 0.0);
+        ca = create_ca(ca_type, p.size, d, p.vmax, p.rand_prob, p.args, p.random_seed);
         if (!ca)
-			return 1;
+            return 1;
 
         int iter = 0;
         while (ca->CountCars() != 0)
         {
-        	ca->Step();
-        	iter++;
+            ca->Step();
+            iter++;
 
-        	if (ca->IsFluxHalted())
-			{
-				cout << "Error: Flujo detenido." << endl;
-				return 1;
-			}
+            if (ca->IsFluxHalted())
+            {
+                cout << "Error: Flujo detenido." << endl;
+                return 1;
+            }
         }
         if (iter != 0)
-        	escape_time.push_back((double)(ca->GetSize())*d/(double)iter);
+            escape_time.push_back((double)(ca->GetSize())*d/(double)iter);
     }
 
+    cout << "Calculando dimensión fractal." << endl;
     double et_mean = aux_mean(escape_time);
     vector<int> fractal(escape_time.size(), 0);
     for (unsigned i = 0; i < escape_time.size(); ++i)
     {
-    	if (escape_time[i] > et_mean)
-    		fractal[i] = 1;
+        if (escape_time[i] > et_mean)
+            fractal[i] = 1;
     }
+    cout << "La dimension fractal es: " << measure_fractal_dimension(fractal, 0.1*fractal.size(), fractal.size(), 1) << "." << endl;
 
     int r = export_plot(fractal, "discharge_vs_density_fractal.bmp", 30, false, BINARY_COLORS);
     delete_ca();
     return r;
 }
+
+int ex_dimension_vs_density(ExParam p)
+{
+    int r;
+    CA_TYPE ca_type = p.type;
+    if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, ca_type))
+    {
+        cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
+        ca_type = OPEN_CA;
+    }
+
+    vector<double> densities, dimension;
+    double p_size = (p.density_max-p.density_min)/(double)p.partitions;
+    CellularAutomata* ca;
+
+    int part = 0;
+    for (double d_left = p.density_min; part < p.partitions; d_left += p_size, part++)
+    {
+        // Reporta progreso.
+        if (p.show_progress)
+            aux_progress_bar(part, 0, p.partitions-1, 1);
+
+        vector<double> escape_time;
+        for (double d = d_left; d < (d_left+p_size); d += p.dt)
+        {
+            // Evoluciona el sistema.
+            p.args.SetDouble(0, 0.0);
+            ca = create_ca(ca_type, p.size, d, p.vmax, p.rand_prob, p.args, p.random_seed);
+            if (!ca)
+                return 1;
+
+            int iter = 0;
+            while (ca->CountCars() != 0)
+            {
+                ca->Step();
+                iter++;
+
+                if (ca->IsFluxHalted())
+                {
+                    cout << "Error: Flujo detenido." << endl;
+                    return 1;
+                }
+            }
+            if (iter != 0)
+                escape_time.push_back((double)(ca->GetSize())*d/(double)iter);
+        }
+
+        double et_mean = aux_mean(escape_time);
+        vector<int> fractal(escape_time.size(), 0);
+        for (unsigned i = 0; i < escape_time.size(); ++i)
+        {
+            if (escape_time[i] > et_mean)
+                fractal[i] = 1;
+        }
+
+        double d_mean = d_left + p_size/2.0;
+        densities.push_back(d_mean);
+        dimension.push_back(measure_fractal_dimension(fractal, 0.1*fractal.size(), fractal.size(), 1));
+
+        if (p.path.empty())
+        {
+            aux_create_directory("Fractal");
+            p.path = "Fractal" + f_separator;
+        }
+
+        string p_name = p.path + "discharge_vs_density_fractal_" + to_string(d_mean) + ".bmp";
+        r = export_plot(fractal, p_name, 30, false, BINARY_COLORS);
+        if (r != 0)
+            return 1;
+    }
+
+    r = export_csv(densities, dimension, "dimension_vs_density.csv");
+    delete_ca();
+    return r;
+}
+
 
 /**
 * @brief Realiza tests para verificar la corrección de los algoritmos.
@@ -795,8 +912,8 @@ void ex_perform_test()
     vector<int> init({1, -1, -1, 1, -1, 1, 1, -1, -1, 1, -1, -1, -1, 1, -1, -1, 1, -1, -1, -1});
     vector<int> end_circ({-1, 2, -1, 1, 0, -1, -1, 1, -1, 1, -1,-1, -1, -1, 2, -1, -1, -1, 2, -1});
     vector<bool> rand_val_circ({false, false, false, false, true, false, true,
-									true, false, false, true, false, false, false,
-									false, true, false, false, true, false, false});
+                                    true, false, false, true, false, false, false,
+                                    false, true, false, false, true, false, false});
 
     cout << "Comprobando automata celular circular... ";
     CircularCA circ_ca(init, rand_val_circ, 5);
@@ -820,8 +937,8 @@ void ex_perform_test()
     // Abierto.
     vector<int> end_open({-1, 1, 0, -1, -1, 1, -1, 1, 0, -1, -1,-1, -1, -1, -1, 3, -1, -1, 2, -1});
     vector<bool> rand_val_open_vec({false, false, false, false, true, false, true, false,
-									true, false, false, true, false, false, false, true,
-									false, true, false, false, true, false, false, false});
+                                    true, false, false, true, false, false, false, true,
+                                    false, true, false, false, true, false, false, false});
 
     cout << "Comprobando automata celular abierto... ";
     OpenCA open_ca(init, rand_val_open_vec, 5, 1);
@@ -846,8 +963,8 @@ void ex_perform_test()
     vector<int> end_aut({ -1, -1, -1, -1, 1, 0, -1, 1, -1, -1, -1, -1, 2, -1, -1, 2, -1, 1, -1, 1 });
     vector<int> aut_cars_vec({ 0, 1, 3, 5 });
     vector<bool> rand_val_aut_vec({ false, false, false, true, true,
-									true, false, true, false, false,
-									false, true, false, true, false });
+                                    true, false, true, false, false,
+                                    false, true, false, true, false });
 
     cout << "Comprobando automata celular con vehiculos autonomos... ";
     AutonomousCA autonomous_ca(init, aut_cars_vec, rand_val_aut_vec, 5);

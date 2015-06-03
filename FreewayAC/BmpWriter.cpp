@@ -1,5 +1,5 @@
-#include <string>
 #include <climits>
+#include <iostream>
 #include "BmpWriter.h"
 using namespace std;
 
@@ -41,7 +41,7 @@ bool BMPPixel::operator==(const BMPPixel &other)
     else return false;
 }
 
-BMPWriter::BMPWriter(const char* filepath, unsigned int width, unsigned int height)
+BMPWriter::BMPWriter(string filepath, unsigned int width, unsigned int height)
 {
     // Crea encabezado.
     m_indexHeight = 0;
@@ -80,23 +80,30 @@ BMPWriter::BMPWriter(const char* filepath, unsigned int width, unsigned int heig
     m_dibHdr->headerSize = 40;        //DIBHeader size.
 
     // Escribe encabezado.
-    m_file.open(filepath, ios::out | ios::binary);
-    m_file.write(ToByte(&m_bmpHdr->identifier), 2);
-    m_file.write(ToByte(&m_bmpHdr->size), 4);
-    m_file.write(ToByte(&m_bmpHdr->appSpecific1), 2);
-    m_file.write(ToByte(&m_bmpHdr->appSpecific2), 2);
-    m_file.write(ToByte(&m_bmpHdr->bitmapData), 4);
-    m_file.write(ToByte(&m_dibHdr->headerSize), 4);
-    m_file.write(ToByte(&m_dibHdr->width), 4);
-    m_file.write(ToByte(&m_dibHdr->height), 4);
-    m_file.write(ToByte(&m_dibHdr->nPlanes), 2);
-    m_file.write(ToByte(&m_dibHdr->colorDepth), 2);
-    m_file.write(ToByte(&m_dibHdr->compression), 4);
-    m_file.write(ToByte(&m_dibHdr->bmpBytes), 4);
-    m_file.write(ToByte(&m_dibHdr->hRes), 4);
-    m_file.write(ToByte(&m_dibHdr->vRes), 4);
-    m_file.write(ToByte(&m_dibHdr->nColors), 4);
-    m_file.write(ToByte(&m_dibHdr->nImpColors), 4);
+    m_file.open(filepath.c_str(), ios::out | ios::binary);
+    if (m_file.is_open())
+    {
+        m_file.write(ToByte(&m_bmpHdr->identifier), 2);
+        m_file.write(ToByte(&m_bmpHdr->size), 4);
+        m_file.write(ToByte(&m_bmpHdr->appSpecific1), 2);
+        m_file.write(ToByte(&m_bmpHdr->appSpecific2), 2);
+        m_file.write(ToByte(&m_bmpHdr->bitmapData), 4);
+        m_file.write(ToByte(&m_dibHdr->headerSize), 4);
+        m_file.write(ToByte(&m_dibHdr->width), 4);
+        m_file.write(ToByte(&m_dibHdr->height), 4);
+        m_file.write(ToByte(&m_dibHdr->nPlanes), 2);
+        m_file.write(ToByte(&m_dibHdr->colorDepth), 2);
+        m_file.write(ToByte(&m_dibHdr->compression), 4);
+        m_file.write(ToByte(&m_dibHdr->bmpBytes), 4);
+        m_file.write(ToByte(&m_dibHdr->hRes), 4);
+        m_file.write(ToByte(&m_dibHdr->vRes), 4);
+        m_file.write(ToByte(&m_dibHdr->nColors), 4);
+        m_file.write(ToByte(&m_dibHdr->nImpColors), 4);
+    }
+    else
+    {
+        cout << "Error: No se puede crear archivo BMP." << endl;
+    }
 }
 BMPWriter::~BMPWriter()
 {
@@ -131,6 +138,10 @@ void BMPWriter::WriteLine(BMPPixel* data)
         }
     }
     m_indexHeight++;
+}
+bool BMPWriter::IsOpen()
+{
+    return m_file.is_open();
 }
 void BMPWriter::CloseBMP()
 {
