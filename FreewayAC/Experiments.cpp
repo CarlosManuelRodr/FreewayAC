@@ -23,7 +23,7 @@ double measure_fractal_dimension(std::vector<int> frac, int min_div, int max_div
         for(int ex=0; ex<div; ++ex)
         {
             bool found = false;
-            for(int w=ex*epsilon; w<(ex+1)*epsilon && !found; ++w)
+            for(int w=(int)ex*epsilon; w<(int)(ex+1)*epsilon && !found; ++w)
             {
                 if ((unsigned)w < frac.size())
                 {
@@ -275,7 +275,7 @@ int ex_flow_vs_vmax(ExParam p)
     vector<double> flow;
     CellularAutomata* ca;
 
-    for (int v = p.vmax_min; v <= p.vmax_max; v += p.dt)
+    for (int v = p.vmax_min; v <= p.vmax_max; v += (int)p.dt)
     {
         // Reporta progreso.
         if (p.show_progress)
@@ -694,7 +694,7 @@ int ex_escape_time_vs_vmax(ExParam p)
     vector<double> escape_time;
     CellularAutomata* ca;
 
-    for (int v = p.vmax_min; v <= p.vmax_max; v += p.dt)
+    for (int v = p.vmax_min; v <= p.vmax_max; v += (int)p.dt)
     {
         // Reporta progreso.
         if (p.show_progress)
@@ -820,7 +820,8 @@ int ex_discharge_vs_density_fratal(ExParam p)
         if (escape_time[i] > et_mean)
             fractal[i] = 1;
     }
-    cout << "La dimension fractal es: " << measure_fractal_dimension(fractal, 0.1*fractal.size(), fractal.size(), 1) << "." << endl;
+	cout << "La dimension fractal es: " << measure_fractal_dimension(fractal, (int)0.1*fractal.size(), fractal.size(), 1);
+	cout << "." << endl;
 
     int r = export_plot(fractal, "discharge_vs_density_fractal.bmp", 30, false, BINARY_COLORS);
     delete_ca();
@@ -883,7 +884,7 @@ int ex_dimension_vs_density(ExParam p)
 
         double d_mean = d_left + p_size/2.0;
         densities.push_back(d_mean);
-        dimension.push_back(measure_fractal_dimension(fractal, 0.1*fractal.size(), fractal.size(), 1));
+        dimension.push_back(measure_fractal_dimension(fractal, (int)0.1*fractal.size(), fractal.size(), 1));
 
         if (p.path.empty())
         {

@@ -193,7 +193,7 @@ BMPPixel Palette::operator[](const unsigned &i)
 *                           *
 ****************************/
 
-const BMPPixel white(255, 255, 255);
+const BMPPixel white((char)255, (char)255, (char)255);
 const BMPPixel black(0, 0, 0);
 
 int export_plot(vector<int> &data, const string &filename, const unsigned &height,
@@ -223,7 +223,7 @@ int export_plot(vector<int> &data, const string &filename, const unsigned &heigh
                         bmpData[i] = white;
                 }
                 else
-                    bmpData[i] = palette[palette_size*((double)data[i]/(double)max)];
+                    bmpData[i] = palette[(unsigned)(palette_size*((double)data[i]/(double)max))];
             }
         }
         else

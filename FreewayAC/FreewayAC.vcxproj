@@ -76,18 +76,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Auxiliar.cpp" />
     <ClCompile Include="BmpWriter.cpp" />
     <ClCompile Include="CellularAutomata.cpp" />
+    <ClCompile Include="Experiments.cpp" />
+    <ClCompile Include="Export.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="mtrand.cpp" />
-    <ClCompile Include="Plotter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Auxiliar.h" />
     <ClInclude Include="BmpWriter.h" />
     <ClInclude Include="CellularAutomata.h" />
-    <ClInclude Include="mtrand.h" />
+    <ClInclude Include="Experiments.h" />
+    <ClInclude Include="Export.h" />
     <ClInclude Include="optionparser.h" />
-    <ClInclude Include="Plotter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

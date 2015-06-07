@@ -21,21 +21,21 @@
     <ClCompile Include="main.cpp">
       <Filter>Archivos de código fuente</Filter>
     </ClCompile>
-    <ClCompile Include="mtrand.cpp">
-      <Filter>Archivos de código fuente</Filter>
-    </ClCompile>
     <ClCompile Include="CellularAutomata.cpp">
       <Filter>Archivos de código fuente</Filter>
     </ClCompile>
-    <ClCompile Include="Plotter.cpp">
+    <ClCompile Include="Auxiliar.cpp">
+      <Filter>Archivos de código fuente</Filter>
+    </ClCompile>
+    <ClCompile Include="Experiments.cpp">
+      <Filter>Archivos de código fuente</Filter>
+    </ClCompile>
+    <ClCompile Include="Export.cpp">
       <Filter>Archivos de código fuente</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BmpWriter.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="mtrand.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="optionparser.h">
@@ -44,7 +44,13 @@
     <ClInclude Include="CellularAutomata.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="Plotter.h">
+    <ClInclude Include="Auxiliar.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Experiments.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Export.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>

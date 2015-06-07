@@ -14,6 +14,15 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <pwd.h>
+
+#elif defined(_WIN32)
+#define NOMINMAX
+#define _CRT_SECURE_NO_WARNINGS
+#include <direct.h>
+#include <Shlobj.h>
+#include <windows.h>
+#include <Shlwapi.h>
+#pragma comment(lib, "shlwapi.lib")
 #endif
 
 using namespace std;
@@ -144,13 +153,15 @@ string df_get_app_folder()
     char mbOwnPth[MAX_PATH];
 
     HMODULE hModule = GetModuleHandle(NULL);
-    if (hModule != NULL)
-    {
-        GetModuleFileName(hModule, ownPth, (sizeof(ownPth)));
-        PathRemoveFileSpec(ownPth);
-        wcstombs(mbOwnPth, ownPth, MAX_PATH);
-        return string(mbOwnPth);
-    }
+	if (hModule != NULL)
+	{
+		GetModuleFileName(hModule, ownPth, (sizeof(ownPth)));
+		PathRemoveFileSpec(ownPth);
+		wcstombs(mbOwnPth, ownPth, MAX_PATH);
+		return string(mbOwnPth);
+	}
+	else
+		return string("");
 #endif
 }
 
@@ -184,12 +195,38 @@ int s_mkpath(std::string s, mode_t mode)
 }
 #endif
 
+void s_replace_all(string &s, const string &search, const string &replace)
+{
+	for (size_t pos = 0; ; pos += replace.length())
+	{
+		// Locate the substring to replace
+		pos = s.find(search, pos);
+		if (pos == string::npos) break;
+		// Replace by erasing and inserting
+		s.erase(pos, search.length());
+		s.insert(pos, replace);
+}
+}
+
+string s_format_path(const string in, bool support_long_path = false)
+{
+#if defined(__linux__) || defined(__APPLE__)
+	return string(in);
+#elif defined(_WIN32)
+	string out(in);
+	s_replace_all(out, "/", "\\");
+	if (support_long_path)
+		out = string("\\\\?\\") + out;
+	return out;
+#endif
+}
+
 void s_mkdir(const string arg)
 {
 #if defined(__linux__) || defined(__APPLE__)
     s_mkpath(arg, 0755);
 #elif defined(_WIN32)
-    string in = format_path(arg);
+	string in = s_format_path(arg);
     wstring w_arg = wstring(in.begin(), in.end());
     CreateDirectory(w_arg.c_str(), NULL);
 #endif
@@ -203,20 +240,11 @@ void s_rm(const string arg)
     if (infile.is_open())
     {
         infile.close();
-        string in = format_path(arg);
+		string in = s_format_path(arg);
         wstring w_arg = wstring(in.begin(), in.end());
         DeleteFile(w_arg.c_str());
     }
 #endif
-}
-int s_path_is_directory (string path)
-{
-    struct stat s_buf;
-
-    if (stat(path.c_str(), &s_buf))
-        return 0;
-
-    return S_ISDIR(s_buf.st_mode);
 }
 
 /****************************
@@ -237,7 +265,7 @@ void RandomGen::SetAlgorithm(RandomAlgorithm ra)
 void RandomGen::Seed(int seed)
 {
     if (seed == -1)
-        seed = std::chrono::system_clock::now().time_since_epoch().count();
+        seed = static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count());
 
     switch (m_ra)
     {
