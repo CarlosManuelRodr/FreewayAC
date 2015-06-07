@@ -47,7 +47,7 @@ public:
 
     ~Matrix();
 
-    // ## Asignaci�n de valores. ##
+    // ## Asignación de valores. ##
 
     ///@brief Crea matriz sin especificar elementos.
     int SetMatrix(unsigned int rows, unsigned int cols);
@@ -61,8 +61,11 @@ public:
     ///@brief Asigna elemento con seguridad.
     void SetElement(unsigned int i, unsigned int j, T val);
 
+	///@brief Asigna val a todos los elementos.
+	void Assign(T val);
 
-    // ## Obtenci�n de valores. ##
+
+    // ## Obtención de valores. ##
     T** GetMatrix();
     std::vector<T> GetRow(unsigned int row);
     unsigned int GetColumns();
@@ -174,11 +177,19 @@ template <class T> int Matrix<T>::SetMatrix(unsigned int rows, unsigned int cols
             m_matrix[i] = new T[m_ncols];
         }
     }
-    catch (std::bad_alloc& ba)
+    catch (std::bad_alloc&)
     {
         return 1;
     }
     return 0;
+}
+template <class T> void Matrix<T>::Assign(T val)
+{
+	for (unsigned i = 0; i < m_nrows; i++)
+	{
+		for (unsigned j = 0; j < m_ncols; j++)
+			m_matrix[i][j] = val;
+	}
 }
 template <class T> T** Matrix<T>::GetMatrix()
 {
@@ -264,6 +275,14 @@ enum STYLES
 *                           *
 ****************************/
 
+const BMPPixel white((char)255, (char)255, (char)255);
+const BMPPixel black(0, 0, 0);
+
+enum ExportFormat
+{
+	CSV, BMP
+};
+
 template <class N> int export_csv(std::vector<N> &data, const std::string &filename)
 {
     std::ofstream file(filename.c_str(), std::ofstream::out);
@@ -316,10 +335,83 @@ template <class N> int export_csv(std::vector<N> &data_1, std::vector<N> &data_2
     }
 }
 
-int export_plot(std::vector<int> &data, const std::string &filename, const unsigned &height = 30,
-                 const bool &normalize = false, const STYLES &style = SUMMER_DAY);
+template <class N> int export_plot(const std::vector<N> data, const std::string filename)
+{
+	unsigned coord_y;
+	unsigned int size = data.size();
+	double min_x = 0;
+	double max_x = size;
+	double min_y = static_cast<double>(*max_element(data.begin(), data.end()));
+	double max_y = static_cast<double>(*min_element(data.begin(), data.end()));
+	double y_factor = (max_y - min_y) / (size - 1);
 
-int export_plot(Matrix<int> &data, const std::string &filename, const bool &normalize = false,
-                 const STYLES &style = SUMMER_DAY);
+	Matrix<bool> plot(size, size);
+	plot.Assign(false);
+
+	// Asigna valores a grafica.
+	for (unsigned x = 0; x < size; x++)
+	{
+		coord_y = (unsigned)((max_y - data[x]) / y_factor);
+		plot[x][coord_y] = true;
+	}
+
+	// Crea imagen.
+	BMPWriter writer(filename.c_str(), size, size);
+	if (writer.IsOpen())
+	{
+		vector<BMPPixel> bmp_data;
+		for (unsigned j = 0; j < size; j++)
+		{
+			bmp_data.assign(size, white);
+			for (unsigned i = 0; i < size; i++)
+			{
+				if (plot[i][j] == true)
+					bmp_data[i] = black;
+			}
+			writer.WriteLine(bmp_data);
+		}
+		writer.CloseBMP();
+		return 0;
+	}
+	else
+		return 1;
+}
+
+template <class N> int export_data(std::vector<N> &data_1, std::vector<N> &data_2, const std::string &filename,
+	                               ExportFormat &format)
+{
+	switch (format)
+	{
+	case CSV:
+		return export_csv(data_1, data_2, aux_replace_extension(filename, "csv"));
+		break;
+	case BMP:
+		return export_plot(data_2, aux_replace_extension(filename, "bmp"));
+		break;
+	default:
+		return 1;
+	}
+}
+
+template <class N> int export_data(std::vector<N> &data, const std::string &filename, ExportFormat &format)
+{
+	switch (format)
+	{
+	case CSV:
+		return export_csv(data, aux_replace_extension(filename, "csv"));
+		break;
+	case BMP:
+		return export_plot(data, aux_replace_extension(filename, "bmp"));
+		break;
+	default:
+		return 1;
+	}
+}
+
+int export_map(std::vector<int> &data, const std::string &filename, const unsigned &height = 30,
+               const bool &normalize = false, const STYLES &style = SUMMER_DAY);
+
+int export_map(Matrix<int> &data, const std::string &filename, const bool &normalize = false,
+               const STYLES &style = SUMMER_DAY);
 
 #endif

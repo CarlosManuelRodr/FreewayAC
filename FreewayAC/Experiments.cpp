@@ -2,7 +2,6 @@
 #include <fstream>
 #include <vector>
 #include "CellularAutomata.h"
-#include "Export.h"
 #include "Experiments.h"
 using namespace std;
 
@@ -23,7 +22,7 @@ double measure_fractal_dimension(std::vector<int> frac, int min_div, int max_div
         for(int ex=0; ex<div; ++ex)
         {
             bool found = false;
-            for(int w=(int)ex*epsilon; w<(int)(ex+1)*epsilon && !found; ++w)
+            for(int w=(int)(ex*epsilon); w<(int)((ex+1)*epsilon) && !found; ++w)
             {
                 if ((unsigned)w < frac.size())
                 {
@@ -63,7 +62,7 @@ double measure_fractal_dimension(std::vector<int> frac, int min_div, int max_div
 *                           *
 ****************************/
 
-int ex_traffic_maps(ExParam p)
+int ex_traffic_map(ExParam p)
 {
     CellularAutomata* ca = create_ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.args);
     ca->Evolve(p.iterations);
@@ -72,7 +71,7 @@ int ex_traffic_maps(ExParam p)
     return r;
 }
 
-int ex_flow_maps(ExParam p)
+int ex_flow_map(ExParam p)
 {
     CellularAutomata* ca = create_ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.args);
     ca->Evolve(p.iterations);
@@ -108,7 +107,7 @@ int ex_ocupancy_fixed(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(ocupancy, p.out_file_name);
+    int r = export_data(ocupancy, p.out_file_name, p.export_format);
     delete_ca();
     return r;
 }
@@ -140,7 +139,7 @@ int ex_flow_fixed(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(flow, p.out_file_name);
+	int r = export_data(flow, p.out_file_name, p.export_format);
     delete_ca();
     return r;
 }
@@ -200,7 +199,7 @@ int ex_flow_vs_density(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(density, flow, p.out_file_name);
+	int r = export_data(density, flow, p.out_file_name, p.export_format);
     delete_ca();
     return r;
 }
@@ -264,7 +263,7 @@ int ex_multilane_flow_vs_density(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(density, flow, p.out_file_name);
+	int r = export_data(density, flow, p.out_file_name, p.export_format);
     delete_ca();
     return r;
 }
@@ -315,7 +314,7 @@ int ex_flow_vs_vmax(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(vmax, flow, p.out_file_name);
+	int r = export_data(vmax, flow, p.out_file_name, p.export_format);
     delete_ca();
     return r;
 }
@@ -366,7 +365,7 @@ int ex_flow_vs_rand_prob(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(rand_prob, flow, p.out_file_name);
+	int r = export_data(rand_prob, flow, p.out_file_name, p.export_format);
     delete_ca();
     return r;
 }
@@ -417,7 +416,7 @@ int ex_flow_vs_aut_cars(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(aut_car_density, flow, p.out_file_name);
+	int r = export_data(aut_car_density, flow, p.out_file_name, p.export_format);
     delete_ca();
     return r;
 }
@@ -485,7 +484,7 @@ int ex_flow_vs_new_car_prob(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(new_car_density, flow, p.out_file_name);
+	int r = export_data(new_car_density, flow, p.out_file_name, p.export_format);
     delete_ca();
     return r;
 }
@@ -536,7 +535,7 @@ int ex_flow_vs_stop_density(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(stop_density, flow, p.out_file_name);
+	int r = export_data(stop_density, flow, p.out_file_name, p.export_format);
     delete_ca();
     return r;
 }
@@ -587,11 +586,10 @@ int ex_flow_vs_semaphore_density(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_csv(semaphore_density, flow, p.out_file_name);
+	int r = export_data(semaphore_density, flow, p.out_file_name, p.export_format);
     delete_ca();
     return r;
 }
-
 
 int ex_escape_time_vs_density(ExParam p)
 {
@@ -635,7 +633,7 @@ int ex_escape_time_vs_density(ExParam p)
 
     }
 
-    int r = export_csv(densities, escape_time, "escape_time_vs_density.csv");
+	int r = export_data(densities, escape_time, "escape_time_vs_density.csv", p.export_format);
     delete_ca();
     return r;
 }
@@ -676,7 +674,7 @@ int ex_escape_time_vs_rand_prob(ExParam p)
 
     }
 
-    int r = export_csv(rand_p, escape_time, "escape_time_vs_rand_prob.csv");
+	int r = export_data(rand_p, escape_time, "escape_time_vs_rand_prob.csv", p.export_format);
     delete_ca();
     return r;
 }
@@ -717,7 +715,7 @@ int ex_escape_time_vs_vmax(ExParam p)
 
     }
 
-    int r = export_csv(vel, escape_time, "escape_time_vs_vmax.csv");
+	int r = export_data(vel, escape_time, "escape_time_vs_vmax.csv", p.export_format);
     delete_ca();
     return r;
 }
@@ -767,7 +765,7 @@ int ex_discharge_vs_density(ExParam p)
 
     }
 
-    int r = export_csv(densities, escape_time, "discharge_vs_density.csv");
+	int r = export_data(densities, escape_time, "discharge_vs_density.csv", p.export_format);
     delete_ca();
     return r;
 }
@@ -823,7 +821,7 @@ int ex_discharge_vs_density_fratal(ExParam p)
 	cout << "La dimension fractal es: " << measure_fractal_dimension(fractal, (int)0.1*fractal.size(), fractal.size(), 1);
 	cout << "." << endl;
 
-    int r = export_plot(fractal, "discharge_vs_density_fractal.bmp", 30, false, BINARY_COLORS);
+    int r = export_map(fractal, "discharge_vs_density_fractal.bmp", 30, false, BINARY_COLORS);
     delete_ca();
     return r;
 }
@@ -893,7 +891,7 @@ int ex_dimension_vs_density(ExParam p)
         }
 
         string p_name = p.path + "discharge_vs_density_fractal_" + to_string(d_mean) + ".bmp";
-        r = export_plot(fractal, p_name, 30, false, BINARY_COLORS);
+        r = export_map(fractal, p_name, 30, false, BINARY_COLORS);
         if (r != 0)
             return 1;
     }

@@ -35,6 +35,12 @@ bool aux_string_to_bool(std::string str);
 
 void aux_create_directory(std::string directory_name);
 
+std::string aux_get_extension(const std::string filepath);
+
+std::string aux_replace_all(const std::string &in, const std::string &search, const std::string &replace);
+
+std::string aux_replace_extension(const std::string &in, const std::string &ext);
+
 /**
 * @brief Informa si find_val está dentro de v.
 * @param v Vector dónde buscar.

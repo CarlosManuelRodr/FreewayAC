@@ -12,6 +12,7 @@
 #include <fstream>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 /**
 * @struct BMPHeader
@@ -84,6 +85,10 @@ public:
     ///@brief Writes BMP line.
     ///@param Array de pixeles a escribir. Las líneas se escriben de abajo a arriba.
     void WriteLine(BMPPixel* data);
+
+	///@brief Writes BMP line.
+	///@param Vector de pixeles a escribir. Las líneas se escriben de abajo a arriba.
+	void WriteLine(std::vector<BMPPixel> data);
 
     ///@brief Return file status.
     bool IsOpen();

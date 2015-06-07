@@ -1,8 +1,8 @@
 #pragma once
 #ifndef _EXPERIMENTS
 #define _EXPERIMENTS
-
 #include "CellularAutomata.h"
+#include "Export.h"
 
 
 /*****************************
@@ -11,6 +11,10 @@
 *                            *
 *****************************/
 
+/**
+* @struct ExParam
+* @brief Parámetros de experimentos.
+*/
 struct ExParam
 {
     CA_TYPE type;
@@ -31,6 +35,8 @@ struct ExParam
     std::string path, out_file_name;
 
     Args args;
+
+	ExportFormat export_format;
 };
 
 
@@ -49,9 +55,15 @@ double measure_fractal_dimension(std::vector<int> frac);
 *                           *
 ****************************/
 
-int ex_traffic_maps(ExParam p);
+/**
+* @brief Crea mapa de tráfico.
+*/
+int ex_traffic_map(ExParam p);
 
-int ex_flow_maps(ExParam p);
+/**
+* @brief Crea mapa de flujo.
+*/
+int ex_flow_map(ExParam p);
 
 /**
 * @brief Mide la ocupación en todas las casillas de AC.

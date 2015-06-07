@@ -193,11 +193,8 @@ BMPPixel Palette::operator[](const unsigned &i)
 *                           *
 ****************************/
 
-const BMPPixel white((char)255, (char)255, (char)255);
-const BMPPixel black(0, 0, 0);
-
-int export_plot(vector<int> &data, const string &filename, const unsigned &height,
-                 const bool &normalize, const STYLES &style)
+int export_map(vector<int> &data, const string &filename, const unsigned &height,
+               const bool &normalize, const STYLES &style)
 {
     Palette palette;
     if (style != BINARY_COLORS)
@@ -252,7 +249,7 @@ int export_plot(vector<int> &data, const string &filename, const unsigned &heigh
     else
         return 1;
 }
-int export_plot(Matrix<int> &data, const string &filename, const bool &normalize, const STYLES &style)
+int export_map(Matrix<int> &data, const string &filename, const bool &normalize, const STYLES &style)
 {
     Palette palette;
     if (style != BINARY_COLORS)

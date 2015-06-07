@@ -85,6 +85,36 @@ void aux_create_directory(string directory_name)
     if (!df_directory_exist(path))
         s_mkdir(path);
 }
+string aux_get_extension(const string filepath)
+{
+	string m_filepath = filepath;
+	return m_filepath.substr(m_filepath.find_last_of('.') + 1);
+}
+string aux_replace_all(const string &in, const string &search, const string &replace)
+{
+	string s = in;
+	for (size_t pos = 0;; pos += replace.length())
+	{
+		pos = s.find(search, pos);
+		if (pos == string::npos) break;
+		s.erase(pos, search.length());
+		s.insert(pos, replace);
+	}
+	return s;
+}
+string aux_replace_extension(const string &in, const string &ext)
+{
+	string orig_ext = aux_get_extension(in);
+	if (orig_ext.empty())
+		return in + "." + ext;
+	else
+	{
+		if (orig_ext != ext)
+			return aux_replace_all(in, orig_ext, ext);
+		else
+			return in;
+	}
+}
 
 /*****************************
 *                            *
@@ -195,26 +225,13 @@ int s_mkpath(std::string s, mode_t mode)
 }
 #endif
 
-void s_replace_all(string &s, const string &search, const string &replace)
-{
-	for (size_t pos = 0; ; pos += replace.length())
-	{
-		// Locate the substring to replace
-		pos = s.find(search, pos);
-		if (pos == string::npos) break;
-		// Replace by erasing and inserting
-		s.erase(pos, search.length());
-		s.insert(pos, replace);
-}
-}
-
 string s_format_path(const string in, bool support_long_path = false)
 {
 #if defined(__linux__) || defined(__APPLE__)
 	return string(in);
 #elif defined(_WIN32)
 	string out(in);
-	s_replace_all(out, "/", "\\");
+	aux_replace_all(out, "/", "\\");
 	if (support_long_path)
 		out = string("\\\\?\\") + out;
 	return out;

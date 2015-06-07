@@ -4,7 +4,7 @@
 using namespace std;
 
 // Operaciones binarias.
-char* ToByte(void* ptr)
+char* to_byte(void* ptr)
 {
     return static_cast<char*>(ptr);
 }
@@ -83,22 +83,22 @@ BMPWriter::BMPWriter(string filepath, unsigned int width, unsigned int height)
     m_file.open(filepath.c_str(), ios::out | ios::binary);
     if (m_file.is_open())
     {
-        m_file.write(ToByte(&m_bmpHdr->identifier), 2);
-        m_file.write(ToByte(&m_bmpHdr->size), 4);
-        m_file.write(ToByte(&m_bmpHdr->appSpecific1), 2);
-        m_file.write(ToByte(&m_bmpHdr->appSpecific2), 2);
-        m_file.write(ToByte(&m_bmpHdr->bitmapData), 4);
-        m_file.write(ToByte(&m_dibHdr->headerSize), 4);
-        m_file.write(ToByte(&m_dibHdr->width), 4);
-        m_file.write(ToByte(&m_dibHdr->height), 4);
-        m_file.write(ToByte(&m_dibHdr->nPlanes), 2);
-        m_file.write(ToByte(&m_dibHdr->colorDepth), 2);
-        m_file.write(ToByte(&m_dibHdr->compression), 4);
-        m_file.write(ToByte(&m_dibHdr->bmpBytes), 4);
-        m_file.write(ToByte(&m_dibHdr->hRes), 4);
-        m_file.write(ToByte(&m_dibHdr->vRes), 4);
-        m_file.write(ToByte(&m_dibHdr->nColors), 4);
-        m_file.write(ToByte(&m_dibHdr->nImpColors), 4);
+        m_file.write(to_byte(&m_bmpHdr->identifier), 2);
+        m_file.write(to_byte(&m_bmpHdr->size), 4);
+        m_file.write(to_byte(&m_bmpHdr->appSpecific1), 2);
+        m_file.write(to_byte(&m_bmpHdr->appSpecific2), 2);
+        m_file.write(to_byte(&m_bmpHdr->bitmapData), 4);
+        m_file.write(to_byte(&m_dibHdr->headerSize), 4);
+        m_file.write(to_byte(&m_dibHdr->width), 4);
+        m_file.write(to_byte(&m_dibHdr->height), 4);
+        m_file.write(to_byte(&m_dibHdr->nPlanes), 2);
+        m_file.write(to_byte(&m_dibHdr->colorDepth), 2);
+        m_file.write(to_byte(&m_dibHdr->compression), 4);
+        m_file.write(to_byte(&m_dibHdr->bmpBytes), 4);
+        m_file.write(to_byte(&m_dibHdr->hRes), 4);
+        m_file.write(to_byte(&m_dibHdr->vRes), 4);
+        m_file.write(to_byte(&m_dibHdr->nColors), 4);
+        m_file.write(to_byte(&m_dibHdr->nImpColors), 4);
     }
     else
     {
@@ -124,20 +124,25 @@ void BMPWriter::WriteLine(BMPPixel* data)
         if(m_paddingBytes == 1)
         {
             char padding = 0x00;
-            m_file.write(ToByte(&padding), 1);
+            m_file.write(to_byte(&padding), 1);
         }
         if(m_paddingBytes == 2)
         {
             short padding = 0x0000;
-            m_file.write(ToByte(&padding), 2);
+            m_file.write(to_byte(&padding), 2);
         }
         if(m_paddingBytes == 3)
         {
             unsigned int padding = 0x00000000;
-            m_file.write(ToByte(&padding), 3);
+            m_file.write(to_byte(&padding), 3);
         }
     }
     m_indexHeight++;
+}
+void BMPWriter::WriteLine(std::vector<BMPPixel> data)
+{
+	if (!data.empty())
+		WriteLine(&data[0]);
 }
 bool BMPWriter::IsOpen()
 {
