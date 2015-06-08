@@ -81,39 +81,39 @@ void aux_progress_bar(double val, double min, double max, double dt)
 }
 void aux_create_directory(string directory_name)
 {
-    string path = df_get_app_folder() + f_separator + directory_name;
+    string path = df_get_app_folder() + df_separator + directory_name;
     if (!df_directory_exist(path))
         s_mkdir(path);
 }
 string aux_get_extension(const string filepath)
 {
-	string m_filepath = filepath;
-	return m_filepath.substr(m_filepath.find_last_of('.') + 1);
+    string m_filepath = filepath;
+    return m_filepath.substr(m_filepath.find_last_of('.') + 1);
 }
 string aux_replace_all(const string &in, const string &search, const string &replace)
 {
-	string s = in;
-	for (size_t pos = 0;; pos += replace.length())
-	{
-		pos = s.find(search, pos);
-		if (pos == string::npos) break;
-		s.erase(pos, search.length());
-		s.insert(pos, replace);
-	}
-	return s;
+    string s = in;
+    for (size_t pos = 0;; pos += replace.length())
+    {
+        pos = s.find(search, pos);
+        if (pos == string::npos) break;
+        s.erase(pos, search.length());
+        s.insert(pos, replace);
+    }
+    return s;
 }
 string aux_replace_extension(const string &in, const string &ext)
 {
-	string orig_ext = aux_get_extension(in);
-	if (orig_ext.empty())
-		return in + "." + ext;
-	else
-	{
-		if (orig_ext != ext)
-			return aux_replace_all(in, orig_ext, ext);
-		else
-			return in;
-	}
+    string orig_ext = aux_get_extension(in);
+    if (orig_ext.empty())
+        return in + "." + ext;
+    else
+    {
+        if (orig_ext != ext)
+            return aux_replace_all(in, orig_ext, ext);
+        else
+            return in;
+    }
 }
 
 /*****************************
@@ -183,15 +183,15 @@ string df_get_app_folder()
     char mbOwnPth[MAX_PATH];
 
     HMODULE hModule = GetModuleHandle(NULL);
-	if (hModule != NULL)
-	{
-		GetModuleFileName(hModule, ownPth, (sizeof(ownPth)));
-		PathRemoveFileSpec(ownPth);
-		wcstombs(mbOwnPth, ownPth, MAX_PATH);
-		return string(mbOwnPth);
-	}
-	else
-		return string("");
+    if (hModule != NULL)
+    {
+        GetModuleFileName(hModule, ownPth, (sizeof(ownPth)));
+        PathRemoveFileSpec(ownPth);
+        wcstombs(mbOwnPth, ownPth, MAX_PATH);
+        return string(mbOwnPth);
+    }
+    else
+        return string("");
 #endif
 }
 
@@ -228,13 +228,13 @@ int s_mkpath(std::string s, mode_t mode)
 string s_format_path(const string in, bool support_long_path = false)
 {
 #if defined(__linux__) || defined(__APPLE__)
-	return string(in);
+    return string(in);
 #elif defined(_WIN32)
-	string out(in);
-	aux_replace_all(out, "/", "\\");
-	if (support_long_path)
-		out = string("\\\\?\\") + out;
-	return out;
+    string out(in);
+    aux_replace_all(out, "/", "\\");
+    if (support_long_path)
+        out = string("\\\\?\\") + out;
+    return out;
 #endif
 }
 
@@ -243,7 +243,7 @@ void s_mkdir(const string arg)
 #if defined(__linux__) || defined(__APPLE__)
     s_mkpath(arg, 0755);
 #elif defined(_WIN32)
-	string in = s_format_path(arg);
+    string in = s_format_path(arg);
     wstring w_arg = wstring(in.begin(), in.end());
     CreateDirectory(w_arg.c_str(), NULL);
 #endif
@@ -257,7 +257,7 @@ void s_rm(const string arg)
     if (infile.is_open())
     {
         infile.close();
-		string in = s_format_path(arg);
+        string in = s_format_path(arg);
         wstring w_arg = wstring(in.begin(), in.end());
         DeleteFile(w_arg.c_str());
     }

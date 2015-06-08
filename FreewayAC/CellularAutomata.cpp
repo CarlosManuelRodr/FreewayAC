@@ -265,24 +265,24 @@ unsigned CellularAutomata::CountCars()
 }
 bool CellularAutomata::IsFluxHalted()
 {
-	bool halted = true;
-	if (m_ca_flow_history.size() > 1)
-	{
-		for (unsigned i = 1; i < m_ca_flow_history.size() && halted; ++i)
-		{
-			for (unsigned j = 0; j < m_size; ++j)
-			{
-				if (m_ca_flow_history[i][j] != 0)
-				{
-					halted = false;
-					break;
-				}
-			}
-		}
-		return halted;
-	}
-	else
-		return false;
+    bool halted = true;
+    if (m_ca_flow_history.size() > 1)
+    {
+        for (unsigned i = 1; i < m_ca_flow_history.size() && halted; ++i)
+        {
+            for (unsigned j = 0; j < m_size; ++j)
+            {
+                if (m_ca_flow_history[i][j] != 0)
+                {
+                    halted = false;
+                    break;
+                }
+            }
+        }
+        return halted;
+    }
+    else
+        return false;
 }
 bool CellularAutomata::Randomization(const double &prob)
 {
@@ -1033,9 +1033,9 @@ CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &dens
 {
     delete_ca();
     if (custom_random_seed != -1)
-    	RandomGen::Seed(custom_random_seed);
+        RandomGen::Seed(custom_random_seed);
     else
-    	RandomGen::Seed();
+        RandomGen::Seed();
 
     try
     {
@@ -1165,8 +1165,8 @@ CellularAutomataML::CellularAutomataML(const unsigned &size, const unsigned &lan
             m_ca[car_positions[j]][i] = 1;
     }
 
-	m_ca_history.push_back(m_ca);
-	//m_ca_flow_history.push_back(m_ca_flow_temp);
+    m_ca_history.push_back(m_ca);
+    //m_ca_flow_history.push_back(m_ca_flow_temp);
 }
 CellularAutomataML::CellularAutomataML(const vector<CAElement> &ca, const vector<bool> &rand_values,
                                        const int &vmax)
@@ -1729,9 +1729,9 @@ CellularAutomataML* create_multilane_ca(CA_TYPE ca, const unsigned &size, const 
 {
     delete_multilane_ca();
     if (custom_random_seed != -1)
-    	RandomGen::Seed(custom_random_seed);
+        RandomGen::Seed(custom_random_seed);
     else
-    	RandomGen::Seed();
+        RandomGen::Seed();
 
     try
     {

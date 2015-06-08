@@ -1,6 +1,6 @@
 /**
 * @file BmpWriter.h
-* @brief Escritor de archivos BMP simple.
+* @brief Escritor de archivos BMP.
 * @author Carlos Manuel Rodríguez Martínez
 * @date 7/18/2012
 */
@@ -22,9 +22,9 @@ struct BMPHeader
 {
     uint16_t identifier;
     uint32_t size;
-    uint16_t appSpecific1;
-    uint16_t appSpecific2;
-    uint32_t bitmapData;
+    uint16_t app_specific1;
+    uint16_t app_specific2;
+    uint32_t bitmap_data;
 };
 
 /**
@@ -33,17 +33,17 @@ struct BMPHeader
 */
 struct DIBHeader
 {
-    uint32_t headerSize;
+    uint32_t header_size;
     int32_t width;
     int32_t height;
-    uint16_t nPlanes;
-    uint16_t colorDepth;
+    uint16_t n_planes;
+    uint16_t color_depth;
     uint32_t compression;
-    uint32_t bmpBytes;
-    int32_t hRes;
-    int32_t vRes;
-    uint32_t nColors;
-    uint32_t nImpColors;
+    uint32_t bmp_bytes;
+    int32_t h_res;
+    int32_t v_res;
+    uint32_t n_colors;
+    uint32_t n_imp_colors;
 };
 
 /**
@@ -53,7 +53,7 @@ struct DIBHeader
 class BMPPixel
 {
 public:
-	char r, g, b;
+    char r, g, b;
     BMPPixel();
     BMPPixel(char mR, char mG, char mB);
     bool operator==(const BMPPixel &other);
@@ -65,14 +65,14 @@ public:
 */
 class BMPWriter
 {
-    BMPHeader* m_bmpHdr;
-    DIBHeader* m_dibHdr;
+    BMPHeader* m_bmp_hdr;
+    DIBHeader* m_dib_hdr;
     std::ofstream m_file;
     unsigned int m_width;
     unsigned int m_height;
-    unsigned int m_paddingBytes;
-    int m_dataSize;
-    unsigned int m_indexHeight;
+    unsigned int m_padding_bytes;
+    int m_data_size;
+    unsigned int m_index_height;
 
 public:
     ///@brief Constructor.
@@ -86,9 +86,9 @@ public:
     ///@param Array de pixeles a escribir. Las líneas se escriben de abajo a arriba.
     void WriteLine(BMPPixel* data);
 
-	///@brief Writes BMP line.
-	///@param Vector de pixeles a escribir. Las líneas se escriben de abajo a arriba.
-	void WriteLine(std::vector<BMPPixel> data);
+    ///@brief Writes BMP line.
+    ///@param Vector de pixeles a escribir. Las líneas se escriben de abajo a arriba.
+    void WriteLine(std::vector<BMPPixel> data);
 
     ///@brief Return file status.
     bool IsOpen();

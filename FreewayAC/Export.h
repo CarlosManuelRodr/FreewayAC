@@ -1,7 +1,7 @@
 /**
-* @file Plotter.h
-* @brief Graficador interno. Escribe archivos en BMP.
-* @author Carlos Manuel Rodr�guez Mart�nez
+* @file Export.h
+* @brief Funciones para exportar datos.
+* @author Carlos Manuel Rodríguez Martínez
 * @date 1/06/2015
 */
 
@@ -61,17 +61,17 @@ public:
     ///@brief Asigna elemento con seguridad.
     void SetElement(unsigned int i, unsigned int j, T val);
 
-	///@brief Asigna val a todos los elementos.
-	void Assign(T val);
+    ///@brief Asigna val a todos los elementos.
+    void Assign(T val);
 
 
     // ## Obtención de valores. ##
-    T** GetMatrix();
-    std::vector<T> GetRow(unsigned int row);
-    unsigned int GetColumns();
-    unsigned int GetRows();
-    T Maximum();
-    bool IsOk();
+    T** GetMatrix();                            ///< Devuelve puntero a matriz.
+    std::vector<T> GetRow(unsigned int row);    ///< Devuelve vector de fila especificada.
+    unsigned int GetColumns();                  ///< Devuelve número de columnas.
+    unsigned int GetRows();                     ///< Devuelve número de fila.as
+    T Maximum();                                ///< Devuelve valor máximo dentro de matriz.
+    bool IsOk();                                ///< Devuelve status.
 
     ///@brief Acceso seguro a elementos.
     T At(unsigned int i, unsigned int j);
@@ -112,9 +112,10 @@ template <class T> void Matrix<T>::Deallocate()
 {
     if (m_matrix != nullptr)
     {
-        for (unsigned int i = 0; i<m_nrows; i++)
+        for (unsigned int i = 0; i < m_nrows; i++)
         {
-            if (m_matrix[i] != nullptr) delete[] m_matrix[i];
+            if (m_matrix[i] != nullptr)
+                delete[] m_matrix[i];
         }
         delete[] m_matrix;
     }
@@ -131,10 +132,8 @@ template <class T> int Matrix<T>::SetMatrix(unsigned int rows, unsigned int cols
     try
     {
         m_matrix = new T*[m_nrows];
-        for (unsigned int i = 0; i<m_nrows; i++)
-        {
+        for (unsigned int i = 0; i < m_nrows; i++)
             m_matrix[i] = new T[m_ncols];
-        }
     }
     catch (std::bad_alloc&)
     {
@@ -144,22 +143,18 @@ template <class T> int Matrix<T>::SetMatrix(unsigned int rows, unsigned int cols
     // Assigna valores.
     if (inputMatrix != nullptr)
     {
-        for (unsigned int i = 0; i<m_nrows; i++)
+        for (unsigned int i = 0; i < m_nrows; i++)
         {
-            for (unsigned int j = 0; j<m_ncols; j++)
-            {
+            for (unsigned int j = 0; j < m_ncols; j++)
                 m_matrix[i][j] = inputMatrix[i][j];
-            }
         }
     }
     else
     {
-        for (unsigned int i = 0; i<m_nrows; i++)
+        for (unsigned int i = 0; i < m_nrows; i++)
         {
-            for (unsigned int j = 0; j<m_ncols; j++)
-            {
+            for (unsigned int j = 0; j < m_ncols; j++)
                 m_matrix[i][j] = 0;
-            }
         }
     }
     return 0;
@@ -172,10 +167,8 @@ template <class T> int Matrix<T>::SetMatrix(unsigned int rows, unsigned int cols
     try
     {
         m_matrix = new T*[m_nrows];
-        for (unsigned int i = 0; i<m_nrows; i++)
-        {
+        for (unsigned int i = 0; i < m_nrows; i++)
             m_matrix[i] = new T[m_ncols];
-        }
     }
     catch (std::bad_alloc&)
     {
@@ -185,11 +178,11 @@ template <class T> int Matrix<T>::SetMatrix(unsigned int rows, unsigned int cols
 }
 template <class T> void Matrix<T>::Assign(T val)
 {
-	for (unsigned i = 0; i < m_nrows; i++)
-	{
-		for (unsigned j = 0; j < m_ncols; j++)
-			m_matrix[i][j] = val;
-	}
+    for (unsigned i = 0; i < m_nrows; i++)
+    {
+        for (unsigned j = 0; j < m_ncols; j++)
+            m_matrix[i][j] = val;
+    }
 }
 template <class T> T** Matrix<T>::GetMatrix()
 {
@@ -197,26 +190,21 @@ template <class T> T** Matrix<T>::GetMatrix()
 }
 template <class T> void Matrix<T>::SetElement(unsigned int i, unsigned int j, T val)
 {
-    if ((i<m_nrows && i >= 0) && (j<m_ncols && j >= 0))
-    {
+    if ((i < m_nrows && i >= 0) && (j < m_ncols && j >= 0))
         m_matrix[i][j] = val;
-    }
 }
 template <class T> T Matrix<T>::At(unsigned int i, unsigned int j)
 {
-    if ((i<m_nrows && i >= 0) && (j<m_ncols && j >= 0))
-    {
+    if ((i < m_nrows && i >= 0) && (j < m_ncols && j >= 0))
         return m_matrix[i][j];
-    }
-    else return 0;
+    else
+        return 0;
 }
 template <class T> std::vector<T> Matrix<T>::GetRow(unsigned int fil)
 {
     std::vector<T> out;
-    for (int j = 0; j<m_ncols; j++)
-    {
+    for (int j = 0; j < m_ncols; j++)
         out.push_back(m_matrix[fil][j]);
-    }
     return out;
 }
 template <class T> unsigned int Matrix<T>::GetColumns()
@@ -253,10 +241,10 @@ template <class T> T*& Matrix<T>::operator[](const unsigned int pos)
 ****************************/
 
 /**
-* @enum STYLES
+* @enum Styles
 * @brief Estilos de paleta de colores.
 */
-enum STYLES
+enum Styles
 {
     SUMMER_DAY,
     COOL_BLUE,
@@ -278,11 +266,20 @@ enum STYLES
 const BMPPixel white((char)255, (char)255, (char)255);
 const BMPPixel black(0, 0, 0);
 
+/**
+* @enum ExportFormat
+* @brief Formatos para exportar archivos.
+*/
 enum ExportFormat
 {
-	CSV, BMP
+    CSV, BMP
 };
 
+/**
+* @brief Exporta datos a archivo csv.
+* @param data Lista de datos a exportar.
+* @param filename Archivo a exportar los datos.
+*/
 template <class N> int export_csv(std::vector<N> &data, const std::string &filename)
 {
     std::ofstream file(filename.c_str(), std::ofstream::out);
@@ -305,6 +302,12 @@ template <class N> int export_csv(std::vector<N> &data, const std::string &filen
     }
 }
 
+/**
+* @brief Exporta datos a archivo csv.
+* @param data1 Lista de datos a exportar.
+* @param data2 Lista de datos a exportar.
+* @param filename Archivo a exportar los datos.
+*/
 template <class N> int export_csv(std::vector<N> &data_1, std::vector<N> &data_2, const std::string &filename)
 {
     if (data_1.size() == data_2.size())
@@ -335,83 +338,94 @@ template <class N> int export_csv(std::vector<N> &data_1, std::vector<N> &data_2
     }
 }
 
+/**
+* @brief Exporta datos como grafica en bmp.
+* @param data Lista de datos a exportar.
+* @param filename Archivo a exportar los datos.
+*/
 template <class N> int export_plot(const std::vector<N> data, const std::string filename)
 {
-	unsigned coord_y;
-	unsigned int size = data.size();
-	double min_x = 0;
-	double max_x = size;
-	double min_y = static_cast<double>(*max_element(data.begin(), data.end()));
-	double max_y = static_cast<double>(*min_element(data.begin(), data.end()));
-	double y_factor = (max_y - min_y) / (size - 1);
+    unsigned coord_y;
+    unsigned int size = data.size();
+    double min_x = 0;
+    double max_x = size;
+    double min_y = static_cast<double>(*max_element(data.begin(), data.end()));
+    double max_y = static_cast<double>(*min_element(data.begin(), data.end()));
+    double y_factor = (max_y - min_y) / (size - 1);
 
-	Matrix<bool> plot(size, size);
-	plot.Assign(false);
+    Matrix<bool> plot(size, size);
+    plot.Assign(false);
 
-	// Asigna valores a grafica.
-	for (unsigned x = 0; x < size; x++)
-	{
-		coord_y = (unsigned)((max_y - data[x]) / y_factor);
-		plot[x][coord_y] = true;
-	}
+    // Asigna valores a grafica.
+    for (unsigned x = 0; x < size; x++)
+    {
+        coord_y = (unsigned)((max_y - data[x]) / y_factor);
+        plot[x][coord_y] = true;
+    }
 
-	// Crea imagen.
-	BMPWriter writer(filename.c_str(), size, size);
-	if (writer.IsOpen())
-	{
-		vector<BMPPixel> bmp_data;
-		for (unsigned j = 0; j < size; j++)
-		{
-			bmp_data.assign(size, white);
-			for (unsigned i = 0; i < size; i++)
-			{
-				if (plot[i][j] == true)
-					bmp_data[i] = black;
-			}
-			writer.WriteLine(bmp_data);
-		}
-		writer.CloseBMP();
-		return 0;
-	}
-	else
-		return 1;
+    // Crea imagen.
+    BMPWriter writer(filename.c_str(), size, size);
+    if (writer.IsOpen())
+    {
+        vector<BMPPixel> bmp_data;
+        for (unsigned j = 0; j < size; j++)
+        {
+            bmp_data.assign(size, white);
+            for (unsigned i = 0; i < size; i++)
+            {
+                if (plot[i][j] == true)
+                    bmp_data[i] = black;
+            }
+            writer.WriteLine(bmp_data);
+        }
+        writer.CloseBMP();
+        return 0;
+    }
+    else
+        return 1;
 }
 
+/**
+* @brief Exporta datos como grafica en bmp.
+* @param data_1 Lista de datos de eje horizontal.
+* @param data_2 Lista de datos de eje vertical.
+* @param filename Archivo a exportar los datos.
+*/
 template <class N> int export_data(std::vector<N> &data_1, std::vector<N> &data_2, const std::string &filename,
-	                               ExportFormat &format)
+                                   ExportFormat &format)
 {
-	switch (format)
-	{
-	case CSV:
-		return export_csv(data_1, data_2, aux_replace_extension(filename, "csv"));
-		break;
-	case BMP:
-		return export_plot(data_2, aux_replace_extension(filename, "bmp"));
-		break;
-	default:
-		return 1;
-	}
+    switch (format)
+    {
+    case CSV:
+        return export_csv(data_1, data_2, aux_replace_extension(filename, "csv"));
+        break;
+    case BMP:
+        return export_plot(data_2, aux_replace_extension(filename, "bmp"));
+        break;
+    default:
+        return 1;
+    }
 }
 
 template <class N> int export_data(std::vector<N> &data, const std::string &filename, ExportFormat &format)
 {
-	switch (format)
-	{
-	case CSV:
-		return export_csv(data, aux_replace_extension(filename, "csv"));
-		break;
-	case BMP:
-		return export_plot(data, aux_replace_extension(filename, "bmp"));
-		break;
-	default:
-		return 1;
-	}
+    switch (format)
+    {
+    case CSV:
+        return export_csv(data, aux_replace_extension(filename, "csv"));
+        break;
+    case BMP:
+        return export_plot(data, aux_replace_extension(filename, "bmp"));
+        break;
+    default:
+        return 1;
+    }
 }
 
 int export_map(std::vector<int> &data, const std::string &filename, const unsigned &height = 30,
-               const bool &normalize = false, const STYLES &style = SUMMER_DAY);
+               const bool &normalize = false, const Styles &style = SUMMER_DAY);
 
 int export_map(Matrix<int> &data, const std::string &filename, const bool &normalize = false,
-               const STYLES &style = SUMMER_DAY);
+               const Styles &style = SUMMER_DAY);
 
 #endif

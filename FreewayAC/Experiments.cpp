@@ -5,6 +5,45 @@
 #include "Experiments.h"
 using namespace std;
 
+/*****************************
+*                            *
+* Parámetros de experimentos *
+*                            *
+*****************************/
+
+void ExParam::Report()
+{
+    cout << "Parametros:" << endl;
+    aux_report("size", size);
+    aux_report("iterations", iterations);
+    aux_report("lanes", lanes);
+    aux_report("vmax", vmax);
+    aux_report("vmax_min", vmax_min);
+    aux_report("vmax_max", vmax_max);
+    aux_report("random_seed", random_seed);
+    aux_report("partitions", partitions);
+    aux_report("density", density);
+    aux_report("density_min", density_min);
+    aux_report("density_max", density_max);
+    aux_report("rand_prob", rand_prob);
+    aux_report("rand_prob_min", rand_prob_min);
+    aux_report("rand_prob_max", rand_prob_max);
+    aux_report("aut_car_density_min", aut_car_density_min);
+    aux_report("aut_car_density_max", aut_car_density_max);
+    aux_report("new_car_prob_min", new_car_prob_min);
+    aux_report("new_car_prob_max", new_car_prob_max);
+    aux_report("stop_density_min", stop_density_min);
+    aux_report("stop_density_max", stop_density_max);
+    aux_report("semaphore_density_min", semaphore_density_min);
+    aux_report("semaphore_density_max", semaphore_density_max);
+    aux_report("dt", dt);
+    aux_report("random_semaphores", random_semaphores);
+    aux_report("show_progress", show_progress);
+    aux_report("path", path);
+    aux_report("out_file_name", out_file_name);
+}
+
+
 /****************************
 *                           *
 *        Experimentos       *
@@ -88,7 +127,7 @@ int ex_flow_fixed(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-	int r = export_data(flow, p.out_file_name, p.export_format);
+    int r = export_data(flow, p.out_file_name, p.export_format);
     delete_ca();
     return r;
 }
@@ -148,7 +187,7 @@ int ex_flow_vs_density(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-	int r = export_data(density, flow, p.out_file_name, p.export_format);
+    int r = export_data(density, flow, p.out_file_name, p.export_format);
     delete_ca();
     return r;
 }
@@ -181,9 +220,9 @@ int ex_multilane_flow_vs_density(ExParam p)
         for (unsigned i = 0; i < width; ++i)
         {
             int sum = 0;
-            for (unsigned j = 0; j<lane_num; ++j)
+            for (unsigned j = 0; j < lane_num; ++j)
             {
-                for (unsigned k=1; k<height; ++k)
+                for (unsigned k=1; k < height; ++k)
                 {
                     if ((ca->GetAt(i, j, k, CA_FLOW_HISTORY) != 0) && (ca->GetAt(i + 1, j, k, CA_FLOW_HISTORY) != 0))
                         sum++;
@@ -212,7 +251,7 @@ int ex_multilane_flow_vs_density(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-	int r = export_data(density, flow, p.out_file_name, p.export_format);
+    int r = export_data(density, flow, p.out_file_name, p.export_format);
     delete_ca();
     return r;
 }
@@ -263,7 +302,7 @@ int ex_flow_vs_vmax(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-	int r = export_data(vmax, flow, p.out_file_name, p.export_format);
+    int r = export_data(vmax, flow, p.out_file_name, p.export_format);
     delete_ca();
     return r;
 }
@@ -314,7 +353,7 @@ int ex_flow_vs_rand_prob(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-	int r = export_data(rand_prob, flow, p.out_file_name, p.export_format);
+    int r = export_data(rand_prob, flow, p.out_file_name, p.export_format);
     delete_ca();
     return r;
 }
@@ -365,7 +404,7 @@ int ex_flow_vs_aut_cars(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-	int r = export_data(aut_car_density, flow, p.out_file_name, p.export_format);
+    int r = export_data(aut_car_density, flow, p.out_file_name, p.export_format);
     delete_ca();
     return r;
 }
@@ -433,7 +472,7 @@ int ex_flow_vs_new_car_prob(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-	int r = export_data(new_car_density, flow, p.out_file_name, p.export_format);
+    int r = export_data(new_car_density, flow, p.out_file_name, p.export_format);
     delete_ca();
     return r;
 }
@@ -484,7 +523,7 @@ int ex_flow_vs_stop_density(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-	int r = export_data(stop_density, flow, p.out_file_name, p.export_format);
+    int r = export_data(stop_density, flow, p.out_file_name, p.export_format);
     delete_ca();
     return r;
 }
@@ -535,7 +574,7 @@ int ex_flow_vs_semaphore_density(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-	int r = export_data(semaphore_density, flow, p.out_file_name, p.export_format);
+    int r = export_data(semaphore_density, flow, p.out_file_name, p.export_format);
     delete_ca();
     return r;
 }
@@ -582,7 +621,7 @@ int ex_escape_time_vs_density(ExParam p)
 
     }
 
-	int r = export_data(densities, escape_time, "escape_time_vs_density.csv", p.export_format);
+    int r = export_data(densities, escape_time, "escape_time_vs_density.csv", p.export_format);
     delete_ca();
     return r;
 }
@@ -623,7 +662,7 @@ int ex_escape_time_vs_rand_prob(ExParam p)
 
     }
 
-	int r = export_data(rand_p, escape_time, "escape_time_vs_rand_prob.csv", p.export_format);
+    int r = export_data(rand_p, escape_time, "escape_time_vs_rand_prob.csv", p.export_format);
     delete_ca();
     return r;
 }
@@ -664,7 +703,7 @@ int ex_escape_time_vs_vmax(ExParam p)
 
     }
 
-	int r = export_data(vel, escape_time, "escape_time_vs_vmax.csv", p.export_format);
+    int r = export_data(vel, escape_time, "escape_time_vs_vmax.csv", p.export_format);
     delete_ca();
     return r;
 }
@@ -714,7 +753,7 @@ int ex_discharge_vs_density(ExParam p)
 
     }
 
-	int r = export_data(densities, escape_time, "discharge_vs_density.csv", p.export_format);
+    int r = export_data(densities, escape_time, "discharge_vs_density.csv", p.export_format);
     delete_ca();
     return r;
 }
@@ -768,13 +807,13 @@ int ex_discharge_vs_density_fratal(ExParam p)
             fractal[i] = 1;
     }
 
-	cout << "La dimension fractal es: ";
-	cout << measure_plot_fractal_dimension(escape_time, (int)(0.1*fractal.size()), fractal.size(), 1);
-	cout << "." << endl;
+    cout << "La dimension fractal es: ";
+    cout << measure_plot_fractal_dimension(escape_time, (int)(0.1*fractal.size()), fractal.size(), 1);
+    cout << "." << endl;
 
-	cout << "La dimension fractal del grafico de barras es: ";
-	cout << measure_fractal_dimension(fractal, 0, (int)(0.1*fractal.size()), fractal.size(), 1);
-	cout << "." << endl;
+    cout << "La dimension fractal del grafico de barras es: ";
+    cout << measure_fractal_dimension(fractal, 0, (int)(0.1*fractal.size()), fractal.size(), 1);
+    cout << "." << endl;
 
     int r = export_map(fractal, "discharge_vs_density_fractal.bmp", 30, false, BINARY_COLORS);
     delete_ca();
@@ -791,7 +830,7 @@ int ex_dimension_vs_density(ExParam p)
         ca_type = OPEN_CA;
     }
 
-    vector<double> densities, dimension;
+    vector<double> densities, dimension, plot_dimension;
     double p_size = (p.density_max-p.density_min)/(double)p.partitions;
     CellularAutomata* ca;
 
@@ -837,18 +876,26 @@ int ex_dimension_vs_density(ExParam p)
 
         double d_mean = d_left + p_size/2.0;
         densities.push_back(d_mean);
-        dimension.push_back(measure_fractal_dimension(fractal, 0, (int)0.1*fractal.size(), fractal.size(), 1));
+        dimension.push_back(measure_fractal_dimension(fractal, 0, (int)(0.1*fractal.size()), fractal.size(), 1));
+        plot_dimension.push_back(measure_plot_fractal_dimension(escape_time, (int)(0.1*fractal.size()), fractal.size(), 1));
 
+        string f_path, f_plot_path;
         if (p.path.empty())
         {
             aux_create_directory("Fractal");
-            p.path = "Fractal" + f_separator;
+            aux_create_directory("Plot");
         }
+        f_path = p.path + "Fractal" + df_separator;
+        f_plot_path = p.path + "Plot" + df_separator;
 
-        string p_name = p.path + "discharge_vs_density_fractal_" + to_string(d_mean) + ".bmp";
+        string p_name = f_path + "discharge_vs_density_fractal_" + to_string(d_mean) + ".bmp";
+        string p_plot_name = f_plot_path + "discharge_vs_density_plot_" + to_string(d_mean) + ".bmp";
         r = export_map(fractal, p_name, 30, false, BINARY_COLORS);
         if (r != 0)
-            return 1;
+            return r;
+        r = export_plot(escape_time, p_plot_name);
+        if (r != 0)
+            return r;
     }
 
     r = export_csv(densities, dimension, "dimension_vs_density.csv");

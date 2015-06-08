@@ -9,9 +9,13 @@ using namespace std;
 *                           *
 ****************************/
 
+/**
+* @class Palette
+* @brief Paleta de colores.
+**/
 class Palette
 {
-    STYLES m_style;
+    Styles m_style;
     unsigned m_red_int, m_green_int, m_blue_int;
     double m_red_mean, m_green_mean, m_blue_mean;
     double m_red_dev, m_green_dev, m_blue_dev;
@@ -25,7 +29,7 @@ class Palette
     double NormalDist(unsigned x, double mean, double std_dev);
 
     ///@brief Calcula color con la paleta de colores del estilo seleccionado.
-    ///@param color_num N�mero a convertir en color.
+    ///@param color_num Número a convertir en color.
     ///@return Color de paleta.
     BMPPixel CalcColor(unsigned color_num);
 
@@ -35,7 +39,7 @@ public:
 
     ///@brief Asigna parámetros dependiendo del estilo.
     ///@param style Estilo seleccionado.
-    void SetStyle(STYLES style);
+    void SetStyle(Styles style);
 
     unsigned GetPaletteSize();
 
@@ -63,9 +67,9 @@ BMPPixel Palette::CalcColor(unsigned color_num)
 
     return BMPPixel(r, g, b);
 }
-void Palette::SetStyle(STYLES style)
+void Palette::SetStyle(Styles style)
 {
-    // Asigna par�metros de cada estilo de color.
+    // Asigna parámetros de cada estilo de color.
     if (style != m_style)
     {
         switch (style)
@@ -194,7 +198,7 @@ BMPPixel Palette::operator[](const unsigned &i)
 ****************************/
 
 int export_map(vector<int> &data, const string &filename, const unsigned &height,
-               const bool &normalize, const STYLES &style)
+               const bool &normalize, const Styles &style)
 {
     Palette palette;
     if (style != BINARY_COLORS)
@@ -203,10 +207,11 @@ int export_map(vector<int> &data, const string &filename, const unsigned &height
     unsigned width = data.size();
     unsigned palette_size = palette.GetPaletteSize();
     BMPWriter writer(filename.c_str(), width, height);
+    vector<BMPPixel> bmp_data;
 
     if (writer.IsOpen())
     {
-        BMPPixel* bmpData = new BMPPixel[width];
+        bmp_data.assign(width, white);
         if (normalize)
         {
             unsigned max = *max_element(data.begin(), data.end());
@@ -215,12 +220,12 @@ int export_map(vector<int> &data, const string &filename, const unsigned &height
                 if (style == BINARY_COLORS)
                 {
                     if (data[i] == 1)
-                        bmpData[i] = black;
+                        bmp_data[i] = black;
                     else
-                        bmpData[i] = white;
+                        bmp_data[i] = white;
                 }
                 else
-                    bmpData[i] = palette[(unsigned)(palette_size*((double)data[i]/(double)max))];
+                    bmp_data[i] = palette[(unsigned)(palette_size*((double)data[i]/(double)max))];
             }
         }
         else
@@ -230,26 +235,25 @@ int export_map(vector<int> &data, const string &filename, const unsigned &height
                 if (style == BINARY_COLORS)
                 {
                     if (data[i] == 1)
-                        bmpData[i] = black;
+                        bmp_data[i] = black;
                     else
-                        bmpData[i] = white;
+                        bmp_data[i] = white;
                 }
                 else
-                    bmpData[i] = palette[data[i]];
+                    bmp_data[i] = palette[data[i]];
             }
         }
 
-        for (int i = height - 1; i >= 0; i--)
-            writer.WriteLine(bmpData);
+        for (int i = height - 1; i >= 0; --i)
+            writer.WriteLine(bmp_data);
 
         writer.CloseBMP();
-        delete[] bmpData;
         return 0;
     }
     else
         return 1;
 }
-int export_map(Matrix<int> &data, const string &filename, const bool &normalize, const STYLES &style)
+int export_map(Matrix<int> &data, const string &filename, const bool &normalize, const Styles &style)
 {
     Palette palette;
     if (style != BINARY_COLORS)
@@ -259,27 +263,28 @@ int export_map(Matrix<int> &data, const string &filename, const bool &normalize,
     unsigned height = data.GetRows();
 
     BMPWriter writer(filename.c_str(), width, height);
+    vector<BMPPixel> bmp_data;
+
     if (writer.IsOpen())
     {
-        BMPPixel* bmpData = new BMPPixel[width];
-        for(int i = height-1; i >= 0; i--)
+        bmp_data.assign(width, white);
+        for(int i = height-1; i >= 0; --i)
         {
             for (unsigned j = 0; j < width; ++j)
             {
                 if (style == BINARY_COLORS)
                 {
                     if (data[i][j] == 1)
-                        bmpData[i] = black;
+                        bmp_data[i] = black;
                     else
-                        bmpData[i] = white;
+                        bmp_data[i] = white;
                 }
                 else
-                    bmpData[j] = palette[data[i][j]];
+                    bmp_data[j] = palette[data[i][j]];
             }
-            writer.WriteLine(bmpData);
+            writer.WriteLine(bmp_data);
         }
         writer.CloseBMP();
-        delete[] bmpData;
         return 0;
     }
     else
