@@ -7,57 +7,6 @@ using namespace std;
 
 /****************************
 *                           *
-*          Medición         *
-*                           *
-****************************/
-
-double measure_fractal_dimension(std::vector<int> frac, int min_div, int max_div, int dt_div)
-{
-    // Conteo de cajas.
-    vector<double> log_epsilon, log_count;
-    for (int div = min_div; div <= max_div; div += dt_div)
-    {
-        double N = 0.0;
-        double epsilon = (double)frac.size()/(double)div;
-        for(int ex=0; ex<div; ++ex)
-        {
-            bool found = false;
-            for(int w=(int)(ex*epsilon); w<(int)((ex+1)*epsilon) && !found; ++w)
-            {
-                if ((unsigned)w < frac.size())
-                {
-                    if (frac[w] != 0)
-                    {
-                        N++;
-                        found = true;
-                        break;
-                    }
-                }
-                else
-                    break;
-            }
-        }
-        log_epsilon.push_back(log(1.0/epsilon));
-        log_count.push_back(log(N));
-    }
-
-    // Ajuste por mínimos cuadrados.
-    double size, sum_xy, sum_x, sum_y, sum_x_squared;
-    sum_xy = sum_x = sum_y = sum_x_squared = 0;
-    size = log_epsilon.size();
-    for(int i = 0; i < size; ++i)
-    {
-        sum_xy += log_epsilon[i]*log_count[i];
-        sum_x += log_epsilon[i];
-        sum_y += log_count[i];
-        sum_x_squared += pow(log_epsilon[i], 2.0);
-    }
-    double fit = (size*sum_xy - sum_x*sum_y)/(size*sum_x_squared - pow(sum_x,2.0));
-    return fit;
-}
-
-/****************************
-*                           *
 *        Experimentos       *
 *                           *
 ****************************/
@@ -810,7 +759,7 @@ int ex_discharge_vs_density_fratal(ExParam p)
             escape_time.push_back((double)(ca->GetSize())*d/(double)iter);
     }
 
-    cout << "Calculando dimensión fractal." << endl;
+    cout << "Calculando dimension fractal." << endl;
     double et_mean = aux_mean(escape_time);
     vector<int> fractal(escape_time.size(), 0);
     for (unsigned i = 0; i < escape_time.size(); ++i)
@@ -818,7 +767,13 @@ int ex_discharge_vs_density_fratal(ExParam p)
         if (escape_time[i] > et_mean)
             fractal[i] = 1;
     }
-	cout << "La dimension fractal es: " << measure_fractal_dimension(fractal, (int)0.1*fractal.size(), fractal.size(), 1);
+
+	cout << "La dimension fractal es: ";
+	cout << measure_plot_fractal_dimension(escape_time, (int)(0.1*fractal.size()), fractal.size(), 1);
+	cout << "." << endl;
+
+	cout << "La dimension fractal del grafico de barras es: ";
+	cout << measure_fractal_dimension(fractal, 0, (int)(0.1*fractal.size()), fractal.size(), 1);
 	cout << "." << endl;
 
     int r = export_map(fractal, "discharge_vs_density_fractal.bmp", 30, false, BINARY_COLORS);
@@ -882,7 +837,7 @@ int ex_dimension_vs_density(ExParam p)
 
         double d_mean = d_left + p_size/2.0;
         densities.push_back(d_mean);
-        dimension.push_back(measure_fractal_dimension(fractal, (int)0.1*fractal.size(), fractal.size(), 1));
+        dimension.push_back(measure_fractal_dimension(fractal, 0, (int)0.1*fractal.size(), fractal.size(), 1));
 
         if (p.path.empty())
         {

@@ -46,7 +46,134 @@ struct ExParam
 *                           *
 ****************************/
 
-double measure_fractal_dimension(std::vector<int> frac);
+template <class N> double measure_fractal_dimension(std::vector<N> frac, N empty, int min_div, int max_div, int dt_div)
+{
+	if (min_div == 0 || max_div == 0 || dt_div == 0)
+	{
+		cout << "Error: Valores incorrectos para calculo de dimension fracal." << endl;
+		return -1.0;
+	}
+
+	// Conteo de cajas.
+	vector<double> log_epsilon, log_count;
+	for (int div = min_div; div <= max_div; div += dt_div)
+	{
+		double N = 0.0;
+		double epsilon = (double)frac.size() / (double)div;
+		for (int ex = 0; ex < div; ++ex)
+		{
+			for (int w = (int)(ex*epsilon); w < (int)((ex + 1)*epsilon); ++w)
+			{
+				if ((unsigned)w < frac.size())
+				{
+					if (frac[w] != empty)
+					{
+						N++;
+						break;
+					}
+				}
+				else
+					break;
+			}
+		}
+		log_epsilon.push_back(log(1.0 / epsilon));
+		log_count.push_back(log(N));
+	}
+
+	// Ajuste por mínimos cuadrados.
+	double size, sum_xy, sum_x, sum_y, sum_x_squared;
+	sum_xy = sum_x = sum_y = sum_x_squared = 0;
+	size = log_epsilon.size();
+	for (int i = 0; i < size; ++i)
+	{
+		sum_xy += log_epsilon[i] * log_count[i];
+		sum_x += log_epsilon[i];
+		sum_y += log_count[i];
+		sum_x_squared += pow(log_epsilon[i], 2.0);
+	}
+	double fit = (size*sum_xy - sum_x*sum_y) / (size*sum_x_squared - pow(sum_x, 2.0));
+	return fit;
+}
+
+template <class N> double measure_fractal_dimension(Matrix<N> frac, N empty, int min_div, int max_div, int dt_div)
+{
+	if (frac.GetRows() != frac.GetColumns())
+		return -1;
+
+	unsigned m_size = frac.GetRows();
+
+	// Conteo de cajas.
+	vector<double> log_epsilon, log_count;
+
+	for (int div = min_div; div <= max_div; div += dt_div)
+	{
+		double N = 0.0;
+		double epsilon = (double)m_size / (double)div;
+		for (int ey = 0; ey < div; ++ey)
+		{
+			for (int ex = 0; ex < div; ++ex)
+			{
+				bool found = false;
+				for (int w = (int)(ex*epsilon); w < (int)((ex + 1)*epsilon) && !found; ++w)
+				{
+					for (int h = (int)(ey*epsilon); h < (int)((ey + 1)*epsilon); h++)
+					{
+						if ((unsigned)w < m_size && (unsigned)h < m_size)
+						{
+							if (frac[w][h] != empty)
+							{
+								N++;
+								found = true;
+								break;
+							}
+						}
+						else
+							break;
+					}
+				}
+			}
+		}
+		log_epsilon.push_back(log(1.0 / epsilon));
+		log_count.push_back(log(N));
+	}
+
+	// Ajuste por mínimos cuadrados.
+	double size, sum_xy, sum_x, sum_y, sum_x_squared;
+	sum_xy = sum_x = sum_y = sum_x_squared = 0;
+	size = log_epsilon.size();
+	for (int i = 0; i < size; ++i)
+	{
+		sum_xy += log_epsilon[i] * log_count[i];
+		sum_x += log_epsilon[i];
+		sum_y += log_count[i];
+		sum_x_squared += pow(log_epsilon[i], 2.0);
+	}
+	double fit = (size*sum_xy - sum_x*sum_y) / (size*sum_x_squared - pow(sum_x, 2.0));
+	return fit;
+}
+template <class N> double measure_plot_fractal_dimension(std::vector<N> data, int min_div, int max_div, int dt_div)
+{
+	// Crea matriz donde se guardará la gráfica.
+	unsigned coord_y;
+	unsigned int size = data.size();
+	double min_x = 0;
+	double max_x = size;
+	double min_y = static_cast<double>(*max_element(data.begin(), data.end()));
+	double max_y = static_cast<double>(*min_element(data.begin(), data.end()));
+	double y_factor = (max_y - min_y) / (size - 1);
+
+	Matrix<bool> plot(size, size);
+	plot.Assign(false);
+
+	// Asigna valores a grafica.
+	for (unsigned x = 0; x < size; x++)
+	{
+		coord_y = (unsigned)((max_y - data[x]) / y_factor);
+		plot[x][coord_y] = true;
+	}
+
+	return measure_fractal_dimension(plot, false, min_div, max_div, dt_div);
+}
 
 
 /****************************
