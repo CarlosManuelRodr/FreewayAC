@@ -20,13 +20,14 @@ using namespace std;
 *                           *
 ****************************/
 
-CellularAutomata::CellularAutomata(const unsigned &size, const double &density, const int &vmax, const double &rand_prob)
+CellularAutomata::CellularAutomata(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const int &init_vel)
 {
     // Inicializa variables.
     m_test = false;
     m_size = size;
     m_vmax = vmax;
     m_rand_prob = rand_prob;
+    m_init_vel = init_vel;
     m_ca.assign(size, -1);
     m_ca_temp.assign(size, -1);
     m_ca_flow_temp.assign(size, 0);
@@ -352,8 +353,8 @@ int CellularAutomata::NextCarDist(const int &pos)
 *                           *
 ****************************/
 
-CircularCA::CircularCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob) 
-    : CellularAutomata(size, density, vmax, rand_prob) {}
+CircularCA::CircularCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const int &init_vel)
+    : CellularAutomata(size, density, vmax, rand_prob, init_vel) {}
 CircularCA::CircularCA(const vector<int> &ca, const vector<bool> &rand_values, const int &vmax)
     : CellularAutomata(ca, rand_values, vmax) {}
 int &CircularCA::At(const unsigned &i, const unsigned &j, const CAS &ca)
@@ -396,9 +397,9 @@ void CircularCA::Evolve(const unsigned &iter)
 *                           *
 ****************************/
 
-OpenCA::OpenCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, 
+OpenCA::OpenCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const int &init_vel,
                const double &new_car_prob, const int &new_car_speed)
-    : CellularAutomata(size, density, vmax, rand_prob)
+    : CellularAutomata(size, density, vmax, rand_prob, init_vel)
 {
     m_new_car_prob = new_car_prob;
     m_new_car_speed = new_car_speed;
@@ -497,8 +498,8 @@ void OpenCA::Step()
 ****************************/
 
 AutonomousCA::AutonomousCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob,
-                 const double &aut_density)
-    : CircularCA(size, density, vmax, rand_prob)
+                           const int &init_vel, const double &aut_density)
+    : CircularCA(size, density, vmax, rand_prob, init_vel)
 {
     // Verifica argumento.
     double l_aut_density = aut_density;
@@ -643,8 +644,8 @@ void AutonomousCA::Step()
 ****************************/
 
 StreetStopCA::StreetStopCA(const unsigned &size, const double &density, const int &vmax, 
-                           const double &rand_prob, const double &stop_density)
-                           : CircularCA(size, density, vmax, rand_prob)
+                           const double &rand_prob, const int &init_vel, const double &stop_density)
+                           : CircularCA(size, density, vmax, rand_prob, init_vel)
 {
     unsigned stops = (unsigned)(((double)size)*stop_density);
     if (stops >= size)
@@ -766,9 +767,9 @@ int StreetStopCA::DrawHistory(string path, string out_file_name)
 ****************************/
 
 SemaphoreCA::SemaphoreCA(const unsigned &size, const double &density, const int &vmax, 
-                         const double &rand_prob, const double &semaphore_density, 
+                         const double &rand_prob, const int &init_vel, const double &semaphore_density,
                          const bool &random_semaphores)
-                       : CircularCA(size, density, vmax, rand_prob)
+                       : CircularCA(size, density, vmax, rand_prob, init_vel)
 {
     m_semaphore_init = 100;
     m_semaphore_open = 50;
@@ -935,11 +936,11 @@ int SemaphoreCA::DrawHistory(string path, string out_file_name)
 ****************************/
 
 SimpleJunctionCA::SimpleJunctionCA(const unsigned &size, const double &density, const int &vmax, 
-                                   const double &rand_prob, const double &new_car_prob, 
+                                   const double &rand_prob, const int &init_vel, const double &new_car_prob,
                                    const int &new_car_speed, const int &target_lane)
-                                 : OpenCA(size, density, vmax, rand_prob, new_car_prob, new_car_speed)
+                                 : OpenCA(size, density, vmax, rand_prob, init_vel, new_car_prob, new_car_speed)
 {
-    m_source = new OpenCA(size, density, vmax, rand_prob, new_car_prob, new_car_speed);
+    m_source = new OpenCA(size, density, vmax, rand_prob, init_vel, new_car_prob, new_car_speed);
     m_source->Connect(this, size / 2);
     m_target_lane = target_lane;
 
@@ -1029,7 +1030,7 @@ SemaphoreCA* semaphoreca = nullptr;
 SimpleJunctionCA* simplejunctionca = nullptr;
 
 CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax, 
-                            const double &rand_prob, Args args, const int &custom_random_seed)
+                            const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed)
 {
     delete_ca();
     if (custom_random_seed != -1)
@@ -1042,25 +1043,25 @@ CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &dens
         switch (ca)
         {
         case CIRCULAR_CA:
-            cellularautomata = circularca = new CircularCA(size, density, vmax, rand_prob);
+            cellularautomata = circularca = new CircularCA(size, density, vmax, rand_prob, init_vel);
             break;
         case OPEN_CA:
-            cellularautomata = openca = new OpenCA(size, density, vmax, rand_prob, args.GetDouble(),
-                args.GetInt());
+            cellularautomata = openca = new OpenCA(size, density, vmax, rand_prob, init_vel, args.GetDouble(),
+                                                   args.GetInt());
             break;
         case AUTONOMOUS_CA:
-            cellularautomata = smartca = new AutonomousCA(size, density, vmax, rand_prob, args.GetDouble());
+            cellularautomata = smartca = new AutonomousCA(size, density, vmax, rand_prob, init_vel, args.GetDouble());
             break;
         case STOP_CA:
-            cellularautomata = streetstopca = new StreetStopCA(size, density, vmax, rand_prob, args.GetDouble());
+            cellularautomata = streetstopca = new StreetStopCA(size, density, vmax, rand_prob, init_vel, args.GetDouble());
             break;
         case SEMAPHORE_CA:
-            cellularautomata = semaphoreca = new SemaphoreCA(size, density, vmax, rand_prob, args.GetDouble(),
+            cellularautomata = semaphoreca = new SemaphoreCA(size, density, vmax, rand_prob, init_vel, args.GetDouble(),
                 args.GetBool());
             break;
         case SIMPLE_JUNCTION_CA:
-            cellularautomata = simplejunctionca = new SimpleJunctionCA(size, density, vmax, rand_prob,
-                args.GetDouble(), args.GetInt(0), args.GetInt(1));
+            cellularautomata = simplejunctionca = new SimpleJunctionCA(size, density, vmax, rand_prob, init_vel,
+                                                                       args.GetDouble(), args.GetInt(0), args.GetInt(1));
             break;
         default:
             cout << "Error: No se puede crear AC especificado en create_ca." << endl;
@@ -1118,7 +1119,7 @@ CAElement::CAElement(const int lanes, const int def_val)
 }
 
 CellularAutomataML::CellularAutomataML(const unsigned &size, const unsigned &lanes, const double &density, 
-                                       const int &vmax, const double &rand_prob)
+                                       const int &vmax, const double &rand_prob, const int &init_vel)
 {
     // Inicializa variables.
     m_test = false;
@@ -1126,6 +1127,7 @@ CellularAutomataML::CellularAutomataML(const unsigned &size, const unsigned &lan
     m_lanes = lanes;
     m_vmax = vmax;
     m_rand_prob = rand_prob;
+    m_init_vel = init_vel;
     m_ca.assign(size, CAElement(lanes));
     m_ca_temp.assign(size, CAElement(lanes));
     m_ca_history.clear();
@@ -1560,8 +1562,8 @@ void CellularAutomataML::Move()
 ****************************/
 
 CircularCAML::CircularCAML(const unsigned &size, const unsigned &lanes, const double &density,
-                           const int &vmax, const double &rand_prob)
-                         : CellularAutomataML(size, lanes, density, vmax, rand_prob) {}
+                           const int &vmax, const double &rand_prob, const int &init_vel)
+                         : CellularAutomataML(size, lanes, density, vmax, rand_prob, init_vel) {}
 CircularCAML::CircularCAML(const vector<CAElement> &ca, const vector<bool> &rand_values, const int &vmax)
                          : CellularAutomataML(ca, rand_values, vmax) {}
 int &CircularCAML::At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca)
@@ -1613,8 +1615,8 @@ void CircularCAML::Evolve(const unsigned &iter)
 ****************************/
 
 OpenCAML::OpenCAML(const unsigned &size, const unsigned int &lanes, const double &density, const int &vmax,
-                   const double &rand_prob, const double &new_car_prob, const int &new_car_speed)
-                 : CellularAutomataML(size, lanes, density, vmax, rand_prob)
+                   const double &rand_prob, const int &init_vel, const double &new_car_prob, const int &new_car_speed)
+                 : CellularAutomataML(size, lanes, density, vmax, rand_prob, init_vel)
 {
     m_new_car_prob = new_car_prob;
     m_new_car_speed = new_car_speed;
@@ -1725,7 +1727,8 @@ CircularCAML* circularcaml = nullptr;
 OpenCAML* opencaml = nullptr;
 
 CellularAutomataML* create_multilane_ca(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density, 
-                                         const int &vmax, const double &rand_prob, Args args, const int &custom_random_seed)
+                                        const int &vmax, const double &rand_prob, const int &init_vel, Args args, 
+                                        const int &custom_random_seed)
 {
     delete_multilane_ca();
     if (custom_random_seed != -1)
@@ -1738,10 +1741,10 @@ CellularAutomataML* create_multilane_ca(CA_TYPE ca, const unsigned &size, const 
         switch (ca)
         {
         case CIRCULAR_MULTILANE_CA:
-            cellularautomataml = circularcaml = new CircularCAML(size, lanes, density, vmax, rand_prob);
+            cellularautomataml = circularcaml = new CircularCAML(size, lanes, density, vmax, rand_prob, init_vel);
             break;
         case OPEN_MULTILANE_CA:
-            cellularautomataml = opencaml = new OpenCAML(size, lanes, density, vmax, rand_prob, args.GetDouble(),
+            cellularautomataml = opencaml = new OpenCAML(size, lanes, density, vmax, rand_prob, init_vel, args.GetDouble(),
                                                          args.GetInt());
             break;
         default:

@@ -28,7 +28,7 @@ public:
     CA_TYPE type;
     unsigned size, iterations, lanes;
     int vmax, vmax_min, vmax_max;
-    int random_seed, partitions;
+    int random_seed, init_vel, partitions;
 
     double density, density_min, density_max;
     double rand_prob, rand_prob_min, rand_prob_max;

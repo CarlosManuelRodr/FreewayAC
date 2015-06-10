@@ -31,7 +31,7 @@ struct Arg: public option::Arg
     }
 };
 
-enum  OptionIndex { UNKNOWN, SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB,
+enum  OptionIndex { UNKNOWN, SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,
 
                     PLOT_TRAFFIC, PLOT_FLOW, MEASURE_OCUPANCY, MEASURE_FLOW,
                     FLOW_VS_DENSITY, FLOW_PER_DENSITY, FLOW_VS_VMAX, FLOW_VS_RAND_PROB, FLOW_VS_AUT_CARS,
@@ -58,6 +58,7 @@ const option::Descriptor usage[] =
     {VMAX,  0,"v", "vmax", Arg::Required, "  -v <arg>, \t--vmax=<arg>  \tVelocidad maxima de auto." },
     {DENSITY,  0,"d", "density", Arg::Required, "  -d <arg>, \t--density=<arg>  \tDensidad de autos." },
     {RAND_PROB,  0,"r", "rand_prob", Arg::Required, "  -r <arg>, \t--rand_prob=<arg>  \tProbabilidad de descenso de velocidad." },
+	{INIT_VEL, 0, "i", "init_vel", Arg::Required, "  -i <arg>, \t--init_vel=<arg>  \tVelocidad inicial de los autos." },
 
     {PLOT_TRAFFIC,  0,"p","plot_traffic", Arg::None,
     "  -p , \t--plot_traffic  \tCrea mapa de posicion de autos vs tiempo." },
@@ -176,72 +177,72 @@ void describe_experiments()
         "                         Parametros relevantes: NEW_CAR_PROB, NEW_CAR_SPEED, TARGET_LANE.\n"
         "\n=== Experimentos de parametro fijo ===\n"
         "PLOT_TRAFFIC          -> Descripcion: Evoluciona automata celular y grafica su representacion.\n"
-        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB.\n"
+        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL.\n"
         "PLOT_FLOW             -> Descripcion: Evoluciona automata celular y grafica su flujo.\n"
-        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB.\n"
+        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL.\n"
         "MEASURE_OCUPANCY      -> Descripcion: Mide la ocupacion de cada casilla del automata celular.\n"
-        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB.\n"
+        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL.\n"
         "MEASURE_FLOW          -> Descripcion: Mide el flujo de cada casilla del automata celular.\n"
-        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB.\n"
+        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL.\n"
         "\n=== Experimentos de parametro variable ===\n"
         "FLOW_VS_DENSITY       -> Descripcion: Mide el flujo de autos promedio respecto a los valores\n"
         "                                      de densidad de autos especificados en un rango.\n"
-        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, RAND_PROB, DMIN, DMAX, DT.\n"
+        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, RAND_PROB, INIT_VEL, DMIN, DMAX, DT.\n"
         "FLOW_PER_DENSITY      -> Descripcion: Mide el flujo de autos promedio sobre densidad respecto\n"
         "                                      a los valores de densidad de autos especificados en un rango.\n"
-        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, RAND_PROB, DMIN, DMAX, DT.\n"
+        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, RAND_PROB, INIT_VEL, DMIN, DMAX, DT.\n"
         "FLOW_VS_VMAX          -> Descripcion: Mide el flujo de autos promedio respecto a los valores de\n"
         "                                      velocidad maxima especificados en un rango.\n"
-        "                         Parametros relevantes: SIZE, ITERATIONS, DENSITY, RAND_PROB, VMAX_MIN, VMAX_MAX, DT.\n"
+        "                         Parametros relevantes: SIZE, ITERATIONS, DENSITY, RAND_PROB, INIT_VEL, VMAX_MIN, VMAX_MAX, DT.\n"
         "FLOW_VS_RAND_PROB     -> Descripcion: Mide el flujo de autos promedio respecto a los valores de\n"
         "                                      probabilidad de descenso de velocidad especificados en un rango.\n"
-        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB_MIN,\n"
+        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, INIT_VEL, RAND_PROB_MIN,\n"
         "                                                RAND_PROB_MAX, DT.\n"
         "FLOW_VS_AUT_CARS      -> Descripcion: Mide el flujo de autos promedio respecto a los valores\n"
         "                                      de densidad de vehiculos autonomos especificados en un rango.\n"
-        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, \n"
+        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL, \n"
         "                                                AUT_MIN, AUT_MAX, DT.\n"
         "FLOW_VS_STOP_DENSITY  -> Descripcion: Mide el flujo de autos promedio respecto a los valores\n"
         "                                      densidad de topes especificados en un rango. Se usa el\n"
         "                                      automata celular CA_STOP.\n"
-        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB,\n"
+        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,\n"
         "                                                STOP_DENSITY_MIN, STOP_DENSITY_MAX, DT.\n"
         "FLOW_VS_NEW_CAR       -> Descripcion: Mide el flujo de autos promedio respecto a los valores\n"
         "                                      de probabilidad de aparicion de nuevo auto especificados\n"
         "                                      en un rango. Se usa el automata celular CA_OPEN o.\n"
         "                                      CA_SIMPLE_JUNCTION.\n"
-        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB,\n"
+        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,\n"
         "                                                NEW_CAR_MIN, NEW_CAR_MAX, DT.\n"
         "FLOW_PER_NEW_CAR      -> Descripcion: Mide el flujo/prob de autos promedio respecto a los valores\n"
         "                                      de probabilidad de aparicion de nuevo auto especificados\n"
         "                                      en un rango. Se usa el automata celular CA_OPEN.\n"
-        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB,\n"
+        "                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,\n"
         "                                                NEW_CAR_MIN, NEW_CAR_MAX, DT.\n"
         "FLOW_VS_SEMAPHORE_DENSITY  -> Descripcion: Mide el flujo de autos promedio respecto a los valores de\n"
         "                              densidad de semaforos especificados en un rango. Se usa el automata\n"
         "                              celular ca_semaphore.\n"
-        "                              Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB,\n"
+        "                              Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,\n"
         "                                                     SEMAPHORE_DENSITY_MIN, SEMAPHORE_DENSITY_MIN,\n"
         "                                                     RANDOM_SEMAPHORES, DT.\n"
         "ESCAPE_TIME_VS_DENSITY     -> Descripcion: Mide el tiempo de escape respecto a los valores de\n"
         "                              densidad de vehiculos especificados en un rango. Se usa el automata\n"
         "                              celular ca_open.\n"
-        "                              Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB,\n"
+        "                              Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,\n"
         "                                                     DMIN, DMAX, DT.\n"
         "DISCHARGE_VS_DENSITY       -> Descripcion: Mide el gasto respecto a los valores de\n"
         "                              densidad de vehiculos especificados en un rango. Se usa el automata\n"
         "                              celular ca_open.\n"
-        "                              Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB,\n"
+        "                              Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,\n"
         "                                                     DMIN, DMAX, DT.\n"
         "DISCHARGE_VS_DENSITY_FRACTAL -> Descripcion: Mide la dimension fractal en un mapa creado por los valores de\n"
         "                                densidad de vehiculos especificados en un rango. Se usa el automata\n"
         "                                celular ca_open.\n"
-        "                                Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB,\n"
+        "                                Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,\n"
         "                                                       DMIN, DMAX, DT.\n"
         "DIMENSION_VS_DENSITY      -> Descripcion: Crea grafica de dimension fractal respecto a los valores de\n"
         "                              densidad de vehículos especificados en un rango. Se usa el automata\n"
         "                              celular ca_open.\n"
-        "                              Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB,\n"
+        "                              Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,\n"
         "                                                     DMIN, DMAX, DT, PARTITIONS.\n";
     cout << text << endl;
 }
@@ -249,7 +250,7 @@ void describe_experiments()
 int main(int argc, char* argv[])
 {
     unsigned size = 100, iterations = 100;
-    int vmax = 5, vmax_min = 0, vmax_max = 20;
+    int vmax = 5, vmax_min = 0, vmax_max = 20, init_vel = 1;
     double density = 0.2, rand_prob = 0.2;
 
     bool ocupancy_fixed = false, flow_fixed = false, flow_vs_density = false;
@@ -746,7 +747,7 @@ int main(int argc, char* argv[])
         if (plot_traffic)
         {
             cout << "Evolucionando automata." << endl;
-            CellularAutomataML* ca = create_multilane_ca(ca_type, size, lanes, density, vmax, rand_prob, args);
+            CellularAutomataML* ca = create_multilane_ca(ca_type, size, lanes, density, vmax, rand_prob, init_vel, args);
             ca->Evolve(iterations);
             if (plot_traffic)
             {

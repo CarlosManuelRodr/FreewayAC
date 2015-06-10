@@ -28,6 +28,7 @@ void ExParam::Report()
     aux_report("rand_prob", rand_prob);
     aux_report("rand_prob_min", rand_prob_min);
     aux_report("rand_prob_max", rand_prob_max);
+    aux_report("init_vel", init_vel);
     aux_report("aut_car_density_min", aut_car_density_min);
     aux_report("aut_car_density_max", aut_car_density_max);
     aux_report("new_car_prob_min", new_car_prob_min);
@@ -52,7 +53,7 @@ void ExParam::Report()
 
 int ex_traffic_map(ExParam p)
 {
-    CellularAutomata* ca = create_ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.args);
+    CellularAutomata* ca = create_ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, p.args);
     ca->Evolve(p.iterations);
     int r = ca->DrawHistory(p.path, p.out_file_name);
     delete_ca();
@@ -61,7 +62,7 @@ int ex_traffic_map(ExParam p)
 
 int ex_flow_map(ExParam p)
 {
-    CellularAutomata* ca = create_ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.args);
+    CellularAutomata* ca = create_ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, p.args);
     ca->Evolve(p.iterations);
     int r = ca->DrawFlowHistory(p.path, p.out_file_name);
     delete_ca();
@@ -70,7 +71,7 @@ int ex_flow_map(ExParam p)
 
 int ex_ocupancy_fixed(ExParam p)
 {
-    CellularAutomata* ca = create_ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.args);
+    CellularAutomata* ca = create_ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, p.args);
     ca->Evolve(p.iterations);
 
     vector<double> ocupancy;
@@ -102,7 +103,7 @@ int ex_ocupancy_fixed(ExParam p)
 
 int ex_flow_fixed(ExParam p)
 {
-    CellularAutomata* ca = create_ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.args);
+    CellularAutomata* ca = create_ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, p.args);
     ca->Evolve(p.iterations);
 
     vector<double> flow;
@@ -145,7 +146,7 @@ int ex_flow_vs_density(ExParam p)
             aux_progress_bar(d, p.density_min, p.density_max, p.dt);
 
         // Evoluciona el sistema.
-        ca = create_ca(p.type, p.size, d, p.vmax, p.rand_prob, p.args, p.random_seed);
+        ca = create_ca(p.type, p.size, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
         if (!ca)
             return 1;
         ca->Evolve(p.iterations);
@@ -205,7 +206,7 @@ int ex_multilane_flow_vs_density(ExParam p)
             aux_progress_bar(d, p.density_min, p.density_max, p.dt);
 
         // Evoluciona el sistema.
-        ca = create_multilane_ca(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.args, p.random_seed);
+        ca = create_multilane_ca(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
         if (!ca)
             return 1;
         ca->Evolve(p.iterations);
@@ -269,7 +270,7 @@ int ex_flow_vs_vmax(ExParam p)
             aux_progress_bar(v, p.vmax_min, p.vmax_max, p.dt);
 
         // Evoluciona el sistema.
-        ca = create_ca(p.type, p.size, p.density, v, p.rand_prob, p.args, p.random_seed);
+        ca = create_ca(p.type, p.size, p.density, v, p.rand_prob, p.init_vel, p.args, p.random_seed);
         if (!ca)
             return 1;
         ca->Evolve(p.iterations);
@@ -320,7 +321,7 @@ int ex_flow_vs_rand_prob(ExParam p)
             aux_progress_bar(r, p.rand_prob_min, p.rand_prob_max, p.dt);
 
         // Evoluciona el sistema.
-        ca = create_ca(p.type, p.size, p.density, p.vmax, r, p.args, p.random_seed);
+        ca = create_ca(p.type, p.size, p.density, p.vmax, r, p.init_vel, p.args, p.random_seed);
         if (!ca)
             return 1;
         ca->Evolve(p.iterations);
@@ -371,7 +372,7 @@ int ex_flow_vs_aut_cars(ExParam p)
             aux_progress_bar(s, p.aut_car_density_min, p.aut_car_density_max, p.dt);
 
         // Evoluciona el sistema.
-        ca = create_ca(AUTONOMOUS_CA, p.size, p.density, p.vmax, p.rand_prob, Args({ s }), p.random_seed);
+        ca = create_ca(AUTONOMOUS_CA, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, Args({ s }), p.random_seed);
         if (!ca)
             return 1;
         ca->Evolve(p.iterations);
@@ -429,7 +430,7 @@ int ex_flow_vs_new_car_prob(ExParam p)
 
         // Evoluciona el sistema.
         p.args.SetDouble(0, s);
-        ca = create_ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.args, p.random_seed);
+        ca = create_ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
         if (!ca)
             return 1;
         ca->Evolve(p.iterations);
@@ -490,7 +491,7 @@ int ex_flow_vs_stop_density(ExParam p)
             aux_progress_bar(d, p.stop_density_min, p.stop_density_max, p.dt);
 
         // Evoluciona el sistema.
-        ca = create_ca(STOP_CA, p.size, p.density, p.vmax, p.rand_prob, Args({ d }), p.random_seed);
+        ca = create_ca(STOP_CA, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, Args({ d }), p.random_seed);
         if (!ca)
             return 1;
         ca->Evolve(p.iterations);
@@ -541,7 +542,7 @@ int ex_flow_vs_semaphore_density(ExParam p)
             aux_progress_bar(d, p.semaphore_density_min, p.semaphore_density_max, p.dt);
 
         // Evoluciona el sistema.
-        ca = create_ca(SEMAPHORE_CA, p.size, p.density, p.vmax, p.rand_prob, Args({ d }, {}, { p.random_semaphores }), p.random_seed);
+        ca = create_ca(SEMAPHORE_CA, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, Args({ d }, {}, { p.random_semaphores }), p.random_seed);
         if (!ca)
             return 1;
         ca->Evolve(p.iterations);
@@ -600,7 +601,7 @@ int ex_escape_time_vs_density(ExParam p)
 
         // Evoluciona el sistema.
         p.args.SetDouble(0, 0.0);
-        ca = create_ca(ca_type, p.size, d, p.vmax, p.rand_prob, p.args, p.random_seed);
+        ca = create_ca(ca_type, p.size, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
         if (!ca)
             return 1;
 
@@ -647,7 +648,7 @@ int ex_escape_time_vs_rand_prob(ExParam p)
 
         // Evoluciona el sistema.
         p.args.SetDouble(0, 0.0);
-        ca = create_ca(ca_type, p.size, p.density, p.vmax, ra, p.args, p.random_seed);
+        ca = create_ca(ca_type, p.size, p.density, p.vmax, ra, p.init_vel, p.args, p.random_seed);
         if (!ca)
             return 1;
 
@@ -688,7 +689,7 @@ int ex_escape_time_vs_vmax(ExParam p)
 
         // Evoluciona el sistema.
         p.args.SetDouble(0, 0.0);
-        ca = create_ca(ca_type, p.size, p.density, v, p.rand_prob, p.args, p.random_seed);
+        ca = create_ca(ca_type, p.size, p.density, v, p.rand_prob, p.init_vel, p.args, p.random_seed);
         if (!ca)
             return 1;
 
@@ -729,7 +730,7 @@ int ex_discharge_vs_density(ExParam p)
 
         // Evoluciona el sistema.
         p.args.SetDouble(0, 0.0);
-        ca = create_ca(ca_type, p.size, d, p.vmax, p.rand_prob, p.args, p.random_seed);
+        ca = create_ca(ca_type, p.size, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
         if (!ca)
             return 1;
 
@@ -778,7 +779,7 @@ int ex_discharge_vs_density_fratal(ExParam p)
 
         // Evoluciona el sistema.
         p.args.SetDouble(0, 0.0);
-        ca = create_ca(ca_type, p.size, d, p.vmax, p.rand_prob, p.args, p.random_seed);
+        ca = create_ca(ca_type, p.size, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
         if (!ca)
             return 1;
 
@@ -846,7 +847,7 @@ int ex_dimension_vs_density(ExParam p)
         {
             // Evoluciona el sistema.
             p.args.SetDouble(0, 0.0);
-            ca = create_ca(ca_type, p.size, d, p.vmax, p.rand_prob, p.args, p.random_seed);
+            ca = create_ca(ca_type, p.size, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
             if (!ca)
                 return 1;
 

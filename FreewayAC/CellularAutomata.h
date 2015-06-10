@@ -66,6 +66,7 @@ protected:
     bool m_test;                 ///< Modo de prueba.
     int m_vmax;                  ///< Valor máximo de la velocidad.
     double m_rand_prob;          ///< Valor de la probabilidad de descenso de velocidad.
+    int m_init_vel;              ///< Velocidad inicial de los autos.
     unsigned m_size;             ///< Tamaño del autómata celular
     std::vector<int> m_ca;       ///< Automata celular. -1 para casillas sin auto, y valores >= 0 indican velocidad del auto en esa casilla.
     std::vector<int> m_ca_temp, m_ca_flow_temp;                         ///< Variable temporal para operaciones con AC.
@@ -82,7 +83,7 @@ public:
     ///@param density Densidad de autos.
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
-    CellularAutomata(const unsigned &size, const double &density, const int &vmax, const double &rand_prob);
+    CellularAutomata(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const int &init_vel);
 
     ///@brief Constructor.
     ///@param ca Lista con valores de AC.
@@ -174,7 +175,7 @@ public:
     ///@param density Densidad de autos.
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
-    CircularCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob);
+    CircularCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const int &init_vel);
 
     ///@brief Constructor.
     ///@param ca Lista con valores de AC.
@@ -220,7 +221,7 @@ public:
     ///@param rand_prob Probabilidad de descenso de velocidad.
     ///@param new_car_prob Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
     ///@param new_car_speed Velocidad de nuevo auto cuando ingresa a la pista.
-    OpenCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, 
+    OpenCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const int &init_vel,
            const double &new_car_prob, const int &new_car_speed);
 
     ///@brief Constructor.
@@ -229,8 +230,7 @@ public:
     ///@param density Densidad de autos.
     ///@param vmax Velocidad máxima de los autos.
     ///@param new_car_speed Velocidad de nuevo auto cuando ingresa a la pista.
-    OpenCA(const std::vector<int> &ca, const std::vector<bool> &rand_values, const int &vmax, 
-           const int &new_car_speed);
+    OpenCA(const std::vector<int> &ca, const std::vector<bool> &rand_values, const int &vmax, const int &new_car_speed);
 
     ///@brief Devuelve elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
@@ -265,7 +265,7 @@ public:
     ///@param rand_prob Probabilidad de descenso de velocidad.
     ///@param aut_density Densidad de autos autónomos respecto a número total de autos.
     AutonomousCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob,
-                 const double &aut_density);
+                 const int &init_vel, const double &aut_density);
 
     ///@brief Constructor.
     ///@param ca Lista con valores de AC.
@@ -301,7 +301,8 @@ public:
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
     ///@param stop_density Densidad de topes respecto a tamaño total del AC.
-    StreetStopCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, const double &stop_density);
+    StreetStopCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob,
+                 const int &init_vel, const double &stop_density);
 
     ///@brief Devuelve la distancia al tope más próximo desde la posición pos.
     ///@param pos Posición desde dónde iniciar la búsqueda.
@@ -343,7 +344,7 @@ public:
     ///@param semaphore_density Densidad de semaforos respecto a tamaño total del AC.
     ///@param 
     SemaphoreCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob,
-                const double &semaphore_density, const bool &random_semaphores = false);
+                const int &init_vel, const double &semaphore_density, const bool &random_semaphores = false);
 
     ///@brief Devuelve la distancia al semáforo más próximo desde la posición pos.
     ///@param pos Posición desde dónde iniciar la búsqueda.
@@ -380,8 +381,8 @@ public:
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
     ///@param return_lane Carril al que apunta la función At.
-    SimpleJunctionCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob, 
-                     const double &new_car_prob, const int &new_car_speed, const int &target_lane = 0);
+    SimpleJunctionCA(const unsigned &size, const double &density, const int &vmax, const double &rand_prob,
+                     const int &init_vel, const double &new_car_prob, const int &new_car_speed, const int &target_lane = 0);
 
     ~SimpleJunctionCA();
 
@@ -421,7 +422,7 @@ public:
 * @return Puntero de clase base que apunta hacia el AC.
 */
 CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax, 
-                            const double &rand_prob, Args args, const int &custom_random_seed = -1);
+                            const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed = -1);
 
 /**
 * @brief Borra cualquier AC que haya sido creado anteriormente.
@@ -462,8 +463,9 @@ class CellularAutomataML
 protected:
     bool m_test;                 ///< Modo de prueba.
     int m_vmax;                  ///< Valor máximo de la velocidad.
-    unsigned m_lanes;             ///< Número de carriles.
+    unsigned m_lanes;            ///< Número de carriles.
     double m_rand_prob;          ///< Valor de la probabilidad de descenso de velocidad.
+    int m_init_vel;              ///< Velocidad inicial de los vehículos.
     unsigned m_size;             ///< Tamaño del autómata celular
     std::vector<CAElement> m_ca;    ///< Automata celular. -1 para casillas sin auto, y valores >= 0 indican velocidad del auto en esa casilla.
     std::vector<CAElement> m_ca_temp, m_ca_flow_temp;                         ///< Variable temporal para operaciones con AC.
@@ -482,14 +484,15 @@ public:
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
     CellularAutomataML(const unsigned &size, const unsigned &lanes, const double &density, 
-                       const int &vmax, const double &rand_prob);
+                       const int &vmax, const double &rand_prob, const int &init_vel);
 
     ///@brief Constructor.
     ///@param ca Lista con valores de AC.
     ///@param rand_values Valores aleatorios en cada paso.
     ///@param density Densidad de autos.
     ///@param vmax Velocidad máxima de los autos.
-    CellularAutomataML(const std::vector<CAElement> &ca, const std::vector<bool> &rand_values, const int &vmax);
+    CellularAutomataML(const std::vector<CAElement> &ca, const std::vector<bool> &rand_values,
+                       const int &vmax);
 
     virtual ~CellularAutomataML();
 
@@ -577,7 +580,7 @@ public:
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
     CircularCAML(const unsigned &size, const unsigned int &lanes, const double &density,
-                 const int &vmax, const double &rand_prob);
+                 const int &vmax, const double &rand_prob, const int &init_vel);
 
     ///@brief Constructor.
     ///@param ca Lista con valores de AC.
@@ -625,7 +628,7 @@ public:
     ///@param new_car_prob Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
     ///@param new_car_speed Velocidad de nuevo auto cuando ingresa a la pista.
     OpenCAML(const unsigned &size, const unsigned int &lanes, const double &density, const int &vmax,
-             const double &rand_prob, const double &new_car_prob, const int &new_car_speed);
+             const double &rand_prob, const int &init_vel, const double &new_car_prob, const int &new_car_speed);
 
     ///@brief Constructor.
     ///@param ca Lista con valores de AC.
@@ -664,7 +667,8 @@ public:
 * @return Puntero de clase base que apunta hacia el AC.
 */
 CellularAutomataML* create_multilane_ca(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density,
-                                        const int &vmax, const double &rand_prob, Args args, const int &custom_random_seed = -1);
+                                        const int &vmax, const double &rand_prob, const int &init_vel, Args args,
+                                        const int &custom_random_seed = -1);
 
 /**
 * @brief Borra cualquier AC multicarril que haya sido creado anteriormente.

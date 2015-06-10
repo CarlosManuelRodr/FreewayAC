@@ -47,7 +47,7 @@ BMPWriter::BMPWriter(string filepath, unsigned int width, unsigned int height)
     m_index_height = 0;
     m_width = width;
     m_height = height;
-    m_dataSize = width*height;
+    m_data_size = width*height;
     m_bmp_hdr = new BMPHeader;
     m_dib_hdr = new DIBHeader;
 
@@ -141,7 +141,7 @@ void BMPWriter::WriteLine(BMPPixel* data)
 }
 void BMPWriter::WriteLine(std::vector<BMPPixel> data)
 {
-    if (!data.empty())
+    if (data.size() == m_width)
         WriteLine(&data[0]);
 }
 bool BMPWriter::IsOpen()
