@@ -1,1 +1,0 @@
-./Debug/FreewayAC_BmpWriter.cpp.o ./Debug/FreewayAC_CellularAutomata.cpp.o ./Debug/FreewayAC_main.cpp.o ./Debug/FreewayAC_mtrand.cpp.o

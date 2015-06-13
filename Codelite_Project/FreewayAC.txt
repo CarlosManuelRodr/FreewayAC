@@ -1,1 +1,0 @@
-./Release/FreewayAC_BmpWriter.cpp.o ./Release/FreewayAC_CellularAutomata.cpp.o ./Release/FreewayAC_main.cpp.o ./Release/FreewayAC_mtrand.cpp.o
