@@ -127,8 +127,7 @@ int ex_flow_fixed(ExParam p)
 
 int ex_flow_vs_density(ExParam p)
 {
-    vector<double> density;
-    vector<double> flow;
+    vector<double> density, flow;
     CaHandler ca;
 
     for (double d = p.density_min; d <= p.density_max; d += p.dt)
@@ -185,9 +184,8 @@ int ex_flow_vs_density(ExParam p)
 
 int ex_multilane_flow_vs_density(ExParam p)
 {
-    vector<double> density;
-    vector<double> flow;
-    CellularAutomataML* ca;
+    vector<double> density, flow;
+    CaHandlerML ca;
 
     for (double d = p.density_min; d <= p.density_max; d += p.dt)
     {
@@ -196,17 +194,17 @@ int ex_multilane_flow_vs_density(ExParam p)
             aux_progress_bar(d, p.density_min, p.density_max, p.dt);
 
         // Evoluciona el sistema.
-        ca = create_multilane_ca(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
-        if (!ca)
+        ca.CreateCa(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
+        if (ca.Status() != 0)
             return 1;
-        ca->Evolve(p.iterations);
+        ca.Evolve(p.iterations);
 
         // Obtiene flujo en cada posición.
         vector<double> tmp_flow;
         tmp_flow.assign(p.size, 0.0);
-        unsigned height = ca->GetHistorySize();
-        unsigned width = ca->GetSize();
-        unsigned lane_num = ca->GetLanes();
+        unsigned height = ca.GetHistorySize();
+        unsigned width = ca.GetSize();
+        unsigned lane_num = ca.GetLanes();
 
         for (unsigned i = 0; i < width; ++i)
         {
@@ -215,7 +213,7 @@ int ex_multilane_flow_vs_density(ExParam p)
             {
                 for (unsigned k = 1; k < height; ++k)
                 {
-                    if ((ca->GetAt(i, j, k, CA_FLOW_HISTORY) != 0) && (ca->GetAt(i + 1, j, k, CA_FLOW_HISTORY) != 0))
+                    if ((ca.GetAt(i, j, k, CA_FLOW_HISTORY) != 0) && (ca.GetAt(i + 1, j, k, CA_FLOW_HISTORY) != 0))
                         sum++;
                 }
             }
@@ -242,15 +240,12 @@ int ex_multilane_flow_vs_density(ExParam p)
     else
         p.out_file_name = p.path + p.out_file_name;
 
-    int r = export_data(density, flow, p.out_file_name, p.export_format);
-    delete_multilane_ca();
-    return r;
+    return export_data(density, flow, p.out_file_name, p.export_format);
 }
 
 int ex_flow_vs_vmax(ExParam p)
 {
-    vector<double> vmax;
-    vector<double> flow;
+    vector<double> vmax, flow;
     CaHandler ca;
 
     for (int v = p.vmax_min; v <= p.vmax_max; v += (int)p.dt)
@@ -298,8 +293,7 @@ int ex_flow_vs_vmax(ExParam p)
 
 int ex_flow_vs_rand_prob(ExParam p)
 {
-    vector<double> rand_prob;
-    vector<double> flow;
+    vector<double> rand_prob, flow;
     CaHandler ca;
 
     for (double r = p.rand_prob_min; r <= p.rand_prob_max; r += p.dt)
@@ -347,8 +341,7 @@ int ex_flow_vs_rand_prob(ExParam p)
 
 int ex_flow_vs_aut_cars(ExParam p)
 {
-    vector<double> aut_car_density;
-    vector<double> flow;
+    vector<double> aut_car_density, flow;
     CaHandler ca;
 
     for (double s = p.aut_car_density_min; s <= p.aut_car_density_max; s += p.dt)
@@ -402,8 +395,7 @@ int ex_flow_vs_new_car_prob(ExParam p)
         return 1;
     }
 
-    vector<double> new_car_density;
-    vector<double> flow;
+    vector<double> new_car_density, flow;
     CaHandler ca;
 
     for (double s = p.new_car_prob_min; s <= p.new_car_prob_max; s += p.dt)
@@ -462,8 +454,7 @@ int ex_flow_vs_new_car_prob(ExParam p)
 
 int ex_flow_vs_stop_density(ExParam p)
 {
-    vector<double> stop_density;
-    vector<double> flow;
+    vector<double> stop_density, flow;
     CaHandler ca;
 
     for (double d = p.stop_density_min; d <= p.stop_density_max; d += p.dt)
@@ -511,8 +502,7 @@ int ex_flow_vs_stop_density(ExParam p)
 
 int ex_flow_vs_semaphore_density(ExParam p)
 {
-    vector<double> semaphore_density;
-    vector<double> flow;
+    vector<double> semaphore_density, flow;
     CaHandler ca;
 
     for (double d = p.semaphore_density_min; d <= p.semaphore_density_max; d += p.dt)
@@ -567,8 +557,7 @@ int ex_escape_time_vs_density(ExParam p)
         ca_type = OPEN_CA;
     }
 
-    vector<double> densities;
-    vector<double> escape_time;
+    vector<double> densities, escape_time;
     CaHandler ca;
 
     for (double d = p.density_min; d <= p.density_max; d += p.dt)
@@ -611,8 +600,7 @@ int ex_escape_time_vs_rand_prob(ExParam p)
         ca_type = OPEN_CA;
     }
 
-    vector<double> rand_p;
-    vector<double> escape_time;
+    vector<double> rand_p, escape_time;
     CaHandler ca;
 
     for (double ra = p.rand_prob_min; ra <= p.rand_prob_max; ra += p.dt)
@@ -649,8 +637,7 @@ int ex_escape_time_vs_vmax(ExParam p)
         ca_type = OPEN_CA;
     }
 
-    vector<double> vel;
-    vector<double> escape_time;
+    vector<double> vel, escape_time;
     CaHandler ca;
 
     for (int v = p.vmax_min; v <= p.vmax_max; v += (int)p.dt)
@@ -687,8 +674,7 @@ int ex_discharge_vs_density(ExParam p)
         ca_type = OPEN_CA;
     }
 
-    vector<double> densities;
-    vector<double> escape_time;
+    vector<double> densities, escape_time;
     CaHandler ca;
 
     for (double d = p.density_min; d <= p.density_max; d += p.dt)
@@ -830,6 +816,8 @@ int ex_dimension_vs_density(ExParam p)
                 escape_time.push_back((double)(ca.GetSize())*d / (double)iter);
         }
 
+        // Obtiene la media y selecciona los puntos mayores e inferiores
+        // para generar fractal.
         double et_mean = aux_mean(escape_time);
         vector<int> fractal(escape_time.size(), 0);
         for (unsigned i = 0; i < escape_time.size(); ++i)
@@ -838,11 +826,13 @@ int ex_dimension_vs_density(ExParam p)
                 fractal[i] = 1;
         }
 
+        // Calcula dimensión fractal.
         double d_mean = d_left + p_size / 2.0;
         densities.push_back(d_mean);
         dimension.push_back(measure_fractal_dimension(fractal, 0, (int)(0.1*fractal.size()), fractal.size(), 1));
         plot_dimension.push_back(measure_plot_fractal_dimension(escape_time, (int)(0.1*fractal.size()), fractal.size(), 1));
 
+        // Crea directorios de salida para gráficas.
         string f_path, f_plot_path;
         if (p.path.empty())
         {
@@ -852,6 +842,7 @@ int ex_dimension_vs_density(ExParam p)
         f_path = p.path + "Fractal" + df_separator;
         f_plot_path = p.path + "Plot" + df_separator;
 
+        // Exporta los datos.
         string p_name = f_path + "discharge_vs_density_fractal_" + to_string(d_mean) + ".bmp";
         string p_plot_name = f_plot_path + "discharge_vs_density_plot_" + to_string(d_mean) + ".bmp";
         r = export_map(fractal, p_name, 30, false, BINARY_COLORS);
@@ -861,12 +852,16 @@ int ex_dimension_vs_density(ExParam p)
         if (r != 0)
             return r;
     }
-    return export_csv(densities, dimension, "dimension_vs_density.csv");
+    r = export_csv(densities, dimension, "dimension_vs_density.csv");
+    if (r != 0)
+        return r;
+    r = export_csv(densities, plot_dimension, "plot_dimension_vs_density.csv");
+    return r;
 }
 
-Coord<double> ex_dimension_vs_density_thread(double density, ExParam p)
+Coord3D<double> ex_dimension_vs_density_thread(double density, ExParam p)
 {
-    Coord<double> output;
+    Coord3D<double> output;
     double p_size = (p.density_max - p.density_min) / (double)p.partitions;
 
     vector<double> escape_time;
@@ -877,24 +872,20 @@ Coord<double> ex_dimension_vs_density_thread(double density, ExParam p)
         p.args.SetDouble(0, 0.0);
         ca.CreateCa(p.type, p.size, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
         if (ca.Status() != 0)
-            return Coord<double>(0.0, 0.0);
+            return Coord3D<double>(0.0, 0.0, 0.0);
 
         int iter = 0;
         while (ca.CountCars() != 0)
         {
             ca.Step();
             iter++;
-
-            if (ca.IsFluxHalted())
-            {
-                cout << "Error: Flujo detenido." << endl;
-                return Coord<double>(0.0, 0.0);
-            }
         }
         if (iter != 0)
             escape_time.push_back((double)(ca.GetSize())*d / (double)iter);
     }
 
+    // Obtiene la media y selecciona los puntos mayores e inferiores
+    // para generar fractal.
     double et_mean = aux_mean(escape_time);
     vector<int> fractal(escape_time.size(), 0);
     for (unsigned i = 0; i < escape_time.size(); ++i)
@@ -903,9 +894,13 @@ Coord<double> ex_dimension_vs_density_thread(double density, ExParam p)
             fractal[i] = 1;
     }
 
+    // Calcula dimensión fractal.
     double d_mean = density + p_size / 2.0;
-    output = Coord<double>(d_mean, measure_fractal_dimension(fractal, 0, (int)(0.1*fractal.size()), fractal.size(), 1));
+    double fractal_dimension = measure_fractal_dimension(fractal, 0, (int)(0.1*fractal.size()), fractal.size(), 1);
+    double plot_dimension = measure_plot_fractal_dimension(escape_time, (int)(0.1*fractal.size()), fractal.size(), 1);
+    output = Coord3D<double>(d_mean, fractal_dimension, plot_dimension);
 
+    // Crea directorios de salida para gráficas.
     string f_path, f_plot_path;
     if (p.path.empty())
     {
@@ -915,6 +910,7 @@ Coord<double> ex_dimension_vs_density_thread(double density, ExParam p)
     f_path = p.path + "Fractal" + df_separator;
     f_plot_path = p.path + "Plot" + df_separator;
 
+    // Exporta los datos.
     string p_name = f_path + "discharge_vs_density_fractal_" + to_string(d_mean) + ".bmp";
     string p_plot_name = f_plot_path + "discharge_vs_density_plot_" + to_string(d_mean) + ".bmp";
     int r;
@@ -930,13 +926,14 @@ Coord<double> ex_dimension_vs_density_thread(double density, ExParam p)
 
 int ex_dimension_vs_density_parallel(ExParam p)
 {
+    int r;
     if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, p.type))
     {
         cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
         p.type = OPEN_CA;
     }
 
-    vector<Coord<double>> result;
+    vector<Coord3D<double>> result;
     double p_size = (p.density_max - p.density_min) / (double)p.partitions;
     if (2.0*p.dt >= p_size)
     {
@@ -944,8 +941,21 @@ int ex_dimension_vs_density_parallel(ExParam p)
         return 1;
     }
 
-    result = aux_parallel_function<Coord<double>, double, ExParam>(ex_dimension_vs_density_thread, p.density_min, p.density_max, p_size, p);
-    return export_csv(result, "dimension_vs_density.csv");
+    result = aux_parallel_function<Coord3D<double>, double, ExParam>(ex_dimension_vs_density_thread, p.density_min, p.density_max, p_size, p);
+
+    vector<Coord<double>> frac_dim, plot_dim;
+    for (unsigned i = 0; i < result.size(); ++i)
+    {
+        frac_dim.push_back(result[i].SubXY());
+        plot_dim.push_back(result[i].SubXZ());
+    }
+
+    r = export_csv(frac_dim, "dimension_vs_density.csv");
+    if (r != 0)
+        return r;
+
+    r = export_csv(plot_dim, "plot_dimension_vs_density.csv");
+    return r;
 }
 
 
@@ -957,9 +967,9 @@ void ex_perform_test()
     // Circular.
     vector<int> init({1, -1, -1, 1, -1, 1, 1, -1, -1, 1, -1, -1, -1, 1, -1, -1, 1, -1, -1, -1});
     vector<int> end_circ({-1, 2, -1, 1, 0, -1, -1, 1, -1, 1, -1,-1, -1, -1, 2, -1, -1, -1, 2, -1});
-    vector<bool> rand_val_circ({false, false, false, false, true, false, true,
-                                    true, false, false, true, false, false, false,
-                                    false, true, false, false, true, false, false});
+    vector<bool> rand_val_circ({ false, false, false, false, true, false, true,
+                                 true, false, false, true, false, false, false,
+                                 false, true, false, false, true, false, false });
 
     cout << "Comprobando automata celular circular... ";
     CircularCA circ_ca(init, rand_val_circ, 5);
@@ -982,9 +992,9 @@ void ex_perform_test()
 
     // Abierto.
     vector<int> end_open({-1, 1, 0, -1, -1, 1, -1, 1, 0, -1, -1,-1, -1, -1, -1, 3, -1, -1, 2, -1});
-    vector<bool> rand_val_open_vec({false, false, false, false, true, false, true, false,
-                                    true, false, false, true, false, false, false, true,
-                                    false, true, false, false, true, false, false, false});
+    vector<bool> rand_val_open_vec({ false, false, false, false, true, false, true, false,
+                                     true, false, false, true, false, false, false, true,
+                                     false, true, false, false, true, false, false, false });
 
     cout << "Comprobando automata celular abierto... ";
     OpenCA open_ca(init, rand_val_open_vec, 5, 1);

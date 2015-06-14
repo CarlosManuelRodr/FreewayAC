@@ -760,14 +760,13 @@ int main(int argc, char* argv[])
         if (plot_traffic)
         {
             cout << "Evolucionando automata." << endl;
-            CellularAutomataML* ca = create_multilane_ca(ca_type, size, lanes, density, vmax, rand_prob, init_vel, args);
-            ca->Evolve(iterations);
+            CaHandlerML ca(ca_type, size, lanes, density, vmax, rand_prob, init_vel, args);
+            ca.Evolve(iterations);
             if (plot_traffic)
             {
                 cout << "Creando mapas." << endl;
-                r = ca->DrawHistory(path, out_file_name);
+                r = ca.DrawHistory(path, out_file_name);
             }
-            delete_multilane_ca();
         }
         else
         {

@@ -12,7 +12,8 @@
 #include <functional>
 #include <stdexcept>
 
-class ThreadPool {
+class ThreadPool
+{
 public:
     ThreadPool(size_t);
     template<class F, class... Args>

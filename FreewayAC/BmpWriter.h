@@ -5,7 +5,6 @@
 * @date 7/18/2012
 */
 
-#pragma once
 #ifndef __bmpWriter
 #define __bmpWriter
 

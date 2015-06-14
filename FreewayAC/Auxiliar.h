@@ -5,7 +5,6 @@
 * @date 8/06/2015
 */
 
-#pragma once
 #ifndef _AUX
 #define _AUX
 
@@ -139,6 +138,11 @@ template <class N> double aux_mean(std::vector<N> v)
 
 /**
 * @brief Lanza threads con argumento en el rango especificado.
+* @param f Función a lanzar.
+* @param min_val Valor mínimo que se le va a pasar a la función.
+* @param max_val Valor máximo que se le va a pasar a la función.
+* @param dt Invervalo entre valores que se le pasan a la función.
+* @param arg Argumento extra que se le pasa a la función.
 */
 template<typename R, typename T, typename Arg>
 std::vector<R> aux_parallel_function(std::function<R(T, Arg)> f, T min_val, T max_val, T dt, Arg arg)
@@ -343,7 +347,7 @@ public:
 
 /**
 * @class Coord
-* @brief Almacenamiento de coordenadas.
+* @brief Almacenamiento de coordenadas 2D.
 **/
 template <class T> class Coord
 {
@@ -395,6 +399,93 @@ template <class T> T Coord<T>::GetX()
 template <class T> T Coord<T>::GetY()
 {
     return m_y;
+}
+
+/**
+* @class Coord3D
+* @brief Almacenamiento de coordenadas 3D.
+**/
+template <class T> class Coord3D
+{
+public:
+    T m_x, m_y, m_z;
+    Coord3D();
+    Coord3D(T x, T y, T z);
+    Coord3D& operator=(const Coord3D& other);
+    Coord3D& operator=(const Coord<T>& other);
+    bool operator==(const Coord3D& other);
+    bool operator!=(const Coord3D& other);
+    T GetX();
+    T GetY();
+    T GetZ();
+    Coord<T> SubXY();
+    Coord<T> SubYZ();
+    Coord<T> SubXZ();
+};
+
+template <class T> Coord3D<T>::Coord3D()
+{
+    m_x = 0;
+    m_y = 0;
+    m_z = 0;
+}
+template <class T> Coord3D<T>::Coord3D(T x, T y, T z)
+{
+    m_x = x;
+    m_y = y;
+    m_z = z;
+}
+template <class T> Coord3D<T>& Coord3D<T>::operator=(const Coord3D<T>& other)
+{
+    m_x = other.m_x;
+    m_y = other.m_y;
+    m_z = other.m_z;
+    return *this;
+}
+template <class T> Coord3D<T>& Coord3D<T>::operator=(const Coord<T>& other)
+{
+    m_x = other.m_x;
+    m_y = other.m_y;
+    m_z = 0;
+    return *this;
+}
+template <class T> bool Coord3D<T>::operator==(const Coord3D<T>& other)
+{
+    if (other.m_x == m_x && other.m_y == m_y && other.m_z = m_z)
+        return true;
+    else
+        return false;
+}
+template <class T> bool Coord3D<T>::operator!=(const Coord3D<T>& other)
+{
+    if (other.m_x == m_x && other.m_y == m_y && other.m_z = m_z)
+        return false;
+    else
+        return true;
+}
+template <class T> T Coord3D<T>::GetX()
+{
+    return m_x;
+}
+template <class T> T Coord3D<T>::GetY()
+{
+    return m_y;
+}
+template <class T> T Coord3D<T>::GetZ()
+{
+    return m_z;
+}
+template <class T> Coord<T> Coord3D<T>::SubXY()
+{
+    return Coord<T>(m_x, m_y);
+}
+template <class T> Coord<T> Coord3D<T>::SubYZ()
+{
+    return Coord<T>(m_y, m_z);
+}
+template <class T> Coord<T> Coord3D<T>::SubXZ()
+{
+    return Coord<T>(m_x, m_z);
 }
 
 #endif

@@ -5,7 +5,6 @@
 * @date 18/05/2015
 */
 
-#pragma once
 #ifndef _CELLULARAUTOMATA
 #define _CELLULARAUTOMATA
 
@@ -411,6 +410,11 @@ public:
 *                           *
 ****************************/
 
+/**
+* @class CaHandler
+* @brief Manejador de CA. Provee interfaz para manejar CA de forma genérica, sin importar el tipo.
+*/
+
 class CaHandler
 {
     CellularAutomata* cellularautomata;
@@ -676,23 +680,43 @@ public:
 ********************************/
 
 /**
-* @brief Crea autómata celular multicarril con los parámetros especificados y devuelve puntero genérico.
-* @param ca Tipo de AC.
-* @param size Tamaño de AC.
-* @param lanes Número de carriles.
-* @param density Densidad de autos.
-* @param vmax Velocidad máxima.
-* @param rand_prob Probabilidad de descenso de velocidad.
-* @param args Argumentos extra que requieren algunos AC.
-* @return Puntero de clase base que apunta hacia el AC.
+* @class CaHandlerML
+* @brief Manejador de CA multicarril. Provee interfaz para manejar CA de forma genérica, sin importar el tipo.
 */
-CellularAutomataML* create_multilane_ca(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density,
-                                        const int &vmax, const double &rand_prob, const int &init_vel, Args args,
-                                        const int &custom_random_seed = -1);
+class CaHandlerML
+{
+    CellularAutomataML* cellularautomataml;
+    CircularCAML* circularcaml;
+    OpenCAML* opencaml;
 
-/**
-* @brief Borra cualquier AC multicarril que haya sido creado anteriormente.
-*/
-void delete_multilane_ca();
+public:
+    CaHandlerML();
+    CaHandlerML(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density, const int &vmax,
+                const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed = -1);
+    ~CaHandlerML();
+    void CreateCa(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density, const int &vmax,
+                  const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed = -1);
+    void DeleteCa();
+    int Status();
+
+    void Evolve(const unsigned &iter);
+    int &At(const int &i, const unsigned &lane, const CAS &ca = CA);
+    int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca);
+    int GetAt(const unsigned &i, const unsigned &lane, const CAS &ca = CA);
+    int GetAt(const unsigned &i, const unsigned &lane, const unsigned &j, const CAS &ca);
+    void Connect(CellularAutomataML* connect, unsigned connect_pos);
+    int NextCarDist(const int &pos, const unsigned &lane);
+    int DrawHistory(std::string path = "", std::string out_file_name = "");
+    int DrawFlowHistory(std::string path = "", std::string out_file_name = "");
+    bool Randomization(const double &prob = -1.0);
+    void Print();
+    unsigned GetSize();
+    unsigned GetHistorySize();
+    unsigned GetLanes();
+    unsigned CountCars();
+    void Step();
+    void ChangeLanes();
+    void Move();
+};
 
 #endif

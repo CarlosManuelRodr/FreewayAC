@@ -5,7 +5,6 @@
 * @date 8/06/2015
 */
 
-#pragma once
 #ifndef _EXPERIMENTS
 #define _EXPERIMENTS
 #include "CellularAutomata.h"
