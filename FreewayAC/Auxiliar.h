@@ -13,6 +13,8 @@
 #include <initializer_list>
 #include <numeric>
 #include <random>
+#include <functional>
+#include "ThreadPool.h"
 
 /****************************
 *                           *
@@ -144,18 +146,17 @@ std::vector<R> aux_parallel_function(std::function<R(T, Arg)> f, T min_val, T ma
     ThreadPool pool(thread::hardware_concurrency());
     std::vector<std::future<R>> result;
     std::vector<R> result_values;
-    std::vector<R> output;
 
     for (T val = min_val; val <= max_val; val += dt)
         result.push_back(pool.enqueue(f, val, arg));
 
     for (unsigned i = 0; i < result.size(); ++i)
+    {
+        aux_progress_bar(i, 0, result.size(), 1);
         result_values.push_back(result[i].get());
-
-    for (unsigned i = 0; i < result.size(); ++i)
-        output.insert(output.begin(), result_values.begin(), result_values.end());
-
-    return output;
+    }
+    aux_progress_bar(1, 0, result.size(), 1);
+    return result_values;
 }
 
 /*****************************
@@ -332,4 +333,68 @@ public:
     ///@param arg Objetivo a copiar.
     void operator=(const Args &arg);
 };
+
+
+/****************************
+*                           *
+*       Coordenadas         *
+*                           *
+****************************/
+
+/**
+* @class Coord
+* @brief Almacenamiento de coordenadas.
+**/
+template <class T> class Coord
+{
+public:
+    T m_x, m_y;
+    Coord();
+    Coord(T x, T y);
+    Coord& operator=(const Coord& other);
+    bool operator==(const Coord& other);
+    bool operator!=(const Coord& other);
+    T GetX();
+    T GetY();
+};
+
+template <class T> Coord<T>::Coord()
+{
+    m_x = 0;
+    m_y = 0;
+}
+template <class T> Coord<T>::Coord(T x, T y)
+{
+    m_x = x;
+    m_y = y;
+}
+template <class T> Coord<T>& Coord<T>::operator=(const Coord<T>& other)
+{
+    m_x = other.m_x;
+    m_y = other.m_y;
+    return *this;
+}
+template <class T> bool Coord<T>::operator==(const Coord<T>& other)
+{
+    if (other.m_x == m_x && other.m_y == m_y)
+        return true;
+    else
+        return false;
+}
+template <class T> bool Coord<T>::operator!=(const Coord<T>& other)
+{
+    if (other.m_x == m_x && other.m_y == m_y)
+        return false;
+    else
+        return true;
+}
+template <class T> T Coord<T>::GetX()
+{
+    return m_x;
+}
+template <class T> T Coord<T>::GetY()
+{
+    return m_y;
+}
+
 #endif

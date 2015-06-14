@@ -36,7 +36,7 @@ enum  OptionIndex { UNKNOWN, SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VE
                     PLOT_TRAFFIC, PLOT_FLOW, MEASURE_OCUPANCY, MEASURE_FLOW,
                     FLOW_VS_DENSITY, FLOW_PER_DENSITY, FLOW_VS_VMAX, FLOW_VS_RAND_PROB, FLOW_VS_AUT_CARS,
                     FLOW_VS_STOP_DENSITY, FLOW_VS_NEW_CAR, FLOW_PER_NEW_CAR, FLOW_VS_SEMAPHORE_DENSITY, ESCAPE_TIME_VS_DENSITY,
-                    DISCHARGE_VS_DENSITY, DISCHARGE_VS_DENSITY_FRACTAL, DIMENSION_VS_DENSITY,
+                    DISCHARGE_VS_DENSITY, DISCHARGE_VS_DENSITY_FRACTAL, DIMENSION_VS_DENSITY, DIMENSION_VS_DENSITY_THREADED,
 
                     CA_CIRCULAR, CA_MULTILANE_CIRCULAR, CA_OPEN, CA_MULTILANE_OPEN, CA_AUTONOMOUS, CA_STOP, CA_SEMAPHORE,
                     CA_SIMPLE_JUNCTION,
@@ -93,6 +93,8 @@ const option::Descriptor usage[] =
     "  \t--discharge_vs_density_fractal  \tCrea fractal de gasto vs densidad en un rango especificado por dmin, dmax y dt." },
     {DIMENSION_VS_DENSITY,  0,"","dimension_vs_density", Arg::None,
     "  \t--dimension_vs_density  \tMide dimension fractal vs densidad en un rango especificado por dmin, dmax y dt." },
+    {DIMENSION_VS_DENSITY_THREADED, 0, "", "dimension_vs_density_threaded", Arg::None,
+    "  \t--dimension_vs_density_threaded  \tMide dimension fractal vs densidad usando varios núcleos en un rango especificado por dmin, dmax y dt." },
 
     {CA_CIRCULAR,  0,"","ca_circular", Arg::None, "  \t--ca_circular  \tAutomata celular circular." },
     {CA_MULTILANE_CIRCULAR, 0, "", "ca_multilane_circular", Arg::None, 
@@ -257,7 +259,8 @@ int main(int argc, char* argv[])
     bool plot_traffic = false, plot_flow = false, flow_vs_vmax = false, flow_vs_rand_prob = false, flow_vs_aut_cars = false;
     bool flow_vs_stop_density = false, flow_per_density = false, flow_vs_new_car = false, flow_per_new_car = false;
     bool flow_vs_semaphore_density = false, escape_time_vs_density = false, discharge_vs_density = false;
-    bool discharge_vs_density_fractal = false, dimension_vs_density = false, per_density = false, per_prob = false;
+    bool discharge_vs_density_fractal = false, dimension_vs_density = false, dimension_vs_density_threaded = false;
+    bool per_density = false, per_prob = false;
 
     bool random_semaphores = false, test = false, show_progress = true;
 
@@ -384,6 +387,10 @@ int main(int argc, char* argv[])
 
             case DIMENSION_VS_DENSITY:
             dimension_vs_density = true;
+            break;
+
+            case DIMENSION_VS_DENSITY_THREADED:
+            dimension_vs_density_threaded = true;
             break;
 
             case CA_CIRCULAR:
@@ -578,7 +585,8 @@ int main(int argc, char* argv[])
     if (!(ocupancy_fixed || flow_fixed || flow_vs_density || flow_per_density || flow_vs_vmax 
         || flow_vs_rand_prob || flow_vs_aut_cars || flow_vs_new_car || flow_per_new_car
         || flow_vs_stop_density || flow_vs_semaphore_density || escape_time_vs_density
-        || discharge_vs_density || discharge_vs_density_fractal || dimension_vs_density || test))
+        || discharge_vs_density || discharge_vs_density_fractal || dimension_vs_density 
+        || dimension_vs_density_threaded || test))
     {
         plot_traffic = true;    // Opcion predeterminada.
     }
@@ -738,8 +746,13 @@ int main(int argc, char* argv[])
         }
         if (dimension_vs_density)
         {
-            cout << "Midiendo dimensión fractal vs densidad de autos." << endl;
+            cout << "Midiendo dimension fractal vs densidad de autos." << endl;
             r = ex_dimension_vs_density(param);
+        }
+        if (dimension_vs_density_threaded)
+        {
+            cout << "Midiendo dimension fractal vs densidad de autos." << endl;
+            r = ex_dimension_vs_density_parallel(param);
         }
     }
     else

@@ -308,6 +308,11 @@ int ex_discharge_vs_density_fratal(ExParam p);
 int ex_dimension_vs_density(ExParam p);
 
 /**
+* @brief Crea gráfica de dimensión fractal de gasto respecto a densidad de vehículos usando threads.
+*/
+int ex_dimension_vs_density_parallel(ExParam p);
+
+/**
 * @brief Realiza tests para verificar la corrección de los algoritmos.
 */
 void ex_perform_test();

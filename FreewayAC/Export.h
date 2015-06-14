@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+#include "Auxiliar.h"
 
 /****************************
 *                           *
@@ -336,6 +337,22 @@ template <class N> int export_csv(std::vector<N> &data_1, std::vector<N> &data_2
         std::cout << "Error: Vectores de datos no coinciden en tamaño." << std::endl;
         return 1;
     }
+}
+
+/**
+* @brief Exporta datos a archivo csv.
+* @param data Lista de datos a exportar.
+* @param filename Archivo a exportar los datos.
+*/
+template <class N> int export_csv(std::vector<Coord<N>> &data, const std::string &filename)
+{
+    std::vector<N> data1, data2;
+    for (unsigned i = 0; i < data.size(); ++i)
+    {
+        data1.push_back(data[i].GetX());
+        data2.push_back(data[i].GetY());
+    }
+    return export_csv(data1, data2, filename);
 }
 
 /**

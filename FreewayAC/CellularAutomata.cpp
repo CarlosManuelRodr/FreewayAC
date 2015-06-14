@@ -1021,18 +1021,29 @@ int SimpleJunctionCA::GetAt(const unsigned &i, const unsigned &j, const CAS &ca)
 *                           *
 ****************************/
 
-CellularAutomata* cellularautomata = nullptr;
-CircularCA* circularca = nullptr;
-OpenCA* openca = nullptr;
-AutonomousCA* smartca = nullptr;
-StreetStopCA* streetstopca = nullptr;
-SemaphoreCA* semaphoreca = nullptr;
-SimpleJunctionCA* simplejunctionca = nullptr;
-
-CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax, 
-                            const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed)
+CaHandler::CaHandler()
 {
-    delete_ca();
+    cellularautomata = nullptr;
+    circularca = nullptr;
+    openca = nullptr;
+    smartca = nullptr;
+    streetstopca = nullptr;
+    semaphoreca = nullptr;
+    simplejunctionca = nullptr;
+}
+CaHandler::CaHandler(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax,
+                     const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed)
+{
+    CreateCa(ca, size, density, vmax, rand_prob, init_vel, args, custom_random_seed);
+}
+CaHandler::~CaHandler()
+{
+    DeleteCa();
+}
+void CaHandler::CreateCa(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax,
+                         const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed)
+{
+    DeleteCa();
     if (custom_random_seed != -1)
         RandomGen::Seed(custom_random_seed);
     else
@@ -1067,15 +1078,14 @@ CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &dens
             cout << "Error: No se puede crear AC especificado en create_ca." << endl;
             break;
         };
-        return cellularautomata;
     }
     catch (std::bad_alloc&)
     {
         cout << "Fatal: Memoria insuficiente." << endl;
-        return nullptr;
+        cellularautomata = nullptr;
     }
 }
-void delete_ca()
+void CaHandler::DeleteCa()
 {
     if (circularca)
         delete circularca;
@@ -1097,6 +1107,85 @@ void delete_ca()
     cellularautomata = nullptr;
     semaphoreca = nullptr;
     simplejunctionca = nullptr;
+}
+int CaHandler::Status()
+{
+    if (cellularautomata != nullptr)
+        return 0;
+    else
+        return 1;
+}
+void CaHandler::Evolve(const unsigned &iter)
+{
+    return cellularautomata->Evolve(iter);
+}
+int CaHandler::NextCarDist(const int &pos)
+{
+    return cellularautomata->NextCarDist(pos);
+}
+bool CaHandler::Randomization(const double &prob)
+{
+    return cellularautomata->Randomization(prob);
+}
+int &CaHandler::At(const int &i, const CAS &ca)
+{
+    return cellularautomata->At(i, ca);
+}
+int &CaHandler::At(const unsigned &i, const unsigned &j, const CAS &ca)
+{
+    return cellularautomata->At(i, j, ca);
+}
+int CaHandler::GetAt(const unsigned &i, const CAS &ca)
+{
+    return cellularautomata->GetAt(i, ca);
+}
+int CaHandler::GetAt(const unsigned &i, const unsigned &j, const CAS &ca)
+{
+    return cellularautomata->GetAt(i, j, ca);
+}
+void CaHandler::Connect(CellularAutomata* connect, unsigned connect_pos)
+{
+    return cellularautomata->Connect(connect, connect_pos);
+}
+int CaHandler::DrawHistory(std::string path, std::string out_file_name)
+{
+    return cellularautomata->DrawHistory(path, out_file_name);
+}
+int CaHandler::DrawFlowHistory(std::string path, std::string out_file_name)
+{
+    return cellularautomata->DrawFlowHistory(path, out_file_name);
+}
+void CaHandler::Print()
+{
+    return cellularautomata->Print();
+}
+unsigned CaHandler::GetSize()
+{
+    return cellularautomata->GetSize();
+}
+unsigned CaHandler::GetHistorySize()
+{
+    return cellularautomata->GetHistorySize();
+}
+unsigned CaHandler::CountCars()
+{
+    return cellularautomata->CountCars();
+}
+bool CaHandler::IsFluxHalted()
+{
+    return cellularautomata->IsFluxHalted();
+}
+void CaHandler::PrintHistory()
+{
+    return cellularautomata->PrintHistory();
+}
+void CaHandler::Step()
+{
+    return cellularautomata->Step();
+}
+void CaHandler::Move()
+{
+    return cellularautomata->Move();
 }
 
 

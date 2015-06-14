@@ -411,25 +411,45 @@ public:
 *                           *
 ****************************/
 
-/**
-* @brief Crea autómata celular con los parámetros especificados y devuelve puntero genérico.
-* @param ca Tipo de AC.
-* @param size Tamaño de AC.
-* @param density Densidad de autos.
-* @param vmax Velocidad máxima.
-* @param rand_prob Probabilidad de descenso de velocidad.
-* @param args Argumentos extra que requieren algunos AC.
-* @return Puntero de clase base que apunta hacia el AC.
-*/
-CellularAutomata* create_ca(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax, 
-                            const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed = -1);
+class CaHandler
+{
+    CellularAutomata* cellularautomata;
+    CircularCA* circularca;
+    OpenCA* openca;
+    AutonomousCA* smartca;
+    StreetStopCA* streetstopca;
+    SemaphoreCA* semaphoreca;
+    SimpleJunctionCA* simplejunctionca;
 
-/**
-* @brief Borra cualquier AC que haya sido creado anteriormente.
-*/
-void delete_ca();
+public:
+    CaHandler();
+    CaHandler(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax,
+              const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed = -1);
+    ~CaHandler();
+    void CreateCa(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax,
+                  const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed = -1);
+    void DeleteCa();
+    int Status();
 
-
+    void Evolve(const unsigned &iter);
+    int NextCarDist(const int &pos);
+    bool Randomization(const double &prob = -1.0);
+    int &At(const int &i, const CAS &ca = CA);
+    int &At(const unsigned &i, const unsigned &j, const CAS &ca);
+    int GetAt(const unsigned &i, const CAS &ca = CA);
+    int GetAt(const unsigned &i, const unsigned &j, const CAS &ca);
+    void Connect(CellularAutomata* connect, unsigned connect_pos);
+    int DrawHistory(std::string path = "", std::string out_file_name = "");
+    int DrawFlowHistory(std::string path = "", std::string out_file_name = "");
+    void Print();
+    unsigned GetSize();
+    unsigned GetHistorySize();
+    unsigned CountCars();
+    bool IsFluxHalted();
+    void PrintHistory();
+    void Step();
+    void Move();
+};
 
 ////////////////////////////////////
 //                                //
@@ -549,8 +569,8 @@ public:
     ///@param prob Probabilidad de obtener valor verdadero. Por defecto se utiliza m_rand_prob.
     bool Randomization(const double &prob = -1.0);
 
-    void Print();                ///< Escribe línea de autómata celular en la terminal.
-    unsigned GetSize();            ///< Devuelve tamaño del AC.
+    void Print();               ///< Escribe línea de autómata celular en la terminal.
+    unsigned GetSize();         ///< Devuelve tamaño del AC.
     unsigned GetHistorySize();  ///< Devuelve tamaño de la lista histórica de evolución del AC.
     unsigned GetLanes();        ///< Devuelve el número de carriles.
     unsigned CountCars();       ///< Cuenta la cantidad de autos en AC.
