@@ -134,6 +134,30 @@ template <class N> double aux_mean(std::vector<N> v)
     return (double)std::accumulate(v.begin(), v.end(), 0.0)/(double)v.size();
 }
 
+
+/**
+* @brief Lanza threads con argumento en el rango especificado.
+*/
+template<typename R, typename T, typename Arg>
+std::vector<R> aux_parallel_function(std::function<R(T, Arg)> f, T min_val, T max_val, T dt, Arg arg)
+{
+    ThreadPool pool(thread::hardware_concurrency());
+    std::vector<std::future<R>> result;
+    std::vector<R> result_values;
+    std::vector<R> output;
+
+    for (T val = min_val; val <= max_val; val += dt)
+        result.push_back(pool.enqueue(f, val, arg));
+
+    for (unsigned i = 0; i < result.size(); ++i)
+        result_values.push_back(result[i].get());
+
+    for (unsigned i = 0; i < result.size(); ++i)
+        output.insert(output.begin(), result_values.begin(), result_values.end());
+
+    return output;
+}
+
 /*****************************
 *                            *
 *   Directorios y archivos   *
@@ -215,9 +239,12 @@ public:
 */
 class Args
 {
+    std::vector<std::string> m_double_labels, m_int_labels;
+    std::vector<std::string> m_bool_labels, m_string_labels;
     std::vector<double> m_double_args;
     std::vector<int> m_int_args;
     std::vector<bool> m_bool_args;
+    std::vector<std::string> m_string_args;
 public:
     Args();
 
@@ -226,35 +253,83 @@ public:
     ///@param i_args Argumentos del tipo int.
     ///@param b_args Argumentos del tipo bool.
     Args(std::initializer_list<double> d_args, std::initializer_list<int> i_args = {},
-         std::initializer_list<bool> b_args = {});
+         std::initializer_list<bool> b_args = {}, std::initializer_list<std::string> s_args = {});
+
+    ///@brief Constructor.
+    ///@param d_args Argumentos del tipo double.
+    ///@param i_args Argumentos del tipo int.
+    ///@param b_args Argumentos del tipo bool.
+    Args(std::initializer_list<std::string> d_args_labels, std::initializer_list<double> d_args,
+         std::initializer_list<std::string> i_args_labels, std::initializer_list<int> i_args,
+         std::initializer_list<std::string> b_args_labels, std::initializer_list<bool> b_args,
+         std::initializer_list<std::string> s_args_labels, std::initializer_list<std::string> s_args);
 
     ///@brief Devuelve elemento double.
     ///@param i Indice del elemento a devolver.
     double GetDouble(const unsigned &i = 0);
 
+    ///@brief Devuelve elemento double.
+    ///@param label Etiqueta del elemento a devolver.
+    double GetDouble(std::string label);
+
     ///@brief Devuelve elemento int.
     ///@param i Indice del elemento a devolver.
     int GetInt(const unsigned &i = 0);
+
+    ///@brief Devuelve elemento double.
+    ///@param label Etiqueta del elemento a devolver.
+    int GetInt(std::string label);
 
     ///@brief Devuelve elemento bool.
     ///@param i Indice del elemento a devolver.
     bool GetBool(const unsigned &i = 0);
 
+    ///@brief Devuelve elemento bool.
+    ///@param label Etiqueta del elemento a devolver.
+    bool GetBool(std::string label);
+
+    ///@brief Devuelve elemento string.
+    ///@param i Indice del elemento a devolver.
+    std::string GetString(const unsigned &i = 0);
+
+    ///@brief Devuelve elemento string.
+    ///@param label Etiqueta del elemento a devolver.
+    std::string GetString(std::string label);
+
     ///@brief Asigna elemento double.
     ///@param i Indice del elemento a devolver.
     void SetDouble(const unsigned &i, double val);
+
+    ///@brief Asigna elemento double.
+    ///@param label Etiqueta del elemento a devolver.
+    void SetDouble(std::string label, double val);
 
     ///@brief Asigna elemento int.
     ///@param i Indice del elemento a devolver.
     void SetInt(const unsigned &i, int val);
 
+    ///@brief Asigna elemento int.
+    ///@param label Etiqueta del elemento a devolver.
+    void SetInt(std::string label, int val);
+
     ///@brief Asigna elemento bool.
     ///@param i Indice del elemento a devolver.
     void SetBool(const unsigned &i, bool val);
+
+    ///@brief Asigna elemento bool.
+    ///@param label Etiqueta del elemento a devolver.
+    void SetBool(std::string label, bool val);
+
+    ///@brief Asigna elemento string.
+    ///@param i Indice del elemento a devolver.
+    void SetString(const unsigned &i, std::string val);
+
+    ///@brief Asigna elemento string.
+    ///@param label Etiqueta del elemento a devolver.
+    void SetString(std::string label, std::string val);
 
     ///@brief Copia los valores del argumento.
     ///@param arg Objetivo a copiar.
     void operator=(const Args &arg);
 };
-
 #endif

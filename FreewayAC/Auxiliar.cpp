@@ -347,16 +347,38 @@ double RandomGen::GetDouble()
 ****************************/
 Args::Args()
 {
+    m_double_labels.assign(1, "");
+    m_int_labels.assign(1, "");
+    m_bool_labels.assign(1, "");
     m_double_args.push_back(0.0);
     m_int_args.push_back(0);
     m_bool_args.push_back(false);
 }
 Args::Args(initializer_list<double> d_args, std::initializer_list<int> i_args,
-           initializer_list<bool> b_args)
+           initializer_list<bool> b_args, std::initializer_list<std::string> s_args)
 {
+    m_double_labels.assign(d_args.size(), "");
+    m_int_labels.assign(i_args.size(), "");
+    m_bool_labels.assign(b_args.size(), "");
+    m_string_labels.assign(s_args.size(), "");
     m_double_args = d_args;
     m_int_args = i_args;
     m_bool_args = b_args;
+    m_string_args = s_args;
+}
+Args::Args(initializer_list<string> d_args_labels, initializer_list<double> d_args,
+           initializer_list<string> i_args_labels, initializer_list<int> i_args,
+           initializer_list<string> b_args_labels, initializer_list<bool> b_args,
+           initializer_list<string> s_args_labels, initializer_list<string> s_args)
+{
+    m_double_labels = d_args_labels;
+    m_int_labels = i_args_labels;
+    m_bool_labels = b_args_labels;
+    m_string_labels = s_args_labels;
+    m_double_args = d_args;
+    m_int_args = i_args;
+    m_bool_args = b_args;
+    m_string_args = s_args;
 }
 double Args::GetDouble(const unsigned &i)
 {
@@ -366,6 +388,17 @@ double Args::GetDouble(const unsigned &i)
 
     {
         cout << "Error: Argumento double faltante. Indice: " << i << "." << endl;
+        return 0.0;
+    }
+}
+double Args::GetDouble(string label)
+{
+    int index = aux_find_pos(m_double_labels, label);
+    if (index != -1)
+        return m_double_args[index];
+    else
+    {
+        cout << "Error: La etiqueta " << label << " no existe en la lista de argumentos." << endl;
         return 0.0;
     }
 }
@@ -379,6 +412,17 @@ int Args::GetInt(const unsigned &i)
         return 0;
     }
 }
+int Args::GetInt(string label)
+{
+    int index = aux_find_pos(m_int_labels, label);
+    if (index != -1)
+        return m_int_args[index];
+    else
+    {
+        cout << "Error: La etiqueta " << label << " no existe en la lista de argumentos." << endl;
+        return 0;
+    }
+}
 bool Args::GetBool(const unsigned &i)
 {
     if (i < m_bool_args.size())
@@ -389,26 +433,97 @@ bool Args::GetBool(const unsigned &i)
         return false;
     }
 }
+bool Args::GetBool(string label)
+{
+    int index = aux_find_pos(m_bool_labels, label);
+    if (index != -1)
+        return m_bool_args[index];
+    else
+    {
+        cout << "Error: La etiqueta " << label << " no existe en la lista de argumentos." << endl;
+        return false;
+    }
+}
+string Args::GetString(const unsigned &i)
+{
+    if (i < m_string_args.size())
+        return m_string_args[i];
+    else
+    {
+        cout << "Error: Argumento string faltante. Indice: " << i << "." << endl;
+        return false;
+    }
+}
+string Args::GetString(string label)
+{
+    int index = aux_find_pos(m_string_labels, label);
+    if (index != -1)
+        return m_string_args[index];
+    else
+    {
+        cout << "Error: La etiqueta " << label << " no existe en la lista de argumentos." << endl;
+        return string();
+    }
+}
 void Args::SetDouble(const unsigned &i, double val)
 {
     if (i < m_double_args.size())
+    {
+        m_double_labels[i] = string();
         m_double_args[i] = val;
+    }
     else
         cout << "Error: Asignacion double invalida. Indice: " << i << ", valor: " << val << "." << endl;
+}
+void Args::SetDouble(string label, double val)
+{
+    if (!aux_is_in(m_double_labels, label))
+    {
+        m_double_labels.push_back(label);
+        m_double_args.push_back(val);
+    }
+    else
+        cout << "La etiqueta " << label << " ya existe dentro de la lista de argumentos." << endl;
 }
 void Args::SetInt(const unsigned &i, int val)
 {
     if (i < m_int_args.size())
+    {
+        m_int_labels[i] = string();
         m_int_args[i] = val;
+    }
     else
         cout << "Error: Asignacion int invalida. Indice: " << i << ", valor: " << val << "." << endl;
+}
+void Args::SetInt(string label, int val)
+{
+    if (!aux_is_in(m_int_labels, label))
+    {
+        m_int_labels.push_back(label);
+        m_int_args.push_back(val);
+    }
+    else
+        cout << "La etiqueta " << label << " ya existe dentro de la lista de argumentos." << endl;
 }
 void Args::SetBool(const unsigned &i, bool val)
 {
     if (i < m_bool_args.size())
+    {
+        m_bool_labels[i] = string();
         m_bool_args[i] = val;
+    }
     else
         cout << "Error: Asignacion bool invalida. Indice: " << i << ", valor: " << val << "." << endl;
+}
+void Args::SetBool(string label, bool val)
+{
+    if (!aux_is_in(m_bool_labels, label))
+    {
+        m_bool_labels.push_back(label);
+        m_bool_args.push_back(val);
+    }
+    else
+        cout << "La etiqueta " << label << " ya existe dentro de la lista de argumentos." << endl;
 }
 void Args::operator=(const Args &arg)
 {
