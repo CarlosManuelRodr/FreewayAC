@@ -1,6 +1,8 @@
 # FreewayAC
 Implementación de simulación de tráfico usando un autómata celular.
 
+![CA](Resultados/Circular/ca.png?raw=true "CA") 
+
 # Instrucciones
 Ejemplo de uso:
 "FreewayAC --size=1000 --iter=1000 --density=0.2 --rand_prob=0.3 --ca_circular --flow_vs_density --dmin=0.0 --dmax=1.0 --dt=0.001"
@@ -160,6 +162,99 @@ Opciones:
             --help                           
                     Muestra instrucciones detalladas de cada experimento.
 
+```
+
+# Tipos de autómata celular
+```
+CA_CIRCULAR           -> Descripcion: Automata celular con fronteras periodicas. Pista circular.
+                         Parametros relevantes: Ninguno.
+CA_MULTILANE_CIRCULAR -> Descripcion: Automata celular multicarril con fronteras periodicas.
+                         Parametros relevantes: LANES.
+CA_OPEN               -> Descripcion: Automata celular con fronteras abiertas. Entran autos en
+                                      la primera pos del AC.
+CA_MULTILANE_OPEN     -> Descripcion: Automata celular con fronteras abiertas. Entran autos en
+                                      la primera pos del AC.
+                         Parametros relevantes: NEW_CAR_PROB, NEW_CAR_SPEED, LANES.
+CA_AUTONOMOUS         -> Descripcion: Automata celular circular con vehiculos autonomos.
+                         Parametros relevantes: AUT_DENSITY.
+CA_STOP               -> Descripcion: Automata celular circular con topes en la pista.
+                         Parametros relevantes: STOP_DENSITY.
+CA_SEMAPHORE          -> Descripcion: Automata celular circular con semaforos en la pista.
+                         Parametros relevantes: SEMAPHORE_DENSITY, RANDOM_SEMAPHORES.
+CA_SIMPLE_JUNCTION    -> Descripcion: Automata celular abierto con unión simple y fronteras abiertas.
+                         Parametros relevantes: NEW_CAR_PROB, NEW_CAR_SPEED, TARGET_LANE.
+```
+
+# Tipos de experimento
+```
+PLOT_TRAFFIC          -> Descripcion: Evoluciona automata celular y grafica su representacion.
+                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL.
+PLOT_FLOW             -> Descripcion: Evoluciona automata celular y grafica su flujo.
+                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL.
+MEASURE_OCUPANCY      -> Descripcion: Mide la ocupacion de cada casilla del automata celular.
+                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL.
+MEASURE_FLOW          -> Descripcion: Mide el flujo de cada casilla del automata celular.
+                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL.
+
+FLOW_VS_DENSITY       -> Descripcion: Mide el flujo de autos promedio respecto a los valores
+                                      de densidad de autos especificados en un rango.
+                         Parametros relevantes: SIZE, ITERATIONS, VMAX, RAND_PROB, INIT_VEL, DMIN, DMAX, DT.
+FLOW_PER_DENSITY      -> Descripcion: Mide el flujo de autos promedio sobre densidad respecto
+                                      a los valores de densidad de autos especificados en un rango.
+                         Parametros relevantes: SIZE, ITERATIONS, VMAX, RAND_PROB, INIT_VEL, DMIN, DMAX, DT.
+FLOW_VS_VMAX          -> Descripcion: Mide el flujo de autos promedio respecto a los valores de
+                                      velocidad maxima especificados en un rango.
+                         Parametros relevantes: SIZE, ITERATIONS, DENSITY, RAND_PROB, INIT_VEL, VMAX_MIN, VMAX_MAX, DT.
+FLOW_VS_RAND_PROB     -> Descripcion: Mide el flujo de autos promedio respecto a los valores de
+                                      probabilidad de descenso de velocidad especificados en un rango.
+                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, INIT_VEL, RAND_PROB_MIN,
+                                                RAND_PROB_MAX, DT.
+FLOW_VS_AUT_CARS      -> Descripcion: Mide el flujo de autos promedio respecto a los valores
+                                      de densidad de vehiculos autonomos especificados en un rango.
+                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL, 
+                                                AUT_MIN, AUT_MAX, DT.
+FLOW_VS_STOP_DENSITY  -> Descripcion: Mide el flujo de autos promedio respecto a los valores
+                                      densidad de topes especificados en un rango. Se usa el
+                                      automata celular CA_STOP.
+                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,
+                                                STOP_DENSITY_MIN, STOP_DENSITY_MAX, DT.
+FLOW_VS_NEW_CAR       -> Descripcion: Mide el flujo de autos promedio respecto a los valores
+                                      de probabilidad de aparicion de nuevo auto especificados
+                                      en un rango. Se usa el automata celular CA_OPEN o.
+                                      CA_SIMPLE_JUNCTION.
+                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,
+                                                NEW_CAR_MIN, NEW_CAR_MAX, DT.
+FLOW_PER_NEW_CAR      -> Descripcion: Mide el flujo/prob de autos promedio respecto a los valores
+                                      de probabilidad de aparicion de nuevo auto especificados
+                                      en un rango. Se usa el automata celular CA_OPEN.
+                         Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,
+                                                NEW_CAR_MIN, NEW_CAR_MAX, DT.
+FLOW_VS_SEMAPHORE_DENSITY  -> Descripcion: Mide el flujo de autos promedio respecto a los valores de
+                              densidad de semaforos especificados en un rango. Se usa el automata
+                              celular ca_semaphore.
+                              Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,
+                                                     SEMAPHORE_DENSITY_MIN, SEMAPHORE_DENSITY_MIN,
+                                                     RANDOM_SEMAPHORES, DT.
+ESCAPE_TIME_VS_DENSITY     -> Descripcion: Mide el tiempo de escape respecto a los valores de
+                              densidad de vehiculos especificados en un rango. Se usa el automata
+                              celular ca_open.
+                              Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,
+                                                     DMIN, DMAX, DT.
+DISCHARGE_VS_DENSITY       -> Descripcion: Mide el gasto respecto a los valores de
+                              densidad de vehiculos especificados en un rango. Se usa el automata
+                              celular ca_open.
+                              Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,
+                                                     DMIN, DMAX, DT.
+DISCHARGE_VS_DENSITY_FRACTAL -> Descripcion: Mide la dimension fractal en un mapa creado por los valores de
+                                densidad de vehiculos especificados en un rango. Se usa el automata
+                                celular ca_open.
+                                Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,
+                                                       DMIN, DMAX, DT.
+DIMENSION_VS_DENSITY      -> Descripcion: Crea grafica de dimension fractal respecto a los valores de
+                              densidad de vehículos especificados en un rango. Se usa el automata
+                              celular ca_open.
+                              Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,
+                                                     DMIN, DMAX, DT, PARTITIONS.
 ```
 
 # Requisitos
