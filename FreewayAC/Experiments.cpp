@@ -780,6 +780,14 @@ int ex_dimension_vs_density(ExParam p)
         ca_type = OPEN_CA;
     }
 
+    // Crea directorios de salida para gráficas.
+    aux_create_directory("Fractal");
+    aux_create_directory("Plot");
+    aux_create_directory("Csv");
+    string f_path = p.path + "Fractal" + df_separator;
+    string f_plot_path = p.path + "Plot" + df_separator;
+    string csv_path = p.path + "Csv" + df_separator;
+
     vector<double> densities, dimension, plot_dimension;
     double p_size = (p.density_max - p.density_min) / (double)p.partitions;
     CaHandler ca;
@@ -832,23 +840,17 @@ int ex_dimension_vs_density(ExParam p)
         dimension.push_back(measure_fractal_dimension(fractal, 0, (int)(0.1*fractal.size()), fractal.size(), 1));
         plot_dimension.push_back(measure_plot_fractal_dimension(escape_time, (int)(0.1*fractal.size()), fractal.size(), 1));
 
-        // Crea directorios de salida para gráficas.
-        string f_path, f_plot_path;
-        if (p.path.empty())
-        {
-            aux_create_directory("Fractal");
-            aux_create_directory("Plot");
-        }
-        f_path = p.path + "Fractal" + df_separator;
-        f_plot_path = p.path + "Plot" + df_separator;
-
         // Exporta los datos.
         string p_name = f_path + "discharge_vs_density_fractal_" + to_string(d_mean) + ".bmp";
         string p_plot_name = f_plot_path + "discharge_vs_density_plot_" + to_string(d_mean) + ".bmp";
+        string csv_name = csv_path + "discharge_vs_density_" + to_string(d_mean) + ".csv";
         r = export_map(fractal, p_name, 30, false, BINARY_COLORS);
         if (r != 0)
             return r;
         r = export_plot(escape_time, p_plot_name);
+        if (r != 0)
+            return r;
+        r = export_csv(escape_time, csv_name);
         if (r != 0)
             return r;
     }
@@ -900,19 +902,13 @@ Coord3D<double> ex_dimension_vs_density_thread(double density, ExParam p)
     double plot_dimension = measure_plot_fractal_dimension(escape_time, (int)(0.1*fractal.size()), fractal.size(), 1);
     output = Coord3D<double>(d_mean, fractal_dimension, plot_dimension);
 
-    // Crea directorios de salida para gráficas.
-    string f_path, f_plot_path;
-    if (p.path.empty())
-    {
-        aux_create_directory("Fractal");
-        aux_create_directory("Plot");
-    }
-    f_path = p.path + "Fractal" + df_separator;
-    f_plot_path = p.path + "Plot" + df_separator;
-
     // Exporta los datos.
+    string f_path = p.path + "Fractal" + df_separator;
+    string f_plot_path = p.path + "Plot" + df_separator;
+    string csv_path = p.path + "Csv" + df_separator;
     string p_name = f_path + "discharge_vs_density_fractal_" + to_string(d_mean) + ".bmp";
     string p_plot_name = f_plot_path + "discharge_vs_density_plot_" + to_string(d_mean) + ".bmp";
+    string csv_name = csv_path + "discharge_vs_density_" + to_string(d_mean) + ".csv";
     int r;
     r = export_map(fractal, p_name, 30, false, BINARY_COLORS);
     if (r != 0)
@@ -920,6 +916,9 @@ Coord3D<double> ex_dimension_vs_density_thread(double density, ExParam p)
     r = export_plot(escape_time, p_plot_name);
     if (r != 0)
         cout << "Error: No se pudo crear grafica." << endl;
+    r = export_csv(escape_time, csv_name);
+    if (r != 0)
+        cout << "Error: No se pudo exportar csv." << endl;
 
     return output;
 }
@@ -932,6 +931,11 @@ int ex_dimension_vs_density_parallel(ExParam p)
         cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
         p.type = OPEN_CA;
     }
+
+    // Crea directorios de salida para gráficas.
+    aux_create_directory("Fractal");
+    aux_create_directory("Plot");
+    aux_create_directory("Csv");
 
     vector<Coord3D<double>> result;
     double p_size = (p.density_max - p.density_min) / (double)p.partitions;

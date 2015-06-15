@@ -1,3 +1,1 @@
 ﻿- Implementar decisión de carril en unión.
-- Hacer variable la velocidad inicial.
-- Threads?
