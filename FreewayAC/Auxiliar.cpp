@@ -83,9 +83,10 @@ void aux_progress_bar(double val, double min, double max, double dt)
 void aux_create_directory(string directory_name)
 {
     string path = df_get_app_folder() + df_separator + directory_name;
+#if defined(__linux__) || defined(__APPLE__)
     if (df_directory_exist(path))
         s_rmrf(path);
-
+#endif
     s_mkdir(path);
 }
 string aux_get_extension(const string filepath)

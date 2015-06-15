@@ -209,7 +209,9 @@ void s_rm(const std::string arg);
 * @brief Borra ruta recursivamente.
 * @param path Ruta a borrar.
 */
+#if defined(__linux__) || defined(__APPLE__)
 int s_rmrf(std::string path);
+#endif
 
 /****************************
 *                           *
