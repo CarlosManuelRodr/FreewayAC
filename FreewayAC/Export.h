@@ -364,8 +364,6 @@ template <class N> int export_plot(const std::vector<N> data, const std::string 
 {
     unsigned coord_y;
     unsigned int size = data.size();
-    double min_x = 0;
-    double max_x = size;
     double min_y = static_cast<double>(*max_element(data.begin(), data.end()));
     double max_y = static_cast<double>(*min_element(data.begin(), data.end()));
     double y_factor = (max_y - min_y) / (size - 1);

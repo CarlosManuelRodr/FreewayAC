@@ -63,6 +63,11 @@ std::string aux_replace_all(const std::string &in, const std::string &search, co
 std::string aux_replace_extension(const std::string &in, const std::string &ext);
 
 /**
+* @brief Emite alerta sonora.
+*/
+void aux_beep();
+
+/**
 * @brief Reporta valor de datos.
 * @param report_type Cadena de texto que indica el tipo de dato a reportar.
 * @param report_value  Valor a reportar.
@@ -199,6 +204,12 @@ void s_mkdir(const std::string arg);
 * @param arg Ruta al archivo a borrar.
 */
 void s_rm(const std::string arg);
+
+/**
+* @brief Borra ruta recursivamente.
+* @param path Ruta a borrar.
+*/
+int s_rmrf(std::string path);
 
 /****************************
 *                           *

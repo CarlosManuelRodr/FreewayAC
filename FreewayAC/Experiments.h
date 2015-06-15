@@ -68,6 +68,8 @@ template <class N> double measure_fractal_dimension(std::vector<N> frac, N empty
     if (min_div == 0 || max_div == 0 || dt_div == 0)
     {
         std::cout << "Error: Valores incorrectos para calculo de dimension fracal." << std::endl;
+        std::cout << "min_div = " << min_div << std::endl << "max_div = " << max_div << std::endl;
+        std::cout << "dt_div = " << dt_div << std::endl;
         return -1.0;
     }
 
@@ -190,8 +192,6 @@ template <class N> double measure_plot_fractal_dimension(std::vector<N> data, in
     // Crea matriz donde se guardará la gráfica.
     unsigned coord_y;
     unsigned int size = data.size();
-    double min_x = 0;
-    double max_x = size;
     double min_y = static_cast<double>(*max_element(data.begin(), data.end()));
     double max_y = static_cast<double>(*min_element(data.begin(), data.end()));
     double y_factor = (max_y - min_y) / (size - 1);

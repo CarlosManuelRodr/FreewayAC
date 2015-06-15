@@ -10,6 +10,7 @@
 
 #if defined(__linux__) || defined(__APPLE__)
 #include <unistd.h>
+#include <ftw.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -82,8 +83,10 @@ void aux_progress_bar(double val, double min, double max, double dt)
 void aux_create_directory(string directory_name)
 {
     string path = df_get_app_folder() + df_separator + directory_name;
-    if (!df_directory_exist(path))
-        s_mkdir(path);
+    if (df_directory_exist(path))
+        s_rmrf(path);
+
+    s_mkdir(path);
 }
 string aux_get_extension(const string filepath)
 {
@@ -114,6 +117,23 @@ string aux_replace_extension(const string &in, const string &ext)
         else
             return in;
     }
+}
+void aux_beep()
+{
+#if defined(__linux__)
+
+    int r = system("which play > /dev/null 2>&1");
+    if (r == 0)
+        // SOX installed. More audible sound.
+        system("play -n synth 0.1 sine 800 vol 0.4 > /dev/null 2>&1");
+    else
+        cout << '\a';
+
+#elif defined(__APPLE__)
+    cout << '\a';
+#elif defined(_WIN32)
+    Beep(800,200);
+#endif
 }
 
 /*****************************
@@ -202,6 +222,19 @@ string df_get_app_folder()
 ****************************/
 
 #if defined(__linux__) || defined(__APPLE__)
+int s_unlink_cb(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
+{
+    int rv = remove(fpath);
+    if (rv)
+        perror(fpath);
+    return rv;
+}
+
+int s_rmrf(string path)
+{
+    return nftw(path.c_str(), s_unlink_cb, 64, FTW_DEPTH | FTW_PHYS);
+}
+
 int s_mkpath(std::string s, mode_t mode)
 {
     size_t pre=0,pos;

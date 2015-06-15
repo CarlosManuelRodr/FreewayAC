@@ -946,8 +946,12 @@ int ex_dimension_vs_density_parallel(ExParam p)
     vector<Coord<double>> frac_dim, plot_dim;
     for (unsigned i = 0; i < result.size(); ++i)
     {
-        frac_dim.push_back(result[i].SubXY());
-        plot_dim.push_back(result[i].SubXZ());
+        // Los valores erróneos son -1.0.
+        if (result[i].GetY() >= 0 && result[i].GetZ() >= 0)
+        {
+            frac_dim.push_back(result[i].SubXY());
+            plot_dim.push_back(result[i].SubXZ());
+        }
     }
 
     r = export_csv(frac_dim, "dimension_vs_density.csv");

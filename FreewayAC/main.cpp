@@ -48,7 +48,7 @@ enum  OptionIndex { UNKNOWN, SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VE
                     STOP_DENSITY_MIN, STOP_DENSITY_MAX, NEW_CAR_MIN, NEW_CAR_MAX, RAND_PROB_MAX, SEMAPHORE_DENSITY_MIN,
                     SEMAPHORE_DENSITY_MAX,
 
-                    OUT_FILE_NAME, PATH, EXPORT_FORMAT, SHOW_PROGRESS, TEST, DEBUG, HELP };
+                    OUT_FILE_NAME, PATH, EXPORT_FORMAT, SHOW_PROGRESS, TEST, REPORT, BEEP, HELP };
 
 const option::Descriptor usage[] =
 {
@@ -150,7 +150,8 @@ const option::Descriptor usage[] =
     {EXPORT_FORMAT, 0, "", "export_format", Arg::Required, "  \t--export_format=<arg>  \tFormato de salida. CSV o BMP." },
     {SHOW_PROGRESS,  0,"", "show_progress", Arg::Required, "  \t--show_progress=<arg>  \tTrue o False. Muestra o no barra de progreso." },
     {TEST,    0,"", "test", Arg::None,    "  \t--test  \tRealiza pruebas para garantizar la fiabilidad de resultados." },
-    {DEBUG,    0,"", "debug", Arg::None,    "  \t--debug  \tModo de depuracion." },
+    {REPORT,    0,"", "report", Arg::None,    "  \t--report  \tReporta lo parametros que se usan en la ejecucion." },
+    {BEEP,    0,"", "beep", Arg::None,    "  \t--beep  \tEmite alerta sonora al terminar la ejecucion." },
     {HELP,    0,"", "help", Arg::None,    "  \t--help  \tMuestra instrucciones detalladas de cada experimento." },
     {0,0,0,0,0,0}
 };
@@ -268,8 +269,7 @@ int main(int argc, char* argv[])
     double aut_min = 0.0, aut_max = 1.0, new_car_min = 0.0, new_car_max = 1.0, stop_density_min = 0.0;
     double stop_density_max = 1.0, semaphore_density_min = 0.0, semaphore_density_max = 1.0;
 
-    bool multilane = false;
-    bool debug = false;
+    bool multilane = false, report = false, beep = false;
     CA_TYPE ca_type = CIRCULAR_CA;
     double new_car_prob = 0.1, aut_density = 0.1, stop_density = 0.1, semaphore_density = 0.1;
     int new_car_speed = 1, target_lane = 0, lanes = 2, random_seed = -1, partitions = 50;
@@ -549,20 +549,18 @@ int main(int argc, char* argv[])
             test = true;
             break;
 
-            case DEBUG:
-            debug = true;
+            case REPORT:
+            report = true;
+            break;
+
+            case BEEP:
+            beep = true;
             break;
         }
     }
 
     delete[] options;
     delete[] buffer;
-
-    if (debug)
-    {
-        aux_create_directory("Carpeta");
-        return 0;
-    }
 
     // Verifica opciones.
     if (!path.empty() && !df_directory_exist(path))
@@ -659,6 +657,9 @@ int main(int argc, char* argv[])
     else
         param.export_format = CSV;
 
+    if (report)
+        param.Report();
+
     // Realiza acciones.
     if (test)
     {
@@ -673,6 +674,11 @@ int main(int argc, char* argv[])
         {
             cout << "Creando mapa de trafico." << endl;
             r = ex_traffic_map(param);
+        }
+        if (plot_flow)
+        {
+            cout << "Creando mapa de flujo." << endl;
+            r = ex_flow_map(param);
         }
         if (ocupancy_fixed)
         {
@@ -786,6 +792,9 @@ int main(int argc, char* argv[])
         cout << "Hecho." << endl;
     else
         cout << "Error en la ejecucion." << endl;
+
+    if (beep)
+        aux_beep();
 
     return 0;
 }

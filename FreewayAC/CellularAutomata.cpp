@@ -83,6 +83,7 @@ CellularAutomata::CellularAutomata(const vector<int> &ca, const vector<bool> &ra
     m_ca_history.push_back(m_ca);
     m_connect = NULL;
     m_connect_pos = -1;
+    m_init_vel = 1;
 }
 CellularAutomata::~CellularAutomata() {}
 void CellularAutomata::Print()
@@ -1282,6 +1283,7 @@ CellularAutomataML::CellularAutomataML(const vector<CAElement> &ca, const vector
     m_ca_history.push_back(m_ca);
     m_connect = NULL;
     m_connect_pos = -1;
+    m_init_vel = 1;
 
     if (m_ca.size() == 0)
     {
