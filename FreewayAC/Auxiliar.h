@@ -13,6 +13,7 @@
 #include <numeric>
 #include <random>
 #include <functional>
+#include <thread>
 #include "ThreadPool.h"
 
 /****************************
@@ -147,7 +148,7 @@ template <class N> double aux_mean(std::vector<N> v)
 template<typename R, typename T, typename Arg>
 std::vector<R> aux_parallel_function(std::function<R(T, Arg)> f, T min_val, T max_val, T dt, Arg arg)
 {
-    ThreadPool pool(thread::hardware_concurrency());
+    ThreadPool pool(std::thread::hardware_concurrency());
     std::vector<std::future<R>> result;
     std::vector<R> result_values;
 

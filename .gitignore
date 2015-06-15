@@ -60,6 +60,8 @@ build/
 #  Application files #
 ######################
 /Release/
+/obj/
+/bin/
 /Debug/
 /Release/
 /Release/

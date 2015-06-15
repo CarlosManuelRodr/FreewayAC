@@ -384,7 +384,7 @@ template <class N> int export_plot(const std::vector<N> data, const std::string 
     BMPWriter writer(filename.c_str(), size, size);
     if (writer.IsOpen())
     {
-        vector<BMPPixel> bmp_data;
+        std::vector<BMPPixel> bmp_data;
         for (unsigned j = 0; j < size; j++)
         {
             bmp_data.assign(size, white);

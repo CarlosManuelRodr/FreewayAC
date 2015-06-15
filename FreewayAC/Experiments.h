@@ -72,10 +72,10 @@ template <class N> double measure_fractal_dimension(std::vector<N> frac, N empty
     }
 
     // Conteo de cajas.
-    vector<double> log_epsilon, log_count;
+    std::vector<double> log_epsilon, log_count;
     for (int div = min_div; div <= max_div; div += dt_div)
     {
-        double N = 0.0;
+        double n = 0.0;
         double epsilon = (double)frac.size() / (double)div;
         for (int ex = 0; ex < div; ++ex)
         {
@@ -85,7 +85,7 @@ template <class N> double measure_fractal_dimension(std::vector<N> frac, N empty
                 {
                     if (frac[w] != empty)
                     {
-                        N++;
+                        n++;
                         break;
                     }
                 }
@@ -94,7 +94,7 @@ template <class N> double measure_fractal_dimension(std::vector<N> frac, N empty
             }
         }
         log_epsilon.push_back(log(1.0 / epsilon));
-        log_count.push_back(log(N));
+        log_count.push_back(log(n));
     }
 
     // Ajuste por mínimos cuadrados.
@@ -137,11 +137,11 @@ template <class N> double measure_fractal_dimension(Matrix<N> frac, N empty, int
     unsigned m_size = frac.GetRows();
 
     // Conteo de cajas.
-    vector<double> log_epsilon, log_count;
+    std::vector<double> log_epsilon, log_count;
 
     for (int div = min_div; div <= max_div; div += dt_div)
     {
-        double N = 0.0;
+        double n = 0.0;
         double epsilon = (double)m_size / (double)div;
         for (int ey = 0; ey < div; ++ey)
         {
@@ -156,7 +156,7 @@ template <class N> double measure_fractal_dimension(Matrix<N> frac, N empty, int
                         {
                             if (frac[w][h] != empty)
                             {
-                                N++;
+                                n++;
                                 found = true;
                                 break;
                             }
@@ -168,7 +168,7 @@ template <class N> double measure_fractal_dimension(Matrix<N> frac, N empty, int
             }
         }
         log_epsilon.push_back(log(1.0 / epsilon));
-        log_count.push_back(log(N));
+        log_count.push_back(log(n));
     }
 
     // Ajuste por mínimos cuadrados.

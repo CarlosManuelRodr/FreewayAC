@@ -451,7 +451,7 @@ string Args::GetString(const unsigned &i)
     else
     {
         cout << "Error: Argumento string faltante. Indice: " << i << "." << endl;
-        return false;
+        return string();
     }
 }
 string Args::GetString(string label)
