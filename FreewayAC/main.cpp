@@ -37,12 +37,13 @@ enum  OptionIndex { UNKNOWN, SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VE
                     FLOW_VS_DENSITY, FLOW_PER_DENSITY, FLOW_VS_VMAX, FLOW_VS_RAND_PROB, FLOW_VS_AUT_CARS,
                     FLOW_VS_STOP_DENSITY, FLOW_VS_NEW_CAR, FLOW_PER_NEW_CAR, FLOW_VS_SEMAPHORE_DENSITY, ESCAPE_TIME_VS_DENSITY,
                     DISCHARGE_VS_DENSITY, DISCHARGE_VS_DENSITY_FRACTAL, DIMENSION_VS_DENSITY, DIMENSION_VS_DENSITY_THREADED,
+                    PENTROPY_VS_DENSITY,
 
                     CA_CIRCULAR, CA_MULTILANE_CIRCULAR, CA_OPEN, CA_MULTILANE_OPEN, CA_AUTONOMOUS, CA_STOP, CA_SEMAPHORE,
                     CA_SIMPLE_JUNCTION,
 
                     NEW_CAR_PROB, NEW_CAR_SPEED, AUT_DENSITY, STOP_DENSITY, SEMAPHORE_DENSITY, RANDOM_SEMAPHORES,
-                    TARGET_LANE, LANES, RANDOM_SEED, RANDOM_GENERATOR, PARTITIONS,
+                    TARGET_LANE, LANES, RANDOM_SEED, RANDOM_GENERATOR, PARTITIONS, PORDER, PINTERVAL,
 
                     DT, DMIN, DMAX, VMAX_MIN, VMAX_MAX, RAND_PROB_MIN, AUT_MIN, AUT_MAX,
                     STOP_DENSITY_MIN, STOP_DENSITY_MAX, NEW_CAR_MIN, NEW_CAR_MAX, RAND_PROB_MAX, SEMAPHORE_DENSITY_MIN,
@@ -95,6 +96,8 @@ const option::Descriptor usage[] =
     "  \t--dimension_vs_density  \tMide dimension fractal vs densidad en un rango especificado por dmin, dmax y dt." },
     {DIMENSION_VS_DENSITY_THREADED, 0, "", "dimension_vs_density_threaded", Arg::None,
     "  \t--dimension_vs_density_threaded  \tMide dimension fractal vs densidad usando varios núcleos en un rango especificado por dmin, dmax y dt." },
+    {PENTROPY_VS_DENSITY,  0,"","pentropy_vs_density", Arg::None,
+    "  \t--pentropy_vs_density  \tMide entropia de permutacion vs densidad en un rango especificado por dmin, dmax y dt." },
 
     {CA_CIRCULAR,  0,"","ca_circular", Arg::None, "  \t--ca_circular  \tAutomata celular circular." },
     {CA_MULTILANE_CIRCULAR, 0, "", "ca_multilane_circular", Arg::None, 
@@ -128,6 +131,10 @@ const option::Descriptor usage[] =
     "  \t--random_generator  \tTipo de generador de aletorios. Disponibles LCG, MT19937, RANLUX24, RANLUX48." },
     {PARTITIONS, 0, "", "partitions", Arg::Required,
     "  \t--partitions  \tNumero de particiones que se realizan sobre un intervalo para calcular dimension fractal." },
+    {PORDER, 0, "", "porder", Arg::Required,
+    "  \t--porder  \tOrden de la entropia de permutacion en la opcion pentropy_vs_density." },
+    {PINTERVAL, 0, "", "pinterval", Arg::Required,
+    "  \t--pinterval  \tIntervalo de la entropia de permutacion en la opcion pentropy_vs_density." },
 
     {DT,  0,"", "dt", Arg::Required, "  \t--dt=<arg>  \tTamagno del intervalo en medicion con rango." },
     {DMIN,  0,"", "dmin", Arg::Required, "  \t--dmin=<arg>  \tDensidad minima en medicion con rango." },
@@ -242,16 +249,22 @@ void describe_experiments()
         "                                celular ca_open.\n"
         "                                Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,\n"
         "                                                       DMIN, DMAX, DT.\n"
-        "DIMENSION_VS_DENSITY      -> Descripcion: Crea grafica de dimension fractal respecto a los valores de\n"
+        "DIMENSION_VS_DENSITY       -> Descripcion: Crea grafica de dimension fractal respecto a los valores de\n"
         "                              densidad de vehículos especificados en un rango. Se usa el automata\n"
         "                              celular ca_open.\n"
         "                              Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,\n"
-        "                                                     DMIN, DMAX, DT, PARTITIONS.\n";
+        "                                                     DMIN, DMAX, DT, PARTITIONS.\n"
+        "PENTROPY_VS_DENSITY        -> Descripcion: Mide la entropia de permutacion respecto a los valores de\n"
+        "                              densidad de vehiculos especificados en un rango. Se usa el automata\n"
+        "                              celular ca_open.\n"
+        "                              Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,\n"
+        "                                                     DMIN, DMAX, DT, PORDER, PINTERVAL.\n";
     cout << text << endl;
 }
 
 int main(int argc, char* argv[])
 {
+    // Valores por defecto.
     unsigned size = 100, iterations = 100;
     int vmax = 5, vmax_min = 0, vmax_max = 20, init_vel = 1;
     double density = 0.2, rand_prob = 0.2;
@@ -261,6 +274,7 @@ int main(int argc, char* argv[])
     bool flow_vs_stop_density = false, flow_per_density = false, flow_vs_new_car = false, flow_per_new_car = false;
     bool flow_vs_semaphore_density = false, escape_time_vs_density = false, discharge_vs_density = false;
     bool discharge_vs_density_fractal = false, dimension_vs_density = false, dimension_vs_density_threaded = false;
+    bool pentropy_vs_density = false;
     bool per_density = false, per_prob = false;
 
     bool random_semaphores = false, test = false, show_progress = true;
@@ -272,11 +286,12 @@ int main(int argc, char* argv[])
     bool multilane = false, report = false, beep = false;
     CA_TYPE ca_type = CIRCULAR_CA;
     double new_car_prob = 0.1, aut_density = 0.1, stop_density = 0.1, semaphore_density = 0.1;
+    int porder = 6, pinterval = -1;
     int new_car_speed = 1, target_lane = 0, lanes = 2, random_seed = -1, partitions = 50;
     string random_generator = "", export_format = "", out_file_name = "", path = "";
 
     // Ejecuta parser de argumentos.
-    argc -= (argc>0); argv += (argc>0);
+    argc -= (argc > 0); argv += (argc > 0);
     option::Stats  stats(usage, argc, argv);
     option::Option *options = new option::Option[stats.options_max];
     option::Option *buffer = new option::Option[stats.buffer_max];
@@ -393,6 +408,10 @@ int main(int argc, char* argv[])
             dimension_vs_density_threaded = true;
             break;
 
+            case PENTROPY_VS_DENSITY:
+            pentropy_vs_density = true;
+            break;
+
             case CA_CIRCULAR:
             ca_type = CIRCULAR_CA;
             break;
@@ -467,6 +486,14 @@ int main(int argc, char* argv[])
 
             case PARTITIONS:
             partitions = aux_string_to_num<int>(opt.arg);
+            break;
+
+            case PORDER:
+            porder = aux_string_to_num<int>(opt.arg);
+            break;
+
+            case PINTERVAL:
+            pinterval = aux_string_to_num<int>(opt.arg);
             break;
 
             case DT:
@@ -584,7 +611,7 @@ int main(int argc, char* argv[])
         || flow_vs_rand_prob || flow_vs_aut_cars || flow_vs_new_car || flow_per_new_car
         || flow_vs_stop_density || flow_vs_semaphore_density || escape_time_vs_density
         || discharge_vs_density || discharge_vs_density_fractal || dimension_vs_density 
-        || dimension_vs_density_threaded || test))
+        || dimension_vs_density_threaded || pentropy_vs_density || test))
     {
         plot_traffic = true;    // Opcion predeterminada.
     }
@@ -594,6 +621,8 @@ int main(int argc, char* argv[])
         per_prob = true;
     if (flow_vs_vmax && dt < 1)
         dt = 1.0;
+    if (pinterval < 0)
+        pinterval = (int)ceil(0.20*abs(dmax-dmin)/dt);
 
     Args args;            // Parámetro extra en el constructor de CA.
     if (ca_type == OPEN_CA)
@@ -624,6 +653,8 @@ int main(int argc, char* argv[])
     param.vmax_max = vmax_max;
     param.random_seed = random_seed;
     param.partitions = partitions;
+    param.porder = porder;
+    param.pinterval = pinterval;
     param.density = density;
     param.density_min = dmin;
     param.density_max = dmax;
@@ -759,6 +790,11 @@ int main(int argc, char* argv[])
         {
             cout << "Midiendo dimension fractal vs densidad de autos." << endl;
             r = ex_dimension_vs_density_parallel(param);
+        }
+        if (pentropy_vs_density)
+        {
+            cout << "Midiendo gasto respecto a densidad de autos." << endl;
+            r = ex_pentropy_vs_density(param);
         }
     }
     else

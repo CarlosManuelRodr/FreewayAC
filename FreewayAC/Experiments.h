@@ -28,6 +28,7 @@ public:
     unsigned size, iterations, lanes;
     int vmax, vmax_min, vmax_max;
     int random_seed, init_vel, partitions;
+    int porder, pinterval;
 
     double density, density_min, density_max;
     double rand_prob, rand_prob_min, rand_prob_max;
@@ -310,6 +311,12 @@ int ex_dimension_vs_density(ExParam p);
 * @brief Crea gráfica de dimensión fractal de gasto respecto a densidad de vehículos usando threads.
 */
 int ex_dimension_vs_density_parallel(ExParam p);
+
+/**
+* @brief Crea gráfica de entropia de permutacion de gasto respecto a densidad de vehículos.
+*/
+int ex_pentropy_vs_density(ExParam p);
+
 
 /**
 * @brief Realiza tests para verificar la corrección de los algoritmos.

@@ -63,7 +63,7 @@ CellularAutomata::CellularAutomata(const unsigned &size, const double &density, 
 
     random_shuffle(car_positions.begin(), car_positions.end(), RandomGen::GetInt);
     for (unsigned i = 0; i < vehicles; ++i)
-        m_ca[car_positions[i]] = 1;
+        m_ca[car_positions[i]] = m_init_vel;
 
     m_ca_history.push_back(m_ca);
     m_ca_flow_history.push_back(m_ca_flow_temp);
@@ -1261,7 +1261,7 @@ CellularAutomataML::CellularAutomataML(const unsigned &size, const unsigned &lan
 
         random_shuffle(car_positions.begin(), car_positions.end(), RandomGen::GetInt);
         for (unsigned j = 0; j < vehicles; ++j)
-            m_ca[car_positions[j]][i] = 1;
+            m_ca[car_positions[j]][i] = m_init_vel;
     }
 
     m_ca_history.push_back(m_ca);

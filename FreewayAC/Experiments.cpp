@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <cmath>
 #include "CellularAutomata.h"
 #include "Experiments.h"
 using namespace std;
@@ -42,6 +43,104 @@ void ExParam::Report()
     aux_report("show_progress", show_progress);
     aux_report("path", path);
     aux_report("out_file_name", out_file_name);
+}
+
+/****************************
+*                           *
+*          Medición         *
+*                           *
+****************************/
+
+vector<Coord<double>> measure_permutation_entropy(vector<double> fecha, vector<double> datolist, int orden, int lon)
+{
+    // Basado en la rutina de David Hernández Enríquez que se encuentra en script/pentropy.py.
+    vector<Coord<double>> out;
+    vector<double> entropies, intervals;
+    vector<double> selecf, selecdl, vecin, permutacion, perminv;
+
+    int T, intercambios, pasada;
+    double factorial, H, valorp, pi;
+
+    int n = fecha.size();
+
+    for (int rep = 0; rep < n-lon+1; rep++)
+    {
+        selecf.assign(fecha.begin()+rep, fecha.begin()+lon+rep);
+        selecdl.assign(datolist.begin()+rep, datolist.begin()+lon+rep);
+        T = selecf.size() - orden + 1;
+        factorial = ceil(tgamma(orden+1));
+        H = 0;
+        Matrix<double> vp(factorial, 3);
+        vp.Assign(0.0);
+
+        for (int i = 0; i < T; i++)
+        {
+            vecin.assign(selecdl.begin()+i, selecdl.begin()+i+orden);
+            permutacion.assign(orden, 0);
+            vector<double> permu(orden);
+            iota(std::begin(permu), std::end(permu), 1);
+
+            // Inicio de ordenamiento burbuja.
+            intercambios = 1;
+            pasada = 1;
+            while (pasada < (int)vecin.size() && intercambios == 1)
+            {
+                intercambios = 0;
+                for (int m = 0; m < (int)vecin.size() - pasada; m++)
+                {
+                    if (vecin[m] > vecin[m+1])
+                    {
+                        swap(vecin[m], vecin[m+1]);
+                        swap(permu[m], permu[m+1]);
+                        intercambios = 1;
+                    }
+                }
+                pasada++;
+            }
+
+            // Fin ordenamiento.
+            for (int j = 0; j < orden; j++)
+                permutacion[permu[j]-1] = j+1;
+
+            valorp = 0;
+            perminv = permutacion;
+            reverse(perminv.begin(), perminv.end());
+
+            // Ciclo para obtener el valor de la permutación.
+            for (int j = 0; j < orden; j++)
+                valorp += permutacion[j]*pow(10.0, j);
+
+            // Ciclo para acumular valores de permutaciones repetidas.
+            for (int l = 0; l < T; l++)
+            {
+                if (valorp == vp[l][0])
+                {
+                    vp[l][1]++;
+                    break;
+                }
+                else
+                {
+                    if (valorp != vp[l][0] && vp[l][0] == 0)
+                    {
+                        vp[l][0] = valorp;
+                        vp[l][1]++;
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (int j = 0; j < factorial; j++)
+        {
+            if (vp[j][0] == 0)
+                continue;
+            vp[j][2] = vp[j][1]/(double)T;
+            pi = -vp[j][2]*log2(vp[j][2]);
+            H += pi;
+        }
+        out.push_back(Coord<double>(rep, H));
+    }
+    return out;
 }
 
 
@@ -674,7 +773,7 @@ int ex_discharge_vs_density(ExParam p)
         ca_type = OPEN_CA;
     }
 
-    vector<double> densities, escape_time;
+    vector<double> density, discharge;
     CaHandler ca;
 
     for (double d = p.density_min; d <= p.density_max; d += p.dt)
@@ -703,12 +802,12 @@ int ex_discharge_vs_density(ExParam p)
         }
         if (iter != 0)
         {
-            densities.push_back(d);
-            escape_time.push_back((double)(ca.GetSize())*d / (double)iter);
+            density.push_back(d);
+            discharge.push_back((double)(ca.GetSize())*d / (double)iter);
         }
 
     }
-    return export_data(densities, escape_time, "discharge_vs_density.csv", p.export_format);
+    return export_data(density, discharge, "discharge_vs_density.csv", p.export_format);
 }
 
 int ex_discharge_vs_density_fratal(ExParam p)
@@ -964,6 +1063,61 @@ int ex_dimension_vs_density_parallel(ExParam p)
 
     r = export_csv(plot_dim, "plot_dimension_vs_density.csv");
     return r;
+}
+
+
+int ex_pentropy_vs_density(ExParam p)
+{
+    CA_TYPE ca_type = p.type;
+    if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, ca_type))
+    {
+        cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
+        ca_type = OPEN_CA;
+    }
+
+    vector<double> density, discharge;
+    CaHandler ca;
+
+    for (double d = p.density_min; d <= p.density_max; d += p.dt)
+    {
+        // Reporta progreso.
+        if (p.show_progress)
+            aux_progress_bar(d, p.density_min, p.density_max, p.dt);
+
+        // Evoluciona el sistema.
+        p.args.SetDouble(0, 0.0);
+        ca.CreateCa(ca_type, p.size, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
+        if (ca.Status() != 0)
+            return 1;
+
+        int iter = 0;
+        while (ca.CountCars() != 0)
+        {
+            ca.Step();
+            iter++;
+        }
+        if (iter != 0)
+        {
+            density.push_back(d);
+            discharge.push_back((double)(ca.GetSize())*d / (double)iter);
+        }
+
+    }
+
+    int r = export_data(density, discharge, "discharge_vs_density.csv", p.export_format);
+    if (r != 0)
+        return r;
+
+    cout << "Midiendo entropia de permutacion." << endl;
+    vector<Coord<double>> result = measure_permutation_entropy(density, discharge, p.porder, p.pinterval);
+    vector<double> intervalos, entropias;
+    for (unsigned i = 0; i < result.size(); i++)
+    {
+        intervalos.push_back(result[i].GetX());
+        entropias.push_back(result[i].GetY());
+    }
+
+    return export_data(intervalos, entropias, "pentropy_vs_density.csv", p.export_format);
 }
 
 
