@@ -651,6 +651,7 @@ int main(int argc, char* argv[])
     param.vmax = vmax;
     param.vmax_min = vmax_min;
     param.vmax_max = vmax_max;
+    param.init_vel = init_vel;
     param.random_seed = random_seed;
     param.partitions = partitions;
     param.porder = porder;

@@ -51,78 +51,86 @@ void ExParam::Report()
 *                           *
 ****************************/
 
-vector<Coord<double>> measure_permutation_entropy(vector<double> fecha, vector<double> datolist, int orden, int lon)
+vector<Coord<double>> measure_permutation_entropy(vector<double> date, vector<double> svalues, int order, int length)
 {
     // Basado en la rutina de David Hernández Enríquez que se encuentra en script/pentropy.py.
+    if (date.size() != svalues.size())
+    {
+        cout << "Error: La longitudes de las listas no coinciden." << endl;
+        return vector<Coord<double>>();
+    }
+
+    cout << "Orden: " << order << endl;
+    cout << "Longitud: " << length << endl;
     vector<Coord<double>> out;
     vector<double> entropies, intervals;
-    vector<double> selecf, selecdl, vecin, permutacion, perminv;
+    vector<double> selecf, selecdl, neighbors, permutation, perminv;
 
-    int T, intercambios, pasada;
-    double factorial, H, valorp, pi;
+    int T, swap_num, pass, factorial;
+    double H, p_value;
 
-    int n = fecha.size();
+    int n = date.size();
 
-    for (int rep = 0; rep < n-lon+1; rep++)
+    for (int rep = 0; rep < n - length + 1; rep++)
     {
-        selecf.assign(fecha.begin()+rep, fecha.begin()+lon+rep);
-        selecdl.assign(datolist.begin()+rep, datolist.begin()+lon+rep);
-        T = selecf.size() - orden + 1;
-        factorial = ceil(tgamma(orden+1));
+        selecf.assign(date.begin() + rep, date.begin() + length + rep);
+        selecdl.assign(svalues.begin() + rep, svalues.begin() + length + rep);
+        T = selecf.size() - order + 1;
+        factorial = (int)ceil(tgamma(order + 1));
         H = 0;
         Matrix<double> vp(factorial, 3);
         vp.Assign(0.0);
 
         for (int i = 0; i < T; i++)
         {
-            vecin.assign(selecdl.begin()+i, selecdl.begin()+i+orden);
-            permutacion.assign(orden, 0);
-            vector<double> permu(orden);
+            neighbors.assign(selecdl.begin() + i, selecdl.begin() + i + order);
+            permutation.assign(order, 0);
+            vector<int> permu(order);
             iota(std::begin(permu), std::end(permu), 1);
 
-            // Inicio de ordenamiento burbuja.
-            intercambios = 1;
-            pasada = 1;
-            while (pasada < (int)vecin.size() && intercambios == 1)
+            // Inicio de orderamiento burbuja.
+            swap_num = 1;
+            pass = 1;
+            while (pass < (int)neighbors.size() && swap_num == 1)
             {
-                intercambios = 0;
-                for (int m = 0; m < (int)vecin.size() - pasada; m++)
+                swap_num = 0;
+                for (int m = 0; m < (int)neighbors.size() - pass; m++)
                 {
-                    if (vecin[m] > vecin[m+1])
+                    if (neighbors[m] > neighbors[m + 1])
                     {
-                        swap(vecin[m], vecin[m+1]);
-                        swap(permu[m], permu[m+1]);
-                        intercambios = 1;
+                        swap(neighbors[m], neighbors[m + 1]);
+                        swap(permu[m], permu[m + 1]);
+                        swap_num = 1;
                     }
                 }
-                pasada++;
+                pass++;
             }
 
-            // Fin ordenamiento.
-            for (int j = 0; j < orden; j++)
-                permutacion[permu[j]-1] = j+1;
+            // Fin orderamiento.
+            for (int j = 0; j < order; j++)
+                permutation[permu[j] - 1] = j + 1;
 
-            valorp = 0;
-            perminv = permutacion;
+            p_value = 0;
+            perminv = permutation;
             reverse(perminv.begin(), perminv.end());
 
             // Ciclo para obtener el valor de la permutación.
-            for (int j = 0; j < orden; j++)
-                valorp += permutacion[j]*pow(10.0, j);
+            for (int j = 0; j < order; j++)
+                p_value += permutation[j] * pow(10.0, j);
 
-            // Ciclo para acumular valores de permutaciones repetidas.
+            // Ciclo para acumular valores de permutationes repetidas.
             for (int l = 0; l < T; l++)
             {
-                if (valorp == vp[l][0])
+                if (p_value == vp[l][0])
                 {
                     vp[l][1]++;
                     break;
                 }
                 else
                 {
-                    if (valorp != vp[l][0] && vp[l][0] == 0)
+                    if (p_value != vp[l][0] && vp[l][0] == 0)
                     {
-                        vp[l][0] = valorp;
+                        vp[l][0] = p_value;
                         vp[l][1]++;
                         break;
                     }
@@ -134,15 +142,13 @@ vector<Coord<double>> measure_permutation_entropy(vector<double> fecha, vector<d
         {
             if (vp[j][0] == 0)
                 continue;
-            vp[j][2] = vp[j][1]/(double)T;
-            pi = -vp[j][2]*log2(vp[j][2]);
-            H += pi;
+            vp[j][2] = vp[j][1] / (double)T;
+            H -= vp[j][2] * log2(vp[j][2]);
         }
-        out.push_back(Coord<double>(rep, H));
+        out.push_back(Coord<double>(date[rep], H));
     }
     return out;
 }
-
 
 /****************************
 *                           *
@@ -782,6 +788,9 @@ int ex_discharge_vs_density(ExParam p)
         if (p.show_progress)
             aux_progress_bar(d, p.density_min, p.density_max, p.dt);
 
+        if (d == 0)
+            continue;
+
         // Evoluciona el sistema.
         p.args.SetDouble(0, 0.0);
         ca.CreateCa(ca_type, p.size, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
@@ -793,12 +802,6 @@ int ex_discharge_vs_density(ExParam p)
         {
             ca.Step();
             iter++;
-
-            if (ca.IsFluxHalted())
-            {
-                cout << "Error: Flujo detenido." << endl;
-                return 1;
-            }
         }
         if (iter != 0)
         {
@@ -1064,7 +1067,6 @@ int ex_dimension_vs_density_parallel(ExParam p)
     r = export_csv(plot_dim, "plot_dimension_vs_density.csv");
     return r;
 }
-
 
 int ex_pentropy_vs_density(ExParam p)
 {
