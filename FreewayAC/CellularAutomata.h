@@ -143,7 +143,10 @@ public:
     ///@param out_file_name Nombre del archivo de salida.
     ///@return 0 si se pudo crear archivo, 1 en caso de error.
     virtual int DrawFlowHistory(std::string path = "", std::string out_file_name = "");
-
+    
+    std::vector<double> CalculateOcupancy();
+    std::vector<double> CalculateFlow();
+    double CalculateMeanFlow();
 
     void Print();                   ///< Escribe línea de autómata celular en la terminal.
     unsigned GetSize();             ///< Devuelve tamaño del AC.
@@ -453,6 +456,10 @@ public:
     void PrintHistory();
     void Step();
     void Move();
+    std::vector<double> CalculateOcupancy();
+    std::vector<double> CalculateFlow();
+    double CalculateMeanFlow();
+
 };
 
 ////////////////////////////////////

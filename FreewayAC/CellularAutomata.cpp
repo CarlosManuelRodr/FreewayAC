@@ -346,6 +346,48 @@ int CellularAutomata::NextCarDist(const int &pos)
         dist++;
     return dist;
 }
+vector<double> CellularAutomata::CalculateOcupancy()
+{
+    vector<double> ocupancy;
+    ocupancy.assign(this->GetSize(), 0.0);
+    unsigned height = this->GetHistorySize();
+    unsigned width = this->GetSize();
+
+    for (unsigned i = 0; i < width; ++i)
+    {
+        int sum = 0;
+        for (unsigned j = 1; j < height; ++j)
+        {
+            if (this->GetAt(i, j, CA_HISTORY) != -1)
+                sum++;
+        }
+        ocupancy[i] = (double)sum/(double)height;
+    }
+    return ocupancy;
+}
+vector<double> CellularAutomata::CalculateFlow()
+{
+    vector<double> flow;
+    flow.assign(this->GetSize(), 0.0);
+    unsigned height = this->GetHistorySize();
+    unsigned width = this->GetSize();
+
+    for (unsigned i = 0; i < width; ++i)
+    {
+        int sum = 0;
+        for (unsigned j = 1; j < height; ++j)
+        {
+            if ((this->GetAt(i, j, CA_FLOW_HISTORY) != 0) && (this->GetAt(i+1, j, CA_FLOW_HISTORY) != 0))
+                sum++;
+        }
+        flow[i] = (double)sum/(double)height;
+    }
+    return flow;
+}
+double CellularAutomata::CalculateMeanFlow()
+{
+    return aux_mean(this->CalculateFlow());
+}
 
 
 /****************************
@@ -1194,6 +1236,18 @@ void CaHandler::Step()
 void CaHandler::Move()
 {
     return cellularautomata->Move();
+}
+vector<double> CaHandler::CalculateOcupancy()
+{
+    return cellularautomata->CalculateOcupancy();
+}
+vector<double> CaHandler::CalculateFlow()
+{
+    return cellularautomata->CalculateFlow();
+}
+double CaHandler::CalculateMeanFlow()
+{
+    return cellularautomata->CalculateMeanFlow();
 }
 
 

@@ -238,21 +238,21 @@ int s_rmrf(string path)
 
 int s_mkpath(std::string s, mode_t mode)
 {
-    size_t pre=0,pos;
+    size_t pre = 0,pos;
     std::string dir;
-    int mdret;
+    int mdret = 1;
 
     if (s[s.size()-1]!='/')
         s += '/';
 
     while ((pos = s.find_first_of('/',pre)) != std::string::npos)
     {
-        dir=s.substr(0, pos++);
-        pre=pos;
+        dir = s.substr(0, pos++);
+        pre = pos;
         if (dir.size() == 0)
             continue;
 
-        if ((mdret = mkdir(dir.c_str(),mode)) && errno != EEXIST)
+        if ((mdret = mkdir(dir.c_str(), mode)) && errno != EEXIST)
             return mdret;
     }
     return mdret;

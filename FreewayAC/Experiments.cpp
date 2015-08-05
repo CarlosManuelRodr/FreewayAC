@@ -44,6 +44,15 @@ void ExParam::Report()
     aux_report("path", path);
     aux_report("out_file_name", out_file_name);
 }
+string ExParam::GetFilePath(string filename)
+{
+    if (out_file_name.empty())
+        out_file_name = path + filename;
+    else
+        out_file_name = path + out_file_name;
+    return out_file_name;
+}
+
 
 /****************************
 *                           *
@@ -174,60 +183,14 @@ int ex_ocupancy_fixed(ExParam p)
 {
     CaHandler ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, p.args);
     ca.Evolve(p.iterations);
-
-    vector<double> ocupancy;
-    ocupancy.assign(ca.GetSize(), 0.0);
-    unsigned height = ca.GetHistorySize();
-    unsigned width = ca.GetSize();
-
-    for (unsigned i = 0; i < width; ++i)
-    {
-        int sum = 0;
-        for (unsigned j = 1; j < height; ++j)
-        {
-            if (ca.GetAt(i, j, CA_HISTORY) != -1)
-                sum++;
-        }
-        ocupancy[i] = (double)sum/(double)height;
-    }
-
-    // Escribe a CSV.
-    if (p.out_file_name.empty())
-        p.out_file_name = p.path + "ocupancy.csv";
-    else
-        p.out_file_name = p.path + p.out_file_name;
-
-    return export_data(ocupancy, p.out_file_name, p.export_format);
+    return export_data(ca.CalculateOcupancy(), p.GetFilePath("ocupancy.csv"), p.export_format);
 }
 
 int ex_flow_fixed(ExParam p)
 {
     CaHandler ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, p.args);
     ca.Evolve(p.iterations);
-
-    vector<double> flow;
-    flow.assign(ca.GetSize(), 0.0);
-    unsigned height = ca.GetHistorySize();
-    unsigned width = ca.GetSize();
-
-    for (unsigned i = 0; i < width; ++i)
-    {
-        int sum = 0;
-        for (unsigned j = 1; j < height; ++j)
-        {
-            if ((ca.GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca.GetAt(i+1, j, CA_FLOW_HISTORY) != 0))
-                sum++;
-        }
-        flow[i] = (double)sum/(double)height;
-    }
-
-    // Escribe a CSV.
-    if (p.out_file_name.empty())
-        p.out_file_name = p.path + "flow.csv";
-    else
-        p.out_file_name = p.path + p.out_file_name;
-
-    return export_data(flow, p.out_file_name, p.export_format);
+    return export_data(ca.CalculateFlow(), p.GetFilePath("flow.csv"), p.export_format);
 }
 
 int ex_flow_vs_density(ExParam p)
@@ -247,25 +210,8 @@ int ex_flow_vs_density(ExParam p)
             return 1;
         ca.Evolve(p.iterations);
 
-        // Obtiene flujo en cada posición.
-        vector<double> tmp_flow;
-        tmp_flow.assign(p.size, 0.0);
-        unsigned height = ca.GetHistorySize();
-        unsigned width = ca.GetSize();
-
-        for (unsigned i = 0; i < width; ++i)
-        {
-            int sum = 0;
-            for (unsigned j = 1; j < height; ++j)
-            {
-                if ((ca.GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca.GetAt(i + 1, j, CA_FLOW_HISTORY) != 0))
-                    sum++;
-            }
-            tmp_flow[i] = (double)sum / (double)height;
-        }
-
         // Obtiene el promedio de todos los flujos.
-        double mean = aux_mean(tmp_flow);
+        double mean = ca.CalculateMeanFlow();
         if (p.per_density) mean /= d;
 
         // Asigna valores.
@@ -273,79 +219,14 @@ int ex_flow_vs_density(ExParam p)
         flow.push_back(mean);
     }
 
-    // Escribe a CSV.
-    if (p.out_file_name.empty())
-    {
-        if (p.per_density)
-            p.out_file_name = p.path + "flow_per_density.csv";
-        else
-            p.out_file_name = p.path + "flow_vs_density.csv";
-    }
+    // Escribe a archivo.
+    string filename;
+    if (p.per_density)
+        filename = "flow_per_density.csv";
     else
-        p.out_file_name = p.path + p.out_file_name;
+        filename =  "flow_vs_density.csv";
 
-    return export_data(density, flow, p.out_file_name, p.export_format);
-}
-
-int ex_multilane_flow_vs_density(ExParam p)
-{
-    vector<double> density, flow;
-    CaHandlerML ca;
-
-    for (double d = p.density_min; d <= p.density_max; d += p.dt)
-    {
-        // Reporta progreso.
-        if (p.show_progress)
-            aux_progress_bar(d, p.density_min, p.density_max, p.dt);
-
-        // Evoluciona el sistema.
-        ca.CreateCa(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
-        if (ca.Status() != 0)
-            return 1;
-        ca.Evolve(p.iterations);
-
-        // Obtiene flujo en cada posición.
-        vector<double> tmp_flow;
-        tmp_flow.assign(p.size, 0.0);
-        unsigned height = ca.GetHistorySize();
-        unsigned width = ca.GetSize();
-        unsigned lane_num = ca.GetLanes();
-
-        for (unsigned i = 0; i < width; ++i)
-        {
-            int sum = 0;
-            for (unsigned j = 0; j < lane_num; ++j)
-            {
-                for (unsigned k = 1; k < height; ++k)
-                {
-                    if ((ca.GetAt(i, j, k, CA_FLOW_HISTORY) != 0) && (ca.GetAt(i + 1, j, k, CA_FLOW_HISTORY) != 0))
-                        sum++;
-                }
-            }
-            tmp_flow[i] = (double)sum / ((double)height*(double)lane_num);
-        }
-
-        // Obtiene el promedio de todos los flujos.
-        double mean = aux_mean(tmp_flow);
-        if (p.per_density) mean /= d;
-
-        // Asigna valores.
-        density.push_back(d);
-        flow.push_back(mean);
-    }
-
-    // Escribe a CSV.
-    if (p.out_file_name.empty())
-    {
-        if (p.per_density)
-            p.out_file_name = p.path + "flow_per_density.csv";
-        else
-            p.out_file_name = p.path + "flow_vs_density.csv";
-    }
-    else
-        p.out_file_name = p.path + p.out_file_name;
-
-    return export_data(density, flow, p.out_file_name, p.export_format);
+    return export_data(density, flow, p.GetFilePath(filename), p.export_format);
 }
 
 int ex_flow_vs_vmax(ExParam p)
@@ -365,35 +246,12 @@ int ex_flow_vs_vmax(ExParam p)
             return 1;
         ca.Evolve(p.iterations);
 
-        // Obtiene flujo en cada posición.
-        vector<double> tmp_flow;
-        tmp_flow.assign(p.size, 0.0);
-        unsigned height = ca.GetHistorySize();
-        unsigned width = ca.GetSize();
-
-        for (unsigned i = 0; i < width; ++i)
-        {
-            int sum = 0;
-            for (unsigned j = 1; j < height; ++j)
-            {
-                if ((ca.GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca.GetAt(i + 1, j, CA_FLOW_HISTORY) != 0))
-                    sum++;
-            }
-            tmp_flow[i] = (double)sum / (double)height;
-        }
-
         // Asigna valores.
         vmax.push_back(v);
-        flow.push_back(aux_mean(tmp_flow));
+        flow.push_back(ca.CalculateMeanFlow());
     }
 
-    // Escribe a CSV.
-    if (p.out_file_name.empty())
-        p.out_file_name = p.path + "flow_vs_vmax.csv";
-    else
-        p.out_file_name = p.path + p.out_file_name;
-
-    return export_data(vmax, flow, p.out_file_name, p.export_format);
+    return export_data(vmax, flow, p.GetFilePath("flow_vs_vmax.csv"), p.export_format);
 }
 
 int ex_flow_vs_rand_prob(ExParam p)
@@ -413,35 +271,12 @@ int ex_flow_vs_rand_prob(ExParam p)
             return 1;
         ca.Evolve(p.iterations);
 
-        // Obtiene flujo en cada posición.
-        vector<double> tmp_flow;
-        tmp_flow.assign(p.size, 0.0);
-        unsigned height = ca.GetHistorySize();
-        unsigned width = ca.GetSize();
-
-        for (unsigned i = 0; i < width; ++i)
-        {
-            int sum = 0;
-            for (unsigned j = 1; j < height; ++j)
-            {
-                if ((ca.GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca.GetAt(i + 1, j, CA_FLOW_HISTORY) != 0))
-                    sum++;
-            }
-            tmp_flow[i] = (double)sum / (double)height;
-        }
-
         // Asigna valores.
         rand_prob.push_back(r);
-        flow.push_back(aux_mean(tmp_flow));
+        flow.push_back(ca.CalculateMeanFlow());
     }
 
-    // Escribe a CSV.
-    if (p.out_file_name.empty())
-        p.out_file_name = p.path + "flow_vs_rand_prob.csv";
-    else
-        p.out_file_name = p.path + p.out_file_name;
-
-    return export_data(rand_prob, flow, p.out_file_name, p.export_format);
+    return export_data(rand_prob, flow, p.GetFilePath("flow_vs_rand_prob.csv"), p.export_format);
 }
 
 int ex_flow_vs_aut_cars(ExParam p)
@@ -461,35 +296,12 @@ int ex_flow_vs_aut_cars(ExParam p)
             return 1;
         ca.Evolve(p.iterations);
 
-        // Obtiene flujo en cada posición.
-        vector<double> tmp_flow;
-        tmp_flow.assign(p.size, 0.0);
-        unsigned height = ca.GetHistorySize();
-        unsigned width = ca.GetSize();
-
-        for (unsigned i = 0; i < width; ++i)
-        {
-            int sum = 0;
-            for (unsigned j = 1; j < height; ++j)
-            {
-                if ((ca.GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca.GetAt(i + 1, j, CA_FLOW_HISTORY) != 0))
-                    sum++;
-            }
-            tmp_flow[i] = (double)sum / (double)height;
-        }
-
         // Asigna valores.
         aut_car_density.push_back(s);
-        flow.push_back(aux_mean(tmp_flow));
+        flow.push_back(ca.CalculateMeanFlow());
     }
 
-    // Escribe a CSV.
-    if (p.out_file_name.empty())
-        p.out_file_name = p.path + "flow_vs_aut_cars.csv";
-    else
-        p.out_file_name = p.path + p.out_file_name;
-
-    return export_data(aut_car_density, flow, p.out_file_name, p.export_format);
+    return export_data(aut_car_density, flow, p.GetFilePath("flow_vs_aut_cars.csv"), p.export_format);
 }
 
 int ex_flow_vs_new_car_prob(ExParam p)
@@ -516,25 +328,8 @@ int ex_flow_vs_new_car_prob(ExParam p)
             return 1;
         ca.Evolve(p.iterations);
 
-        // Obtiene flujo en cada posición.
-        vector<double> tmp_flow;
-        tmp_flow.assign(p.size, 0.0);
-        unsigned height = ca.GetHistorySize();
-        unsigned width = ca.GetSize();
-
-        for (unsigned i = 0; i < width; ++i)
-        {
-            int sum = 0;
-            for (unsigned j = 1; j < height; ++j)
-            {
-                if ((ca.GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca.GetAt(i + 1, j, CA_FLOW_HISTORY) != 0))
-                    sum++;
-            }
-            tmp_flow[i] = (double)sum / (double)height;
-        }
-
         // Obtiene el promedio de todos los flujos.
-        double mean = aux_mean(tmp_flow);
+        double mean = ca.CalculateMeanFlow();
         if (p.per_prob)
             mean /= s;
 
@@ -543,18 +338,14 @@ int ex_flow_vs_new_car_prob(ExParam p)
         flow.push_back(mean);
     }
 
-    // Escribe a CSV.
-    if (p.out_file_name.empty())
-    {
-        if (p.per_prob)
-            p.out_file_name = p.path + "flow_per_new_car_prob.csv";
-        else
-            p.out_file_name = p.path + "flow_vs_new_car_prob.csv";
-    }
+    // Escribe a archivo.
+    string filename;
+    if (p.per_prob)
+        filename = "flow_per_new_car_prob.csv";
     else
-        p.out_file_name = p.path + p.out_file_name;
+        filename = "flow_vs_new_car_prob.csv";
 
-    return export_data(new_car_density, flow, p.out_file_name, p.export_format);
+    return export_data(new_car_density, flow, p.GetFilePath(filename), p.export_format);
 }
 
 int ex_flow_vs_stop_density(ExParam p)
@@ -574,35 +365,12 @@ int ex_flow_vs_stop_density(ExParam p)
             return 1;
         ca.Evolve(p.iterations);
 
-        // Obtiene flujo en cada posición.
-        vector<double> tmp_flow;
-        tmp_flow.assign(p.size, 0.0);
-        unsigned height = ca.GetHistorySize();
-        unsigned width = ca.GetSize();
-
-        for (unsigned i = 0; i < width; ++i)
-        {
-            int sum = 0;
-            for (unsigned j = 1; j < height; ++j)
-            {
-                if ((ca.GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca.GetAt(i + 1, j, CA_FLOW_HISTORY) != 0))
-                    sum++;
-            }
-            tmp_flow[i] = (double)sum / (double)height;
-        }
-
         // Asigna valores.
         stop_density.push_back(d);
-        flow.push_back(aux_mean(tmp_flow));
+        flow.push_back(ca.CalculateMeanFlow());
     }
 
-    // Escribe a CSV.
-    if (p.out_file_name.empty())
-        p.out_file_name = p.path + "flow_vs_stop_density.csv";
-    else
-        p.out_file_name = p.path + p.out_file_name;
-
-    return export_data(stop_density, flow, p.out_file_name, p.export_format);
+    return export_data(stop_density, flow, p.GetFilePath("flow_vs_stop_density.csv"), p.export_format);
 }
 
 int ex_flow_vs_semaphore_density(ExParam p)
@@ -622,35 +390,12 @@ int ex_flow_vs_semaphore_density(ExParam p)
             return 1;
         ca.Evolve(p.iterations);
 
-        // Obtiene flujo en cada posición.
-        vector<double> tmp_flow;
-        tmp_flow.assign(p.size, 0.0);
-        unsigned height = ca.GetHistorySize();
-        unsigned width = ca.GetSize();
-
-        for (unsigned i = 0; i < width; ++i)
-        {
-            int sum = 0;
-            for (unsigned j = 1; j < height; ++j)
-            {
-                if ((ca.GetAt(i, j, CA_FLOW_HISTORY) != 0) && (ca.GetAt(i + 1, j, CA_FLOW_HISTORY) != 0))
-                    sum++;
-            }
-            tmp_flow[i] = (double)sum / (double)height;
-        }
-
         // Asigna valores.
         semaphore_density.push_back(d);
-        flow.push_back(aux_mean(tmp_flow));
+        flow.push_back(ca.CalculateMeanFlow());
     }
 
-    // Escribe a CSV.
-    if (p.out_file_name.empty())
-        p.out_file_name = p.path + "flow_vs_semaphore_density.csv";
-    else
-        p.out_file_name = p.path + p.out_file_name;
-
-    return export_data(semaphore_density, flow, p.out_file_name, p.export_format);
+    return export_data(semaphore_density, flow, p.GetFilePath("flow_vs_semaphore_density.csv"), p.export_format);
 }
 
 int ex_escape_time_vs_density(ExParam p)
@@ -693,7 +438,7 @@ int ex_escape_time_vs_density(ExParam p)
         escape_time.push_back(iter);
 
     }
-    return export_data(densities, escape_time, "escape_time_vs_density.csv", p.export_format);
+    return export_data(densities, escape_time, p.GetFilePath("escape_time_vs_density.csv"), p.export_format);
 }
 
 int ex_escape_time_vs_rand_prob(ExParam p)
@@ -730,7 +475,7 @@ int ex_escape_time_vs_rand_prob(ExParam p)
         escape_time.push_back(iter);
 
     }
-    return export_data(rand_p, escape_time, "escape_time_vs_rand_prob.csv", p.export_format);
+    return export_data(rand_p, escape_time, p.GetFilePath("escape_time_vs_rand_prob.csv"), p.export_format);
 }
 
 int ex_escape_time_vs_vmax(ExParam p)
@@ -767,7 +512,7 @@ int ex_escape_time_vs_vmax(ExParam p)
         escape_time.push_back(iter);
 
     }
-    return export_data(vel, escape_time, "escape_time_vs_vmax.csv", p.export_format);
+    return export_data(vel, escape_time, p.GetFilePath("escape_time_vs_vmax.csv"), p.export_format);
 }
 
 int ex_discharge_vs_density(ExParam p)
@@ -810,7 +555,7 @@ int ex_discharge_vs_density(ExParam p)
         }
 
     }
-    return export_data(density, discharge, "discharge_vs_density.csv", p.export_format);
+    return export_data(density, discharge, p.GetFilePath("discharge_vs_density.csv"), p.export_format);
 }
 
 int ex_discharge_vs_density_fratal(ExParam p)
@@ -869,7 +614,7 @@ int ex_discharge_vs_density_fratal(ExParam p)
     cout << "La dimension fractal del grafico de barras es: ";
     cout << measure_fractal_dimension(fractal, 0, (int)(0.1*fractal.size()), fractal.size(), 1);
     cout << "." << endl;
-    return export_map(fractal, "discharge_vs_density_fractal.bmp", 30, false, BINARY_COLORS);
+    return export_map(fractal, p.GetFilePath("discharge_vs_density_fractal.bmp"), 30, false, BINARY_COLORS);
 }
 
 int ex_dimension_vs_density(ExParam p)
@@ -956,10 +701,10 @@ int ex_dimension_vs_density(ExParam p)
         if (r != 0)
             return r;
     }
-    r = export_csv(densities, dimension, "dimension_vs_density.csv");
+    r = export_csv(densities, dimension, p.GetFilePath("dimension_vs_density.csv"));
     if (r != 0)
         return r;
-    r = export_csv(densities, plot_dimension, "plot_dimension_vs_density.csv");
+    r = export_csv(densities, plot_dimension, p.GetFilePath("plot_dimension_vs_density.csv"));
     return r;
 }
 
@@ -1060,11 +805,11 @@ int ex_dimension_vs_density_parallel(ExParam p)
         }
     }
 
-    r = export_csv(frac_dim, "dimension_vs_density.csv");
+    r = export_csv(frac_dim, p.GetFilePath("dimension_vs_density.csv"));
     if (r != 0)
         return r;
 
-    r = export_csv(plot_dim, "plot_dimension_vs_density.csv");
+    r = export_csv(plot_dim, p.GetFilePath("plot_dimension_vs_density.csv"));
     return r;
 }
 
@@ -1119,7 +864,7 @@ int ex_pentropy_vs_density(ExParam p)
         entropias.push_back(result[i].GetY());
     }
 
-    return export_data(intervalos, entropias, "pentropy_vs_density.csv", p.export_format);
+    return export_data(intervalos, entropias, p.GetFilePath("pentropy_vs_density.csv"), p.export_format);
 }
 
 

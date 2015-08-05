@@ -89,7 +89,7 @@ template <class N> int export_csv(std::vector<N> &data, const std::string &filen
 * @param data2 Lista de datos a exportar.
 * @param filename Archivo a exportar los datos.
 */
-template <class N> int export_csv(std::vector<N> &data_1, std::vector<N> &data_2, const std::string &filename)
+template <class N> int export_csv(std::vector<N> data_1, std::vector<N> data_2, const std::string filename)
 {
     if (data_1.size() == data_2.size())
     {
@@ -124,7 +124,7 @@ template <class N> int export_csv(std::vector<N> &data_1, std::vector<N> &data_2
 * @param data Lista de datos a exportar.
 * @param filename Archivo a exportar los datos.
 */
-template <class N> int export_csv(std::vector<Coord<N>> &data, const std::string &filename)
+template <class N> int export_csv(std::vector<Coord<N>> data, std::string filename)
 {
     std::vector<N> data1, data2;
     for (unsigned i = 0; i < data.size(); ++i)
@@ -186,8 +186,8 @@ template <class N> int export_plot(const std::vector<N> data, const std::string 
 * @param data_2 Lista de datos de eje vertical.
 * @param filename Archivo a exportar los datos.
 */
-template <class N> int export_data(std::vector<N> &data_1, std::vector<N> &data_2, const std::string &filename,
-                                   ExportFormat &format)
+template <class N> int export_data(std::vector<N> data_1, std::vector<N> data_2, std::string filename,
+                                   ExportFormat format)
 {
     switch (format)
     {
@@ -202,7 +202,7 @@ template <class N> int export_data(std::vector<N> &data_1, std::vector<N> &data_
     }
 }
 
-template <class N> int export_data(std::vector<N> &data, const std::string &filename, ExportFormat &format)
+template <class N> int export_data(std::vector<N> data, std::string filename, ExportFormat format)
 {
     switch (format)
     {
@@ -217,10 +217,9 @@ template <class N> int export_data(std::vector<N> &data, const std::string &file
     }
 }
 
-int export_map(std::vector<int> &data, const std::string &filename, const unsigned &height = 30,
-               const bool &normalize = false, const Styles &style = SUMMER_DAY);
+int export_map(std::vector<int> data, std::string filename, const unsigned height = 30,
+               const bool normalize = false, const Styles style = SUMMER_DAY);
 
-int export_map(Matrix<int> &data, const std::string &filename, const bool &normalize = false,
-               const Styles &style = SUMMER_DAY);
+int export_map(Matrix<int> data, std::string filename, const Styles style = SUMMER_DAY);
 
 #endif

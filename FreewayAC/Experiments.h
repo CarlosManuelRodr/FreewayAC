@@ -47,6 +47,7 @@ public:
     ExportFormat export_format;
 
     void Report();
+    std::string GetFilePath(std::string filename);
 };
 
 
@@ -241,11 +242,6 @@ int ex_flow_fixed(ExParam p);
 * @brief Mide el flujo promedio de todas las casillas respecto a densidad de autos.
 */
 int ex_flow_vs_density(ExParam p);
-
-/**
-* @brief Mide el flujo promedio de todas las casillas respecto a densidad de autos.
-*/
-int ex_multilane_flow_vs_density(ExParam p);
 
 /**
 * @brief Mide el flujo promedio de todas las casillas respecto a velocidad máxima autos.
