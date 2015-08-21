@@ -1512,6 +1512,105 @@ void CellularAutomataML::Move()
     m_ca_flow_history.push_back(m_ca_flow_temp);
     m_ca.assign(m_ca_temp.begin(), m_ca_temp.end());
 }
+void CellularAutomataML::PrintHistory()
+{
+    for (unsigned i = 0; i < m_ca_history.size(); ++i)
+    {
+        for (unsigned k = 0; k < m_lanes; k++)
+        {
+            for (unsigned j = 0; j < m_size; ++j)
+            {
+                if (j != m_size -1)
+                {
+                    if (m_ca_history[i][k][j] == -1)
+                        cout << " , ";
+                    else
+                        cout << m_ca_history[i][k][j] << ", ";
+                }
+                else
+                {
+                    if (m_ca_history[i][k][j] == -1)
+                        cout << " ";
+                    else
+                        cout << m_ca_history[i][k][j];
+                }
+            }
+        }
+        cout << endl;
+    }
+}
+bool CellularAutomataML::IsFluxHalted()
+{
+    bool halted = true;
+    if (m_ca_flow_history.size() > 1)
+    {
+        for (unsigned i = 1; i < m_ca_flow_history.size() && halted; ++i)
+        {
+            for (unsigned k = 0; k < m_lanes; k++)
+            {
+                for (unsigned j = 0; j < m_size; ++j)
+                {
+                    if (m_ca_flow_history[i][k][j] != 0)
+                    {
+                        halted = false;
+                        break;
+                    }
+                }
+            }
+        }
+        return halted;
+    }
+    else
+        return false;
+}
+vector<double> CellularAutomataML::CalculateOcupancy()
+{
+    vector<double> ocupancy;
+    ocupancy.assign(this->GetSize(), 0.0);
+    unsigned height = this->GetHistorySize();
+    unsigned width = this->GetSize();
+
+    for (unsigned i = 0; i < width; ++i)
+    {
+        int sum = 0;
+        for (unsigned j = 1; j < height; ++j)
+        {
+            for (unsigned k = 0; k < m_lanes; k++)
+            {
+                if (this->GetAt(i, k, j, CA_HISTORY) != -1)
+                    sum++;
+            }
+        }
+        ocupancy[i] = (double)sum/((double)height*(double)m_lanes);
+    }
+    return ocupancy;
+}
+vector<double> CellularAutomataML::CalculateFlow()
+{
+    vector<double> flow;
+    flow.assign(this->GetSize(), 0.0);
+    unsigned height = this->GetHistorySize();
+    unsigned width = this->GetSize();
+
+    for (unsigned i = 0; i < width; ++i)
+    {
+        int sum = 0;
+        for (unsigned j = 1; j < height; ++j)
+        {
+            for (unsigned k = 0; k < m_lanes; k++)
+            {
+                if ((this->GetAt(i, k, j, CA_FLOW_HISTORY) != 0) && (this->GetAt(i+1, k, j, CA_FLOW_HISTORY) != 0))
+                    sum++;
+            }
+        }
+        flow[i] = (double)sum/((double)height*(double)m_lanes);
+    }
+    return flow;
+}
+double CellularAutomataML::CalculateMeanFlow()
+{
+    return aux_mean(this->CalculateFlow());
+}
 
 
 /****************************
@@ -1675,140 +1774,6 @@ void OpenCAML::Step()
     m_ca_history.push_back(m_ca);
 }
 
-/********************************
-*                               *
-*  Manejador de CA Multicarril  *
-*                               *
-********************************/
-
-CaHandlerML::CaHandlerML()
-{
-    cellularautomataml = nullptr;
-    circularcaml = nullptr;
-    opencaml = nullptr;
-}
-CaHandlerML::CaHandlerML(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density, const int &vmax,
-                         const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed)
-{
-    CreateCa(ca, size, lanes, density, vmax, rand_prob, init_vel, args, custom_random_seed);
-}
-CaHandlerML::~CaHandlerML()
-{
-    DeleteCa();
-}
-void CaHandlerML::CreateCa(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density,
-                           const int &vmax, const double &rand_prob, const int &init_vel, Args args, 
-                           const int &custom_random_seed)
-{
-    DeleteCa();
-    if (custom_random_seed != -1)
-        RandomGen::Seed(custom_random_seed);
-    else
-        RandomGen::Seed();
-
-    try
-    {
-        switch (ca)
-        {
-        case CIRCULAR_MULTILANE_CA:
-            cellularautomataml = circularcaml = new CircularCAML(size, lanes, density, vmax, rand_prob, init_vel);
-            break;
-        case OPEN_MULTILANE_CA:
-            cellularautomataml = opencaml = new OpenCAML(size, lanes, density, vmax, rand_prob, init_vel, args.GetDouble(),
-                                                         args.GetInt());
-            break;
-        default:
-            cout << "Error: No se puede crear AC especificado en create_multilane_ca." << endl;
-            break;
-        };
-    }
-    catch (std::bad_alloc&)
-    {
-        cout << "Fatal: Memoria insuficiente." << endl;
-        cellularautomataml = nullptr;
-    }
-}
-void CaHandlerML::DeleteCa()
-{
-    if (circularcaml)
-        delete circularcaml;
-    if (opencaml)
-        delete opencaml;
-
-    circularcaml = nullptr;
-    opencaml = nullptr;
-}
-int CaHandlerML::Status()
-{
-    if (cellularautomataml != nullptr)
-        return 0;
-    else
-        return 1;
-}
-void CaHandlerML::Evolve(const unsigned &iter)
-{
-    return cellularautomataml->Evolve(iter);
-}
-int CaHandlerML::NextCarDist(const int &pos, const unsigned &lane)
-{
-    return cellularautomataml->NextCarDist(pos, lane);
-}
-bool CaHandlerML::Randomization(const double &prob)
-{
-    return cellularautomataml->Randomization(prob);
-}
-int &CaHandlerML::At(const int &i, const unsigned &lane, const CAS &ca)
-{
-    return cellularautomataml->At(i, lane, ca);
-}
-int &CaHandlerML::At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca)
-{
-    return cellularautomataml->At(i, lane, j, ca);
-}
-int CaHandlerML::GetAt(const unsigned &i, const unsigned &lane, const CAS &ca)
-{
-    return cellularautomataml->GetAt(i, lane, ca);
-}
-int CaHandlerML::GetAt(const unsigned &i, const unsigned &lane, const unsigned &j, const CAS &ca)
-{
-    return cellularautomataml->GetAt(i, lane, j, ca);
-}
-int CaHandlerML::DrawHistory(std::string path, std::string out_file_name)
-{
-    return cellularautomataml->DrawHistory(path, out_file_name);
-}
-int CaHandlerML::DrawFlowHistory(std::string path, std::string out_file_name)
-{
-    return cellularautomataml->DrawFlowHistory(path, out_file_name);
-}
-void CaHandlerML::Print()
-{
-    return cellularautomataml->Print();
-}
-unsigned CaHandlerML::GetSize()
-{
-    return cellularautomataml->GetSize();
-}
-unsigned CaHandlerML::GetHistorySize()
-{
-    return cellularautomataml->GetHistorySize();
-}
-unsigned CaHandlerML::GetLanes()
-{
-    return cellularautomataml->GetLanes();
-}
-unsigned CaHandlerML::CountCars()
-{
-    return cellularautomataml->CountCars();
-}
-void CaHandlerML::Step()
-{
-    return cellularautomataml->Step();
-}
-void CaHandlerML::Move()
-{
-    return cellularautomataml->Move();
-}
 
 /****************************
 *                           *
@@ -1866,6 +1831,7 @@ CaHandler::~CaHandler()
 void CaHandler::CreateCa(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax,
 	const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed)
 {
+    multilane = false;
 	DeleteCa();
 	if (custom_random_seed != -1)
 		RandomGen::Seed(custom_random_seed);
@@ -1911,6 +1877,7 @@ void CaHandler::CreateCa(CA_TYPE ca, const unsigned &size, const double &density
 void CaHandler::CreateCa(CA_TYPE ca, const unsigned & size, const unsigned & lanes, const double & density, const int & vmax,
 	const double & rand_prob, const int & init_vel, Args args, const int & custom_random_seed)
 {
+    multilane = false;
 	DeleteCa();
 	if (custom_random_seed != -1)
 		RandomGen::Seed(custom_random_seed);
@@ -1944,10 +1911,12 @@ void CaHandler::CreateCa(CA_TYPE ca, const unsigned & size, const unsigned & lan
 			break;
 		case CIRCULAR_MULTILANE_CA:
 			cellularautomataml = circularcaml = new CircularCAML(size, lanes, density, vmax, rand_prob, init_vel);
+            multilane = true;
 			break;
 		case OPEN_MULTILANE_CA:
 			cellularautomataml = opencaml = new OpenCAML(size, lanes, density, vmax, rand_prob, init_vel, args.GetDouble(),
 				args.GetInt());
+            multilane = true;
 			break;
 		default:
 			cout << "Error: No se puede crear AC especificado en create_ca." << endl;
@@ -1998,101 +1967,149 @@ int CaHandler::Status()
 }
 void CaHandler::Evolve(const unsigned &iter)
 {
-	return cellularautomata->Evolve(iter);
+    if (multilane)
+        return cellularautomataml->Evolve(iter);
+    else
+        return cellularautomata->Evolve(iter);
 }
-int CaHandler::NextCarDist(const int &pos)
+int CaHandler::NextCarDist(const int &pos, const unsigned &lane)
 {
-	return cellularautomata->NextCarDist(pos);
+    if (multilane)
+        return cellularautomataml->NextCarDist(pos, lane);
+    else
+        return cellularautomata->NextCarDist(pos);
 }
 bool CaHandler::Randomization(const double &prob)
 {
-	return cellularautomata->Randomization(prob);
+    if (multilane)
+        return cellularautomataml->Randomization(prob);
+    else
+        return cellularautomata->Randomization(prob);
 }
-int &CaHandler::At(const int &i, const CAS &ca)
+int &CaHandler::At(const int &i, const unsigned &lane, const CAS &ca)
 {
-	return cellularautomata->At(i, ca);
+    if (multilane)
+        return cellularautomataml->At(i, lane, ca);
+    else
+        return cellularautomata->At(i, ca);
 }
-int &CaHandler::At(const unsigned &i, const unsigned &j, const CAS &ca)
+int &CaHandler::At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca)
 {
-	return cellularautomata->At(i, j, ca);
+    if (multilane)
+        return cellularautomataml->At(i, lane, j, ca);
+    else
+        return cellularautomata->At(i, j, ca);
 }
-int CaHandler::GetAt(const unsigned &i, const CAS &ca)
+int CaHandler::GetAt(const unsigned &i, const unsigned &lane, const CAS &ca)
 {
-	return cellularautomata->GetAt(i, ca);
+    if (multilane)
+        return cellularautomataml->GetAt(i, lane, ca);
+    else
+        return cellularautomata->GetAt(i, ca);
 }
-int CaHandler::GetAt(const unsigned &i, const unsigned &j, const CAS &ca)
+int CaHandler::GetAt(const unsigned &i, const unsigned &lane, const unsigned &j, const CAS &ca)
 {
-	return cellularautomata->GetAt(i, j, ca);
-}
-int &At(const int &i, const unsigned &lane, const CAS &ca = CA)
-{
-
-}
-int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca)
-{
-
-}
-int GetAt(const unsigned &i, const unsigned &lane, const CAS &ca = CA)
-{
-
-}
-int GetAt(const unsigned &i, const unsigned &lane, const unsigned &j, const CAS &ca)
-{
-
+    if (multilane)
+        return cellularautomataml->GetAt(i, lane, j, ca);
+    else
+        return cellularautomata->GetAt(i, j, ca);
 }
 void CaHandler::Connect(CellularAutomata* connect, unsigned connect_pos)
 {
-	return cellularautomata->Connect(connect, connect_pos);
+    return cellularautomata->Connect(connect, connect_pos);
+}
+void CaHandler::Connect(CellularAutomataML* connect, unsigned connect_pos)
+{
+    return cellularautomataml->Connect(connect, connect_pos);
 }
 int CaHandler::DrawHistory(std::string path, std::string out_file_name)
 {
-	return cellularautomata->DrawHistory(path, out_file_name);
+    if (multilane)
+        return cellularautomataml->DrawHistory(path, out_file_name);
+    else
+        return cellularautomata->DrawHistory(path, out_file_name);
 }
 int CaHandler::DrawFlowHistory(std::string path, std::string out_file_name)
 {
-	return cellularautomata->DrawFlowHistory(path, out_file_name);
+    if (multilane)
+        return cellularautomataml->DrawFlowHistory(path, out_file_name);
+    else
+        return cellularautomata->DrawFlowHistory(path, out_file_name);
 }
 void CaHandler::Print()
 {
-	return cellularautomata->Print();
+    if (multilane)
+        return cellularautomataml->Print();
+    else
+        return cellularautomata->Print();
 }
 unsigned CaHandler::GetSize()
 {
-	return cellularautomata->GetSize();
+    if (multilane)
+        return cellularautomataml->GetSize();
+    else
+        return cellularautomata->GetSize();
 }
 unsigned CaHandler::GetHistorySize()
 {
-	return cellularautomata->GetHistorySize();
+    if (multilane)
+        return cellularautomataml->GetHistorySize();
+    else
+        return cellularautomata->GetHistorySize();
 }
 unsigned CaHandler::CountCars()
 {
-	return cellularautomata->CountCars();
+    if (multilane)
+        return cellularautomataml->CountCars();
+    else
+        return cellularautomata->CountCars();
 }
 bool CaHandler::IsFluxHalted()
 {
-	return cellularautomata->IsFluxHalted();
+    if (multilane)
+        return cellularautomataml->IsFluxHalted();
+    else
+        return cellularautomata->IsFluxHalted();
 }
 void CaHandler::PrintHistory()
 {
-	return cellularautomata->PrintHistory();
+    if (multilane)
+        return cellularautomataml->PrintHistory();
+    else
+        return cellularautomata->PrintHistory();
 }
 void CaHandler::Step()
 {
-	return cellularautomata->Step();
+    if (multilane)
+        return cellularautomataml->Step();
+    else
+        return cellularautomata->Step();
 }
 void CaHandler::Move()
 {
-	return cellularautomata->Move();
+    if (multilane)
+        return cellularautomataml->Move();
+    else
+        return cellularautomata->Move();
 }
 vector<double> CaHandler::CalculateOcupancy()
 {
-	return cellularautomata->CalculateOcupancy();
+    if (multilane)
+        return cellularautomataml->CalculateOcupancy();
+    else
+        return cellularautomata->CalculateOcupancy();
 }
 vector<double> CaHandler::CalculateFlow()
 {
-	return cellularautomata->CalculateFlow();
+    if (multilane)
+        return cellularautomataml->CalculateFlow();
+    else
+        return cellularautomata->CalculateFlow();
 }
 double CaHandler::CalculateMeanFlow()
 {
-	return cellularautomata->CalculateMeanFlow();
+    if (multilane)
+        return cellularautomataml->CalculateMeanFlow();
+    else
+        return cellularautomata->CalculateMeanFlow();
 }

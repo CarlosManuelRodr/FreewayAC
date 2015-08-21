@@ -53,6 +53,8 @@ build/
 .buildozer/
 /Debug/
 /Release/
+/build-FreewayAC-Desktop-Debug/
+/build-FreewayAC-Desktop-Release/
 /ipch/
 /FreewayAC/Debug/
 /FreewayAC/Release/

@@ -167,28 +167,28 @@ vector<Coord<double>> measure_permutation_entropy(vector<double> date, vector<do
 
 int ex_traffic_map(ExParam p)
 {
-    CaHandler ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, p.args);
+    CaHandler ca(p.type, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, p.args);
     ca.Evolve(p.iterations);
     return ca.DrawHistory(p.path, p.out_file_name);
 }
 
 int ex_flow_map(ExParam p)
 {
-    CaHandler ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, p.args);
+    CaHandler ca(p.type, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, p.args);
     ca.Evolve(p.iterations);
     return ca.DrawFlowHistory(p.path, p.out_file_name);
 }
 
 int ex_ocupancy_fixed(ExParam p)
 {
-    CaHandler ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, p.args);
+    CaHandler ca(p.type, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, p.args);
     ca.Evolve(p.iterations);
     return export_data(ca.CalculateOcupancy(), p.GetFilePath("ocupancy.csv"), p.export_format);
 }
 
 int ex_flow_fixed(ExParam p)
 {
-    CaHandler ca(p.type, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, p.args);
+    CaHandler ca(p.type, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, p.args);
     ca.Evolve(p.iterations);
     return export_data(ca.CalculateFlow(), p.GetFilePath("flow.csv"), p.export_format);
 }
@@ -205,7 +205,7 @@ int ex_flow_vs_density(ExParam p)
             aux_progress_bar(d, p.density_min, p.density_max, p.dt);
 
         // Evoluciona el sistema.
-        ca.CreateCa(p.type, p.size, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
+        ca.CreateCa(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
         if (ca.Status() != 0)
             return 1;
         ca.Evolve(p.iterations);
@@ -241,7 +241,7 @@ int ex_flow_vs_vmax(ExParam p)
             aux_progress_bar(v, p.vmax_min, p.vmax_max, p.dt);
 
         // Evoluciona el sistema.
-        ca.CreateCa(p.type, p.size, p.density, v, p.rand_prob, p.init_vel, p.args, p.random_seed);
+        ca.CreateCa(p.type, p.size, p.lanes, p.density, v, p.rand_prob, p.init_vel, p.args, p.random_seed);
         if (ca.Status() != 0)
             return 1;
         ca.Evolve(p.iterations);
@@ -266,7 +266,7 @@ int ex_flow_vs_rand_prob(ExParam p)
             aux_progress_bar(r, p.rand_prob_min, p.rand_prob_max, p.dt);
 
         // Evoluciona el sistema.
-        ca.CreateCa(p.type, p.size, p.density, p.vmax, r, p.init_vel, p.args, p.random_seed);
+        ca.CreateCa(p.type, p.size, p.lanes, p.density, p.vmax, r, p.init_vel, p.args, p.random_seed);
         if (ca.Status() != 0)
             return 1;
         ca.Evolve(p.iterations);
@@ -291,7 +291,7 @@ int ex_flow_vs_aut_cars(ExParam p)
             aux_progress_bar(s, p.aut_car_density_min, p.aut_car_density_max, p.dt);
 
         // Evoluciona el sistema.
-        ca.CreateCa(AUTONOMOUS_CA, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, Args({ s }), p.random_seed);
+        ca.CreateCa(AUTONOMOUS_CA, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, Args({ s }), p.random_seed);
         if (ca.Status() != 0)
             return 1;
         ca.Evolve(p.iterations);
@@ -323,7 +323,7 @@ int ex_flow_vs_new_car_prob(ExParam p)
 
         // Evoluciona el sistema.
         p.args.SetDouble(0, s);
-        ca.CreateCa(p.type, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
+        ca.CreateCa(p.type, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
         if (ca.Status() != 0)
             return 1;
         ca.Evolve(p.iterations);
@@ -401,7 +401,7 @@ int ex_flow_vs_semaphore_density(ExParam p)
 int ex_escape_time_vs_density(ExParam p)
 {
     CA_TYPE ca_type = p.type;
-    if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, ca_type))
+    if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, ca_type))
     {
         cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
         ca_type = OPEN_CA;
@@ -418,7 +418,7 @@ int ex_escape_time_vs_density(ExParam p)
 
         // Evoluciona el sistema.
         p.args.SetDouble(0, 0.0);
-        ca.CreateCa(ca_type, p.size, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
+        ca.CreateCa(ca_type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
         if (ca.Status() != 0)
             return 1;
 
@@ -444,7 +444,7 @@ int ex_escape_time_vs_density(ExParam p)
 int ex_escape_time_vs_rand_prob(ExParam p)
 {
     CA_TYPE ca_type = p.type;
-    if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, ca_type))
+    if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, ca_type))
     {
         cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
         ca_type = OPEN_CA;
@@ -461,7 +461,7 @@ int ex_escape_time_vs_rand_prob(ExParam p)
 
         // Evoluciona el sistema.
         p.args.SetDouble(0, 0.0);
-        ca.CreateCa(ca_type, p.size, p.density, p.vmax, ra, p.init_vel, p.args, p.random_seed);
+        ca.CreateCa(ca_type, p.size, p.lanes, p.density, p.vmax, ra, p.init_vel, p.args, p.random_seed);
         if (ca.Status() != 0)
             return 1;
 
@@ -481,7 +481,7 @@ int ex_escape_time_vs_rand_prob(ExParam p)
 int ex_escape_time_vs_vmax(ExParam p)
 {
     CA_TYPE ca_type = p.type;
-    if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, ca_type))
+    if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, ca_type))
     {
         cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
         ca_type = OPEN_CA;
@@ -498,7 +498,7 @@ int ex_escape_time_vs_vmax(ExParam p)
 
         // Evoluciona el sistema.
         p.args.SetDouble(0, 0.0);
-        ca.CreateCa(ca_type, p.size, p.density, v, p.rand_prob, p.init_vel, p.args, p.random_seed);
+        ca.CreateCa(ca_type, p.size, p.lanes, p.density, v, p.rand_prob, p.init_vel, p.args, p.random_seed);
         if (ca.Status() != 0)
             return 1;
 
@@ -518,7 +518,7 @@ int ex_escape_time_vs_vmax(ExParam p)
 int ex_discharge_vs_density(ExParam p)
 {
     CA_TYPE ca_type = p.type;
-    if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, ca_type))
+    if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, ca_type))
     {
         cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
         ca_type = OPEN_CA;
@@ -538,7 +538,7 @@ int ex_discharge_vs_density(ExParam p)
 
         // Evoluciona el sistema.
         p.args.SetDouble(0, 0.0);
-        ca.CreateCa(ca_type, p.size, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
+        ca.CreateCa(ca_type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
         if (ca.Status() != 0)
             return 1;
 
@@ -561,7 +561,7 @@ int ex_discharge_vs_density(ExParam p)
 int ex_discharge_vs_density_fratal(ExParam p)
 {
     CA_TYPE ca_type = p.type;
-    if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, ca_type))
+    if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, ca_type))
     {
         cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
         ca_type = OPEN_CA;
@@ -578,7 +578,7 @@ int ex_discharge_vs_density_fratal(ExParam p)
 
         // Evoluciona el sistema.
         p.args.SetDouble(0, 0.0);
-        ca.CreateCa(ca_type, p.size, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
+        ca.CreateCa(ca_type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
         if (ca.Status() != 0)
             return 1;
 
@@ -621,7 +621,7 @@ int ex_dimension_vs_density(ExParam p)
 {
     int r;
     CA_TYPE ca_type = p.type;
-    if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, ca_type))
+    if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, ca_type))
     {
         cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
         ca_type = OPEN_CA;
@@ -651,7 +651,7 @@ int ex_dimension_vs_density(ExParam p)
         {
             // Evoluciona el sistema.
             p.args.SetDouble(0, 0.0);
-            ca.CreateCa(ca_type, p.size, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
+            ca.CreateCa(ca_type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
             if (ca.Status() != 0)
                 return 1;
 
@@ -719,7 +719,7 @@ Coord3D<double> ex_dimension_vs_density_thread(double density, ExParam p)
     {
         // Evoluciona el sistema.
         p.args.SetDouble(0, 0.0);
-        ca.CreateCa(p.type, p.size, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
+        ca.CreateCa(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
         if (ca.Status() != 0)
             return Coord3D<double>(0.0, 0.0, 0.0);
 
@@ -773,7 +773,7 @@ Coord3D<double> ex_dimension_vs_density_thread(double density, ExParam p)
 int ex_dimension_vs_density_parallel(ExParam p)
 {
     int r;
-    if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, p.type))
+    if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, p.type))
     {
         cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
         p.type = OPEN_CA;
@@ -816,7 +816,7 @@ int ex_dimension_vs_density_parallel(ExParam p)
 int ex_pentropy_vs_density(ExParam p)
 {
     CA_TYPE ca_type = p.type;
-    if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, ca_type))
+    if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, ca_type))
     {
         cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
         ca_type = OPEN_CA;
@@ -833,7 +833,7 @@ int ex_pentropy_vs_density(ExParam p)
 
         // Evoluciona el sistema.
         p.args.SetDouble(0, 0.0);
-        ca.CreateCa(ca_type, p.size, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
+        ca.CreateCa(ca_type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
         if (ca.Status() != 0)
             return 1;
 

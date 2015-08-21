@@ -152,7 +152,7 @@ public:
     unsigned GetSize();             ///< Devuelve tamaño del AC.
     unsigned GetHistorySize();      ///< Devuelve tamaño de la lista histórica de evolución del AC.
     unsigned CountCars();           ///< Cuenta la cantidad de autos en AC.
-    bool IsFluxHalted();        ///< Informa si el flujo está estancado.
+    bool IsFluxHalted();            ///< Informa si el flujo está estancado.
     void PrintHistory();            ///< Escribe los valores históricos del AC en la terminal.
     virtual void Step();            ///< Aplica reglas de evolución temporal del AC.
     virtual void Move();            ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
@@ -524,11 +524,17 @@ public:
     ///@param prob Probabilidad de obtener valor verdadero. Por defecto se utiliza m_rand_prob.
     bool Randomization(const double &prob = -1.0);
 
+    std::vector<double> CalculateOcupancy();
+    std::vector<double> CalculateFlow();
+    double CalculateMeanFlow();
+
     void Print();               ///< Escribe línea de autómata celular en la terminal.
     unsigned GetSize();         ///< Devuelve tamaño del AC.
     unsigned GetHistorySize();  ///< Devuelve tamaño de la lista histórica de evolución del AC.
     unsigned GetLanes();        ///< Devuelve el número de carriles.
     unsigned CountCars();       ///< Cuenta la cantidad de autos en AC.
+    bool IsFluxHalted();        ///< Informa si el flujo está estancado.
+    void PrintHistory();        ///< Escribe los valores históricos del AC en la terminal.
     virtual void Step();        ///< Aplica reglas de evolución temporal del AC.
     virtual void ChangeLanes(); ///< Aplica las reglas de cambio carril.
     virtual void Move();        ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
@@ -624,51 +630,6 @@ public:
     void Step();    ///< Aplica reglas de evolución temporal del AC.
 };
 
-/********************************
-*                               *
-*  Manejador de CA Multicarril  *
-*                               *
-********************************/
-
-/**
-* @class CaHandlerML
-* @brief Manejador de CA multicarril. Provee interfaz para manejar CA de forma genérica, sin importar el tipo.
-*/
-class CaHandlerML
-{
-    CellularAutomataML* cellularautomataml;
-    CircularCAML* circularcaml;
-    OpenCAML* opencaml;
-
-public:
-    CaHandlerML();
-    CaHandlerML(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density, const int &vmax,
-                const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed = -1);
-    ~CaHandlerML();
-    void CreateCa(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density, const int &vmax,
-                  const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed = -1);
-    void DeleteCa();
-    int Status();
-
-    void Evolve(const unsigned &iter);
-    int &At(const int &i, const unsigned &lane, const CAS &ca = CA);
-    int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca);
-    int GetAt(const unsigned &i, const unsigned &lane, const CAS &ca = CA);
-    int GetAt(const unsigned &i, const unsigned &lane, const unsigned &j, const CAS &ca);
-    void Connect(CellularAutomataML* connect, unsigned connect_pos);
-    int NextCarDist(const int &pos, const unsigned &lane);
-    int DrawHistory(std::string path = "", std::string out_file_name = "");
-    int DrawFlowHistory(std::string path = "", std::string out_file_name = "");
-    bool Randomization(const double &prob = -1.0);
-    void Print();
-    unsigned GetSize();
-    unsigned GetHistorySize();
-    unsigned GetLanes();
-    unsigned CountCars();
-    void Step();
-    void ChangeLanes();
-    void Move();
-};
 
 /****************************
 *                           *
@@ -712,13 +673,14 @@ public:
 	int Status();
 
 	void Evolve(const unsigned &iter);
-	int NextCarDist(const int &pos);
+    int NextCarDist(const int &pos, const unsigned &lane);
 	bool Randomization(const double &prob = -1.0);
 	int &At(const int &i, const unsigned &lane, const CAS &ca = CA);
 	int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca);
 	int GetAt(const unsigned &i, const unsigned &lane, const CAS &ca = CA);
 	int GetAt(const unsigned &i, const unsigned &lane, const unsigned &j, const CAS &ca);
 	void Connect(CellularAutomata* connect, unsigned connect_pos);
+    void Connect(CellularAutomataML* connect, unsigned connect_pos);
 	int DrawHistory(std::string path = "", std::string out_file_name = "");
 	int DrawFlowHistory(std::string path = "", std::string out_file_name = "");
 	void Print();
