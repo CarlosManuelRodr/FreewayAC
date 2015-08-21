@@ -614,7 +614,7 @@ int ex_discharge_vs_density_fratal(ExParam p)
     cout << "La dimension fractal del grafico de barras es: ";
     cout << measure_fractal_dimension(fractal, 0, (int)(0.1*fractal.size()), fractal.size(), 1);
     cout << "." << endl;
-    return export_map(fractal, p.GetFilePath("discharge_vs_density_fractal.bmp"), 30, false, BINARY_COLORS);
+    return export_map(fractal, p.GetFilePath("discharge_vs_density_fractal.bmp"), 30);
 }
 
 int ex_dimension_vs_density(ExParam p)
@@ -691,7 +691,7 @@ int ex_dimension_vs_density(ExParam p)
         string p_name = f_path + "discharge_vs_density_fractal_" + to_string(d_mean) + ".bmp";
         string p_plot_name = f_plot_path + "discharge_vs_density_plot_" + to_string(d_mean) + ".bmp";
         string csv_name = csv_path + "discharge_vs_density_" + to_string(d_mean) + ".csv";
-        r = export_map(fractal, p_name, 30, false, BINARY_COLORS);
+        r = export_map(fractal, p_name, 30);
         if (r != 0)
             return r;
         r = export_plot(escape_time, p_plot_name);
@@ -757,7 +757,7 @@ Coord3D<double> ex_dimension_vs_density_thread(double density, ExParam p)
     string p_plot_name = f_plot_path + "discharge_vs_density_plot_" + to_string(d_mean) + ".bmp";
     string csv_name = csv_path + "discharge_vs_density_" + to_string(d_mean) + ".csv";
     int r;
-    r = export_map(fractal, p_name, 30, false, BINARY_COLORS);
+    r = export_map(fractal, p_name, 30);
     if (r != 0)
         cout << "Error: No se pudo crear mapa." << endl;
     r = export_plot(escape_time, p_plot_name);

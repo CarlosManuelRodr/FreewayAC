@@ -17,29 +17,6 @@
 
 /****************************
 *                           *
-*     Paleta de colores     *
-*                           *
-****************************/
-
-/**
-* @enum Styles
-* @brief Estilos de paleta de colores.
-*/
-enum Styles
-{
-    SUMMER_DAY,
-    COOL_BLUE,
-    HARD_RED,
-    BLACK_AND_WHITE,
-    PASTEL,
-    PSYCH_EXPERIENCE,
-    VIVID_COLORS,
-    BINARY_COLORS,
-    NONE
-};
-
-/****************************
-*                           *
 *  Funciones para exportar  *
 *                           *
 ****************************/
@@ -217,9 +194,8 @@ template <class N> int export_data(std::vector<N> data, std::string filename, Ex
     }
 }
 
-int export_map(std::vector<int> data, std::string filename, const unsigned height = 30,
-               const bool normalize = false, const Styles style = SUMMER_DAY);
+int export_map(std::vector<int> data, std::string filename, const unsigned height = 30);
 
-int export_map(Matrix<int> data, std::string filename, const Styles style = SUMMER_DAY);
+int export_map(Matrix<int> data, std::string filename);
 
 #endif
