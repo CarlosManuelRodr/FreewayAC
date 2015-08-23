@@ -194,6 +194,12 @@ template <class N> int export_data(std::vector<N> data, std::string filename, Ex
     }
 }
 
+template <class N> int export_data(std::vector<Coord<N>> data, std::string filename,
+	ExportFormat format)
+{
+	return export_data(aux_coordvec_to_vec<N>(data, COORD_X), aux_coordvec_to_vec<N>(data, COORD_Y), filename, format);
+}
+
 int export_map(std::vector<int> data, std::string filename, const unsigned height = 30);
 
 int export_map(Matrix<int> data, std::string filename);

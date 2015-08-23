@@ -159,6 +159,11 @@ vector<Coord<double>> measure_permutation_entropy(vector<double> date, vector<do
     return out;
 }
 
+vector<Coord<double>> measure_permutation_entropy(vector<Coord<double>> data, int order, int length)
+{
+	return measure_permutation_entropy(aux_coordvec_to_vec(data, COORD_X), aux_coordvec_to_vec(data, COORD_Y), order, length);
+}
+
 /****************************
 *                           *
 *        Experimentos       *
@@ -193,31 +198,26 @@ int ex_flow_fixed(ExParam p)
     return export_data(ca.CalculateFlow(), p.GetFilePath("flow.csv"), p.export_format);
 }
 
+Coord<double> ex_flow_vs_density_thread(double d, ExParam &p)
+{
+	// Evoluciona el sistema.
+	CaHandler ca;
+	ca.CreateCa(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
+
+	if (ca.Status() != 0)
+		return Coord<double>(0.0, 0.0);
+	ca.Evolve(p.iterations);
+
+	// Obtiene el promedio de todos los flujos.
+	double mean = ca.CalculateMeanFlow();
+	if (p.per_density) mean /= d;
+
+	return Coord<double>(d, mean);
+}
+
 int ex_flow_vs_density(ExParam p)
 {
-    vector<double> density, flow;
-    CaHandler ca;
-
-    for (double d = p.density_min; d <= p.density_max; d += p.dt)
-    {
-        // Reporta progreso.
-        if (p.show_progress)
-            aux_progress_bar(d, p.density_min, p.density_max, p.dt);
-
-        // Evoluciona el sistema.
-        ca.CreateCa(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
-        if (ca.Status() != 0)
-            return 1;
-        ca.Evolve(p.iterations);
-
-        // Obtiene el promedio de todos los flujos.
-        double mean = ca.CalculateMeanFlow();
-        if (p.per_density) mean /= d;
-
-        // Asigna valores.
-        density.push_back(d);
-        flow.push_back(mean);
-    }
+	vector<Coord<double>> dens_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_density_thread, p.density_min, p.density_max, p.dt, p);
 
     // Escribe a archivo.
     string filename;
@@ -226,82 +226,82 @@ int ex_flow_vs_density(ExParam p)
     else
         filename =  "flow_vs_density.csv";
 
-    return export_data(density, flow, p.GetFilePath(filename), p.export_format);
+    return export_data(dens_flow, p.GetFilePath(filename), p.export_format);
+}
+
+Coord<double> ex_flow_vs_vmax_thread(int v, ExParam &p)
+{
+	// Evoluciona el sistema.
+	CaHandler ca;
+	ca.CreateCa(p.type, p.size, p.lanes, p.density, v, p.rand_prob, p.init_vel, p.args, p.random_seed);
+
+	if (ca.Status() != 0)
+		return Coord<double>(0.0, 0.0);
+	ca.Evolve(p.iterations);
+
+	return Coord<double>(v, ca.CalculateMeanFlow());
 }
 
 int ex_flow_vs_vmax(ExParam p)
 {
-    vector<double> vmax, flow;
-    CaHandler ca;
+	vector<Coord<double>> vmax_flow = aux_parallel_function<Coord<double>, int, ExParam&>(ex_flow_vs_vmax_thread, p.vmax_min, p.vmax_max, (int)p.dt, p);
+    return export_data(vmax_flow, p.GetFilePath("flow_vs_vmax.csv"), p.export_format);
+}
 
-    for (int v = p.vmax_min; v <= p.vmax_max; v += (int)p.dt)
-    {
-        // Reporta progreso.
-        if (p.show_progress)
-            aux_progress_bar(v, p.vmax_min, p.vmax_max, p.dt);
+Coord<double> ex_flow_vs_rand_prob_thread(double r, ExParam &p)
+{
+	// Evoluciona el sistema.
+	CaHandler ca;
+	ca.CreateCa(p.type, p.size, p.lanes, p.density, p.vmax, r, p.init_vel, p.args, p.random_seed);
 
-        // Evoluciona el sistema.
-        ca.CreateCa(p.type, p.size, p.lanes, p.density, v, p.rand_prob, p.init_vel, p.args, p.random_seed);
-        if (ca.Status() != 0)
-            return 1;
-        ca.Evolve(p.iterations);
+	if (ca.Status() != 0)
+		return Coord<double>(0.0, 0.0);
+	ca.Evolve(p.iterations);
 
-        // Asigna valores.
-        vmax.push_back(v);
-        flow.push_back(ca.CalculateMeanFlow());
-    }
-
-    return export_data(vmax, flow, p.GetFilePath("flow_vs_vmax.csv"), p.export_format);
+	return Coord<double>(r, ca.CalculateMeanFlow());
 }
 
 int ex_flow_vs_rand_prob(ExParam p)
 {
-    vector<double> rand_prob, flow;
-    CaHandler ca;
+	vector<Coord<double>> rand_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_rand_prob_thread, p.rand_prob_min, p.rand_prob_max, p.dt, p);
+    return export_data(rand_flow, p.GetFilePath("flow_vs_rand_prob.csv"), p.export_format);
+}
 
-    for (double r = p.rand_prob_min; r <= p.rand_prob_max; r += p.dt)
-    {
-        // Reporta progreso.
-        if (p.show_progress)
-            aux_progress_bar(r, p.rand_prob_min, p.rand_prob_max, p.dt);
+Coord<double> ex_flow_vs_aut_cars_thread(double s, ExParam &p)
+{
+	// Evoluciona el sistema.
+	CaHandler ca;
+	ca.CreateCa(AUTONOMOUS_CA, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, Args({ s }), p.random_seed);
 
-        // Evoluciona el sistema.
-        ca.CreateCa(p.type, p.size, p.lanes, p.density, p.vmax, r, p.init_vel, p.args, p.random_seed);
-        if (ca.Status() != 0)
-            return 1;
-        ca.Evolve(p.iterations);
+	if (ca.Status() != 0)
+		return Coord<double>(0.0, 0.0);
+	ca.Evolve(p.iterations);
 
-        // Asigna valores.
-        rand_prob.push_back(r);
-        flow.push_back(ca.CalculateMeanFlow());
-    }
-
-    return export_data(rand_prob, flow, p.GetFilePath("flow_vs_rand_prob.csv"), p.export_format);
+	return Coord<double>(s, ca.CalculateMeanFlow());
 }
 
 int ex_flow_vs_aut_cars(ExParam p)
 {
-    vector<double> aut_car_density, flow;
-    CaHandler ca;
+	vector<Coord<double>> aut_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_aut_cars_thread, p.aut_car_density_min, p.aut_car_density_max, p.dt, p);
+    return export_data(aut_flow, p.GetFilePath("flow_vs_aut_cars.csv"), p.export_format);
+}
 
-    for (double s = p.aut_car_density_min; s <= p.aut_car_density_max; s += p.dt)
-    {
-        // Reporta progreso.
-        if (p.show_progress)
-            aux_progress_bar(s, p.aut_car_density_min, p.aut_car_density_max, p.dt);
+Coord<double> ex_flow_vs_new_car_prob_thread(double s, ExParam &p)
+{
+	// Evoluciona el sistema.
+	CaHandler ca;
+	ca.CreateCa(p.type, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
 
-        // Evoluciona el sistema.
-        ca.CreateCa(AUTONOMOUS_CA, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, Args({ s }), p.random_seed);
-        if (ca.Status() != 0)
-            return 1;
-        ca.Evolve(p.iterations);
+	if (ca.Status() != 0)
+		return Coord<double>(0.0, 0.0);
+	ca.Evolve(p.iterations);
 
-        // Asigna valores.
-        aut_car_density.push_back(s);
-        flow.push_back(ca.CalculateMeanFlow());
-    }
+	// Obtiene el promedio de todos los flujos.
+	double mean = ca.CalculateMeanFlow();
+	if (p.per_prob)
+		mean /= s;
 
-    return export_data(aut_car_density, flow, p.GetFilePath("flow_vs_aut_cars.csv"), p.export_format);
+	return Coord<double>(s, mean);
 }
 
 int ex_flow_vs_new_car_prob(ExParam p)
@@ -312,32 +312,6 @@ int ex_flow_vs_new_car_prob(ExParam p)
         return 1;
     }
 
-    vector<double> new_car_density, flow;
-    CaHandler ca;
-
-    for (double s = p.new_car_prob_min; s <= p.new_car_prob_max; s += p.dt)
-    {
-        // Reporta progreso.
-        if (p.show_progress)
-            aux_progress_bar(s, p.new_car_prob_min, p.new_car_prob_max, p.dt);
-
-        // Evoluciona el sistema.
-        p.args.SetDouble(0, s);
-        ca.CreateCa(p.type, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
-        if (ca.Status() != 0)
-            return 1;
-        ca.Evolve(p.iterations);
-
-        // Obtiene el promedio de todos los flujos.
-        double mean = ca.CalculateMeanFlow();
-        if (p.per_prob)
-            mean /= s;
-
-        // Asigna valores.
-        new_car_density.push_back(s);
-        flow.push_back(mean);
-    }
-
     // Escribe a archivo.
     string filename;
     if (p.per_prob)
@@ -345,526 +319,190 @@ int ex_flow_vs_new_car_prob(ExParam p)
     else
         filename = "flow_vs_new_car_prob.csv";
 
-    return export_data(new_car_density, flow, p.GetFilePath(filename), p.export_format);
+	vector<Coord<double>> new_car_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_new_car_prob_thread, p.new_car_prob_min, p.new_car_prob_max, p.dt, p);
+    return export_data(new_car_flow, p.GetFilePath(filename), p.export_format);
+}
+
+Coord<double> ex_flow_vs_stop_density_thread(double d, ExParam &p)
+{
+	// Evoluciona el sistema.
+	CaHandler ca;
+	ca.CreateCa(STOP_CA, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, Args({ d }), p.random_seed);
+
+	if (ca.Status() != 0)
+		return Coord<double>(0.0, 0.0);
+	ca.Evolve(p.iterations);
+
+	return Coord<double>(d, ca.CalculateMeanFlow());
 }
 
 int ex_flow_vs_stop_density(ExParam p)
 {
-    vector<double> stop_density, flow;
-    CaHandler ca;
+	vector<Coord<double>> stop_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_stop_density_thread, p.stop_density_min, p.stop_density_max, p.dt, p);
+    return export_data(stop_flow, p.GetFilePath("flow_vs_stop_density.csv"), p.export_format);
+}
 
-    for (double d = p.stop_density_min; d <= p.stop_density_max; d += p.dt)
-    {
-        // Reporta progreso.
-        if (p.show_progress)
-            aux_progress_bar(d, p.stop_density_min, p.stop_density_max, p.dt);
+Coord<double> ex_flow_vs_semaphore_density_thread(double d, ExParam &p)
+{
+	// Evoluciona el sistema.
+	CaHandler ca;
+	ca.CreateCa(SEMAPHORE_CA, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, Args({ d }, {}, { p.random_semaphores }), p.random_seed);
 
-        // Evoluciona el sistema.
-        ca.CreateCa(STOP_CA, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, Args({ d }), p.random_seed);
-        if (ca.Status() != 0)
-            return 1;
-        ca.Evolve(p.iterations);
+	if (ca.Status() != 0)
+		return Coord<double>(0.0, 0.0);
+	ca.Evolve(p.iterations);
 
-        // Asigna valores.
-        stop_density.push_back(d);
-        flow.push_back(ca.CalculateMeanFlow());
-    }
-
-    return export_data(stop_density, flow, p.GetFilePath("flow_vs_stop_density.csv"), p.export_format);
+	return Coord<double>(d, ca.CalculateMeanFlow());
 }
 
 int ex_flow_vs_semaphore_density(ExParam p)
 {
-    vector<double> semaphore_density, flow;
-    CaHandler ca;
+	vector<Coord<double>> semaphore_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_semaphore_density_thread, p.semaphore_density_min, p.semaphore_density_max, p.dt, p);
+    return export_data(semaphore_flow, p.GetFilePath("flow_vs_semaphore_density.csv"), p.export_format);
+}
 
-    for (double d = p.semaphore_density_min; d <= p.semaphore_density_max; d += p.dt)
-    {
-        // Reporta progreso.
-        if (p.show_progress)
-            aux_progress_bar(d, p.semaphore_density_min, p.semaphore_density_max, p.dt);
+Coord<double> ex_escape_time_vs_density_thread(double d, ExParam &p)
+{
+	// Evoluciona el sistema.
+	p.args.SetDouble(0, 0.0);
+	CaHandler ca;
+	ca.CreateCa(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
 
-        // Evoluciona el sistema.
-        ca.CreateCa(SEMAPHORE_CA, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, Args({ d }, {}, { p.random_semaphores }), p.random_seed);
-        if (ca.Status() != 0)
-            return 1;
-        ca.Evolve(p.iterations);
-
-        // Asigna valores.
-        semaphore_density.push_back(d);
-        flow.push_back(ca.CalculateMeanFlow());
-    }
-
-    return export_data(semaphore_density, flow, p.GetFilePath("flow_vs_semaphore_density.csv"), p.export_format);
+	int iter = 0;
+	while (ca.CountCars() != 0)
+	{
+		ca.Step();
+		iter++;
+	}
+	if (iter != 0)
+		return Coord<double>(d, (double)iter);
+	else
+		return Coord<double>(0.0, 0.0);
 }
 
 int ex_escape_time_vs_density(ExParam p)
 {
-    CA_TYPE ca_type = p.type;
-    if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, ca_type))
-    {
-        cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
-        ca_type = OPEN_CA;
-    }
+	if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, p.type))
+	{
+		cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
+		p.type = OPEN_CA;
+	}
 
-    vector<double> densities, escape_time;
-    CaHandler ca;
+	vector<Coord<double>> dens_escape = aux_parallel_function<Coord<double>, double, ExParam&>(ex_escape_time_vs_density_thread, p.density_min, p.density_max, p.dt, p);
+    return export_data(dens_escape, p.GetFilePath("escape_time_vs_density.csv"), p.export_format);
+}
 
-    for (double d = p.density_min; d <= p.density_max; d += p.dt)
-    {
-        // Reporta progreso.
-        if (p.show_progress)
-            aux_progress_bar(d, p.density_min, p.density_max, p.dt);
+Coord<double> ex_escape_time_vs_rand_prob_thread(double ra, ExParam &p)
+{
+	// Evoluciona el sistema.
+	p.args.SetDouble(0, 0.0);
+	CaHandler ca;
+	ca.CreateCa(p.type, p.size, p.lanes, p.density, p.vmax, ra, p.init_vel, p.args, p.random_seed);
 
-        // Evoluciona el sistema.
-        p.args.SetDouble(0, 0.0);
-        ca.CreateCa(ca_type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
-        if (ca.Status() != 0)
-            return 1;
-
-        int iter = 0;
-        while (ca.CountCars() != 0)
-        {
-            ca.Step();
-            iter++;
-
-            if (ca.IsFluxHalted())
-            {
-                cout << "Error: Flujo detenido." << endl;
-                return 1;
-            }
-        }
-        densities.push_back(d);
-        escape_time.push_back(iter);
-
-    }
-    return export_data(densities, escape_time, p.GetFilePath("escape_time_vs_density.csv"), p.export_format);
+	int iter = 0;
+	while (ca.CountCars() != 0)
+	{
+		ca.Step();
+		iter++;
+	}
+	if (iter != 0)
+		return Coord<double>(ra, (double)iter);
+	else
+		return Coord<double>(0.0, 0.0);
 }
 
 int ex_escape_time_vs_rand_prob(ExParam p)
 {
-    CA_TYPE ca_type = p.type;
-    if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, ca_type))
-    {
-        cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
-        ca_type = OPEN_CA;
-    }
+	if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, p.type))
+	{
+		cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
+		p.type = OPEN_CA;
+	}
 
-    vector<double> rand_p, escape_time;
-    CaHandler ca;
+	vector<Coord<double>> rand_escape = aux_parallel_function<Coord<double>, double, ExParam&>(ex_escape_time_vs_rand_prob_thread, p.rand_prob_min, p.rand_prob_max, p.dt, p);
+    return export_data(rand_escape, p.GetFilePath("escape_time_vs_rand_prob.csv"), p.export_format);
+}
 
-    for (double ra = p.rand_prob_min; ra <= p.rand_prob_max; ra += p.dt)
-    {
-        // Reporta progreso.
-        if (p.show_progress)
-            aux_progress_bar(ra, p.rand_prob_min, p.rand_prob_max, p.dt);
+Coord<double> ex_escape_time_vs_vmax_thread(int v, ExParam &p)
+{
+	// Evoluciona el sistema.
+	p.args.SetDouble(0, 0.0);
+	CaHandler ca;
+	ca.CreateCa(p.type, p.size, p.lanes, p.density, v, p.rand_prob, p.init_vel, p.args, p.random_seed);
 
-        // Evoluciona el sistema.
-        p.args.SetDouble(0, 0.0);
-        ca.CreateCa(ca_type, p.size, p.lanes, p.density, p.vmax, ra, p.init_vel, p.args, p.random_seed);
-        if (ca.Status() != 0)
-            return 1;
-
-        int iter = 0;
-        while (ca.CountCars() != 0 && !ca.IsFluxHalted())
-        {
-            ca.Step();
-            iter++;
-        }
-        rand_p.push_back(ra);
-        escape_time.push_back(iter);
-
-    }
-    return export_data(rand_p, escape_time, p.GetFilePath("escape_time_vs_rand_prob.csv"), p.export_format);
+	int iter = 0;
+	while (ca.CountCars() != 0)
+	{
+		ca.Step();
+		iter++;
+	}
+	if (iter != 0)
+		return Coord<double>((double)v, (double)iter);
+	else
+		return Coord<double>(0.0, 0.0);
 }
 
 int ex_escape_time_vs_vmax(ExParam p)
 {
-    CA_TYPE ca_type = p.type;
-    if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, ca_type))
-    {
-        cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
-        ca_type = OPEN_CA;
-    }
+	if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, p.type))
+	{
+		cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
+		p.type = OPEN_CA;
+	}
 
-    vector<double> vel, escape_time;
-    CaHandler ca;
+	vector<Coord<double>> vmax_escape = aux_parallel_function<Coord<double>, int, ExParam&>(ex_escape_time_vs_vmax_thread, p.vmax_min, p.vmax_max, (int)p.dt, p);
+    return export_data(vmax_escape, p.GetFilePath("escape_time_vs_vmax.csv"), p.export_format);
+}
 
-    for (int v = p.vmax_min; v <= p.vmax_max; v += (int)p.dt)
-    {
-        // Reporta progreso.
-        if (p.show_progress)
-            aux_progress_bar(v, p.vmax_min, p.vmax_max, p.dt);
+Coord<double> ex_discharge_vs_density_thread(double d, ExParam &p)
+{
+	// Evoluciona el sistema.
+	p.args.SetDouble(0, 0.0);
+	CaHandler ca;
+	ca.CreateCa(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
 
-        // Evoluciona el sistema.
-        p.args.SetDouble(0, 0.0);
-        ca.CreateCa(ca_type, p.size, p.lanes, p.density, v, p.rand_prob, p.init_vel, p.args, p.random_seed);
-        if (ca.Status() != 0)
-            return 1;
-
-        int iter = 0;
-        while (ca.CountCars() != 0 && !ca.IsFluxHalted())
-        {
-            ca.Step();
-            iter++;
-        }
-        vel.push_back(v);
-        escape_time.push_back(iter);
-
-    }
-    return export_data(vel, escape_time, p.GetFilePath("escape_time_vs_vmax.csv"), p.export_format);
+	int iter = 0;
+	while (ca.CountCars() != 0)
+	{
+		ca.Step();
+		iter++;
+	}
+	if (iter != 0)
+		return Coord<double>(d, (double)(ca.GetSize())*d / (double)iter);
+	else
+		return Coord<double>(0.0, 0.0);
 }
 
 int ex_discharge_vs_density(ExParam p)
 {
-    CA_TYPE ca_type = p.type;
-    if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, ca_type))
-    {
-        cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
-        ca_type = OPEN_CA;
-    }
-
-    vector<double> density, discharge;
-    CaHandler ca;
-
-    for (double d = p.density_min; d <= p.density_max; d += p.dt)
-    {
-        // Reporta progreso.
-        if (p.show_progress)
-            aux_progress_bar(d, p.density_min, p.density_max, p.dt);
-
-        if (d == 0)
-            continue;
-
-        // Evoluciona el sistema.
-        p.args.SetDouble(0, 0.0);
-        ca.CreateCa(ca_type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
-        if (ca.Status() != 0)
-            return 1;
-
-        int iter = 0;
-        while (ca.CountCars() != 0)
-        {
-            ca.Step();
-            iter++;
-        }
-        if (iter != 0)
-        {
-            density.push_back(d);
-            discharge.push_back((double)(ca.GetSize())*d / (double)iter);
-        }
-
-    }
-    return export_data(density, discharge, p.GetFilePath("discharge_vs_density.csv"), p.export_format);
-}
-
-int ex_discharge_vs_density_fratal(ExParam p)
-{
-    CA_TYPE ca_type = p.type;
-    if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, ca_type))
-    {
-        cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
-        ca_type = OPEN_CA;
-    }
-
-    vector<double> escape_time;
-    CaHandler ca;
-
-    for (double d = p.density_min; d <= p.density_max; d += p.dt)
-    {
-        // Reporta progreso.
-        if (p.show_progress)
-            aux_progress_bar(d, p.density_min, p.density_max, p.dt);
-
-        // Evoluciona el sistema.
-        p.args.SetDouble(0, 0.0);
-        ca.CreateCa(ca_type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
-        if (ca.Status() != 0)
-            return 1;
-
-        int iter = 0;
-        while (ca.CountCars() != 0)
-        {
-            ca.Step();
-            iter++;
-
-            if (ca.IsFluxHalted())
-            {
-                cout << "Error: Flujo detenido." << endl;
-                return 1;
-            }
-        }
-        if (iter != 0)
-            escape_time.push_back((double)(ca.GetSize())*d / (double)iter);
-    }
-
-    cout << "Calculando dimension fractal." << endl;
-    double et_mean = aux_mean(escape_time);
-    vector<int> fractal(escape_time.size(), 0);
-    for (unsigned i = 0; i < escape_time.size(); ++i)
-    {
-        if (escape_time[i] > et_mean)
-            fractal[i] = 1;
-    }
-
-    cout << "La dimension fractal es: ";
-    cout << measure_plot_fractal_dimension(escape_time, (int)(0.1*fractal.size()), fractal.size(), 1);
-    cout << "." << endl;
-
-    cout << "La dimension fractal del grafico de barras es: ";
-    cout << measure_fractal_dimension(fractal, 0, (int)(0.1*fractal.size()), fractal.size(), 1);
-    cout << "." << endl;
-    return export_map(fractal, p.GetFilePath("discharge_vs_density_fractal.bmp"), 30);
-}
-
-int ex_dimension_vs_density(ExParam p)
-{
-    int r;
-    CA_TYPE ca_type = p.type;
-    if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, ca_type))
-    {
-        cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
-        ca_type = OPEN_CA;
-    }
-
-    // Crea directorios de salida para gráficas.
-    aux_create_directory("Fractal");
-    aux_create_directory("Plot");
-    aux_create_directory("Csv");
-    string f_path = p.path + "Fractal" + df_separator;
-    string f_plot_path = p.path + "Plot" + df_separator;
-    string csv_path = p.path + "Csv" + df_separator;
-
-    vector<double> densities, dimension, plot_dimension;
-    double p_size = (p.density_max - p.density_min) / (double)p.partitions;
-    CaHandler ca;
-
-    int part = 0;
-    for (double d_left = p.density_min; part < p.partitions; d_left += p_size, part++)
-    {
-        // Reporta progreso.
-        if (p.show_progress)
-            aux_progress_bar(part, 0, p.partitions - 1, 1);
-
-        vector<double> escape_time;
-        for (double d = d_left; d < (d_left + p_size); d += p.dt)
-        {
-            // Evoluciona el sistema.
-            p.args.SetDouble(0, 0.0);
-            ca.CreateCa(ca_type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
-            if (ca.Status() != 0)
-                return 1;
-
-            int iter = 0;
-            while (ca.CountCars() != 0)
-            {
-                ca.Step();
-                iter++;
-
-                if (ca.IsFluxHalted())
-                {
-                    cout << "Error: Flujo detenido." << endl;
-                    return 1;
-                }
-            }
-            if (iter != 0)
-                escape_time.push_back((double)(ca.GetSize())*d / (double)iter);
-        }
-
-        // Obtiene la media y selecciona los puntos mayores e inferiores
-        // para generar fractal.
-        double et_mean = aux_mean(escape_time);
-        vector<int> fractal(escape_time.size(), 0);
-        for (unsigned i = 0; i < escape_time.size(); ++i)
-        {
-            if (escape_time[i] > et_mean)
-                fractal[i] = 1;
-        }
-
-        // Calcula dimensión fractal.
-        double d_mean = d_left + p_size / 2.0;
-        densities.push_back(d_mean);
-        dimension.push_back(measure_fractal_dimension(fractal, 0, (int)(0.1*fractal.size()), fractal.size(), 1));
-        plot_dimension.push_back(measure_plot_fractal_dimension(escape_time, (int)(0.1*fractal.size()), fractal.size(), 1));
-
-        // Exporta los datos.
-        string p_name = f_path + "discharge_vs_density_fractal_" + to_string(d_mean) + ".bmp";
-        string p_plot_name = f_plot_path + "discharge_vs_density_plot_" + to_string(d_mean) + ".bmp";
-        string csv_name = csv_path + "discharge_vs_density_" + to_string(d_mean) + ".csv";
-        r = export_map(fractal, p_name, 30);
-        if (r != 0)
-            return r;
-        r = export_plot(escape_time, p_plot_name);
-        if (r != 0)
-            return r;
-        r = export_csv(escape_time, csv_name);
-        if (r != 0)
-            return r;
-    }
-    r = export_csv(densities, dimension, p.GetFilePath("dimension_vs_density.csv"));
-    if (r != 0)
-        return r;
-    r = export_csv(densities, plot_dimension, p.GetFilePath("plot_dimension_vs_density.csv"));
-    return r;
-}
-
-Coord3D<double> ex_dimension_vs_density_thread(double density, ExParam p)
-{
-    Coord3D<double> output;
-    double p_size = (p.density_max - p.density_min) / (double)p.partitions;
-
-    vector<double> escape_time;
-    CaHandler ca;
-    for (double d = density; d < (density + p_size) && d < 1.0; d += p.dt)
-    {
-        // Evoluciona el sistema.
-        p.args.SetDouble(0, 0.0);
-        ca.CreateCa(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
-        if (ca.Status() != 0)
-            return Coord3D<double>(0.0, 0.0, 0.0);
-
-        int iter = 0;
-        while (ca.CountCars() != 0)
-        {
-            ca.Step();
-            iter++;
-        }
-        if (iter != 0)
-            escape_time.push_back((double)(ca.GetSize())*d / (double)iter);
-    }
-
-    // Obtiene la media y selecciona los puntos mayores e inferiores
-    // para generar fractal.
-    double et_mean = aux_mean(escape_time);
-    vector<int> fractal(escape_time.size(), 0);
-    for (unsigned i = 0; i < escape_time.size(); ++i)
-    {
-        if (escape_time[i] > et_mean)
-            fractal[i] = 1;
-    }
-
-    // Calcula dimensión fractal.
-    double d_mean = density + p_size / 2.0;
-    double fractal_dimension = measure_fractal_dimension(fractal, 0, (int)(0.1*fractal.size()), fractal.size(), 1);
-    double plot_dimension = measure_plot_fractal_dimension(escape_time, (int)(0.1*fractal.size()), fractal.size(), 1);
-    output = Coord3D<double>(d_mean, fractal_dimension, plot_dimension);
-
-    // Exporta los datos.
-    string f_path = p.path + "Fractal" + df_separator;
-    string f_plot_path = p.path + "Plot" + df_separator;
-    string csv_path = p.path + "Csv" + df_separator;
-    string p_name = f_path + "discharge_vs_density_fractal_" + to_string(d_mean) + ".bmp";
-    string p_plot_name = f_plot_path + "discharge_vs_density_plot_" + to_string(d_mean) + ".bmp";
-    string csv_name = csv_path + "discharge_vs_density_" + to_string(d_mean) + ".csv";
-    int r;
-    r = export_map(fractal, p_name, 30);
-    if (r != 0)
-        cout << "Error: No se pudo crear mapa." << endl;
-    r = export_plot(escape_time, p_plot_name);
-    if (r != 0)
-        cout << "Error: No se pudo crear grafica." << endl;
-    r = export_csv(escape_time, csv_name);
-    if (r != 0)
-        cout << "Error: No se pudo exportar csv." << endl;
-
-    return output;
-}
-
-int ex_dimension_vs_density_parallel(ExParam p)
-{
-    int r;
     if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, p.type))
     {
         cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
-        p.type = OPEN_CA;
+		p.type = OPEN_CA;
     }
 
-    // Crea directorios de salida para gráficas.
-    aux_create_directory("Fractal");
-    aux_create_directory("Plot");
-    aux_create_directory("Csv");
-
-    vector<Coord3D<double>> result;
-    double p_size = (p.density_max - p.density_min) / (double)p.partitions;
-    if (2.0*p.dt >= p_size)
-    {
-        cout << "Error: dt no es suficientemente pequeño. Se aconseja un valor menor a " << p_size/2.0 << endl;
-        return 1;
-    }
-
-    result = aux_parallel_function<Coord3D<double>, double, ExParam>(ex_dimension_vs_density_thread, p.density_min, p.density_max, p_size, p);
-
-    vector<Coord<double>> frac_dim, plot_dim;
-    for (unsigned i = 0; i < result.size(); ++i)
-    {
-        // Los valores erróneos son -1.0.
-        if (result[i].GetY() >= 0 && result[i].GetZ() >= 0)
-        {
-            frac_dim.push_back(result[i].SubXY());
-            plot_dim.push_back(result[i].SubXZ());
-        }
-    }
-
-    r = export_csv(frac_dim, p.GetFilePath("dimension_vs_density.csv"));
-    if (r != 0)
-        return r;
-
-    r = export_csv(plot_dim, p.GetFilePath("plot_dimension_vs_density.csv"));
-    return r;
+	vector<Coord<double>> dens_discharge = aux_parallel_function<Coord<double>, double, ExParam&>(ex_discharge_vs_density_thread, p.density_min, p.density_max, p.dt, p);
+	return export_data(dens_discharge, "discharge_vs_density.csv", p.export_format);
 }
+
 
 int ex_pentropy_vs_density(ExParam p)
 {
-    CA_TYPE ca_type = p.type;
-    if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, ca_type))
-    {
-        cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
-        ca_type = OPEN_CA;
-    }
+	CA_TYPE ca_type = p.type;
+	if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, ca_type))
+	{
+		cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
+		ca_type = OPEN_CA;
+	}
 
-    vector<double> density, discharge;
-    CaHandler ca;
+	vector<Coord<double>> dens_discharge = aux_parallel_function<Coord<double>, double, ExParam&>(ex_discharge_vs_density_thread, p.density_min, p.density_max, p.dt, p);
+	int r = export_data(dens_discharge, "discharge_vs_density.csv", p.export_format);
+	if (r != 0)
+		return r;
 
-    for (double d = p.density_min; d <= p.density_max; d += p.dt)
-    {
-        // Reporta progreso.
-        if (p.show_progress)
-            aux_progress_bar(d, p.density_min, p.density_max, p.dt);
-
-        // Evoluciona el sistema.
-        p.args.SetDouble(0, 0.0);
-        ca.CreateCa(ca_type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
-        if (ca.Status() != 0)
-            return 1;
-
-        int iter = 0;
-        while (ca.CountCars() != 0)
-        {
-            ca.Step();
-            iter++;
-        }
-        if (iter != 0)
-        {
-            density.push_back(d);
-            discharge.push_back((double)(ca.GetSize())*d / (double)iter);
-        }
-
-    }
-
-    int r = export_data(density, discharge, "discharge_vs_density.csv", p.export_format);
-    if (r != 0)
-        return r;
-
-    cout << "Midiendo entropia de permutacion." << endl;
-    vector<Coord<double>> result = measure_permutation_entropy(density, discharge, p.porder, p.pinterval);
-    vector<double> intervalos, entropias;
-    for (unsigned i = 0; i < result.size(); i++)
-    {
-        intervalos.push_back(result[i].GetX());
-        entropias.push_back(result[i].GetY());
-    }
-
-    return export_data(intervalos, entropias, p.GetFilePath("pentropy_vs_density.csv"), p.export_format);
+	cout << "Midiendo entropia de permutacion." << endl;
+	vector<Coord<double>> result = measure_permutation_entropy(dens_discharge, p.porder, p.pinterval);
+	return export_data(result, p.GetFilePath("pentropy_vs_density.csv"), p.export_format);
 }
 
 

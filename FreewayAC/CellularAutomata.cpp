@@ -1960,7 +1960,7 @@ void CaHandler::DeleteCa()
 }
 int CaHandler::Status()
 {
-	if (cellularautomata != nullptr)
+	if (cellularautomata != nullptr || cellularautomataml != nullptr)
 		return 0;
 	else
 		return 1;

@@ -53,11 +53,13 @@ build/
 .buildozer/
 /Debug/
 /Release/
+/x64/
 /build-FreewayAC-Desktop-Debug/
 /build-FreewayAC-Desktop-Release/
 /ipch/
 /FreewayAC/Debug/
 /FreewayAC/Release/
+/FreewayAC/x64/
 
 #  Application files #
 ######################

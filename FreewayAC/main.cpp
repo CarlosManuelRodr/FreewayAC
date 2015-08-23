@@ -36,8 +36,7 @@ enum  OptionIndex { UNKNOWN, SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VE
                     PLOT_TRAFFIC, PLOT_FLOW, MEASURE_OCUPANCY, MEASURE_FLOW,
                     FLOW_VS_DENSITY, FLOW_PER_DENSITY, FLOW_VS_VMAX, FLOW_VS_RAND_PROB, FLOW_VS_AUT_CARS,
                     FLOW_VS_STOP_DENSITY, FLOW_VS_NEW_CAR, FLOW_PER_NEW_CAR, FLOW_VS_SEMAPHORE_DENSITY, ESCAPE_TIME_VS_DENSITY,
-                    DISCHARGE_VS_DENSITY, DISCHARGE_VS_DENSITY_FRACTAL, DIMENSION_VS_DENSITY, DIMENSION_VS_DENSITY_THREADED,
-                    PENTROPY_VS_DENSITY,
+                    DISCHARGE_VS_DENSITY, PENTROPY_VS_DENSITY,
 
                     CA_CIRCULAR, CA_MULTILANE_CIRCULAR, CA_OPEN, CA_MULTILANE_OPEN, CA_AUTONOMOUS, CA_STOP, CA_SEMAPHORE,
                     CA_SIMPLE_JUNCTION,
@@ -90,12 +89,6 @@ const option::Descriptor usage[] =
     "  \t--escape_time_vs_density  \tMide tiempo de escape vs densidad en un rango especificado por dmin, dmax y dt." },
     {DISCHARGE_VS_DENSITY,  0,"","discharge_vs_density", Arg::None,
     "  \t--discharge_vs_density  \tMide gasto vs densidad en un rango especificado por dmin, dmax y dt." },
-    {DISCHARGE_VS_DENSITY_FRACTAL,  0,"","discharge_vs_density_fractal", Arg::None,
-    "  \t--discharge_vs_density_fractal  \tCrea fractal de gasto vs densidad en un rango especificado por dmin, dmax y dt." },
-    {DIMENSION_VS_DENSITY,  0,"","dimension_vs_density", Arg::None,
-    "  \t--dimension_vs_density  \tMide dimension fractal vs densidad en un rango especificado por dmin, dmax y dt." },
-    {DIMENSION_VS_DENSITY_THREADED, 0, "", "dimension_vs_density_threaded", Arg::None,
-    "  \t--dimension_vs_density_threaded  \tMide dimension fractal vs densidad usando varios núcleos en un rango especificado por dmin, dmax y dt." },
     {PENTROPY_VS_DENSITY,  0,"","pentropy_vs_density", Arg::None,
     "  \t--pentropy_vs_density  \tMide entropia de permutacion vs densidad en un rango especificado por dmin, dmax y dt." },
 
@@ -244,16 +237,6 @@ void describe_experiments()
         "                              celular ca_open.\n"
         "                              Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,\n"
         "                                                     DMIN, DMAX, DT.\n"
-        "DISCHARGE_VS_DENSITY_FRACTAL -> Descripcion: Mide la dimension fractal en un mapa creado por los valores de\n"
-        "                                densidad de vehiculos especificados en un rango. Se usa el automata\n"
-        "                                celular ca_open.\n"
-        "                                Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,\n"
-        "                                                       DMIN, DMAX, DT.\n"
-        "DIMENSION_VS_DENSITY       -> Descripcion: Crea grafica de dimension fractal respecto a los valores de\n"
-        "                              densidad de vehículos especificados en un rango. Se usa el automata\n"
-        "                              celular ca_open.\n"
-        "                              Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,\n"
-        "                                                     DMIN, DMAX, DT, PARTITIONS.\n"
         "PENTROPY_VS_DENSITY        -> Descripcion: Mide la entropia de permutacion respecto a los valores de\n"
         "                              densidad de vehiculos especificados en un rango. Se usa el automata\n"
         "                              celular ca_open.\n"
@@ -273,7 +256,6 @@ int main(int argc, char* argv[])
     bool plot_traffic = false, plot_flow = false, flow_vs_vmax = false, flow_vs_rand_prob = false, flow_vs_aut_cars = false;
     bool flow_vs_stop_density = false, flow_per_density = false, flow_vs_new_car = false, flow_per_new_car = false;
     bool flow_vs_semaphore_density = false, escape_time_vs_density = false, discharge_vs_density = false;
-    bool discharge_vs_density_fractal = false, dimension_vs_density = false, dimension_vs_density_threaded = false;
     bool pentropy_vs_density = false;
     bool per_density = false, per_prob = false;
 
@@ -394,18 +376,6 @@ int main(int argc, char* argv[])
 
             case DISCHARGE_VS_DENSITY:
             discharge_vs_density = true;
-            break;
-
-            case DISCHARGE_VS_DENSITY_FRACTAL:
-            discharge_vs_density_fractal = true;
-            break;
-
-            case DIMENSION_VS_DENSITY:
-            dimension_vs_density = true;
-            break;
-
-            case DIMENSION_VS_DENSITY_THREADED:
-            dimension_vs_density_threaded = true;
             break;
 
             case PENTROPY_VS_DENSITY:
@@ -610,8 +580,7 @@ int main(int argc, char* argv[])
     if (!(ocupancy_fixed || flow_fixed || flow_vs_density || flow_per_density || flow_vs_vmax 
         || flow_vs_rand_prob || flow_vs_aut_cars || flow_vs_new_car || flow_per_new_car
         || flow_vs_stop_density || flow_vs_semaphore_density || escape_time_vs_density
-        || discharge_vs_density || discharge_vs_density_fractal || dimension_vs_density 
-        || dimension_vs_density_threaded || pentropy_vs_density || test))
+        || discharge_vs_density || pentropy_vs_density || test))
     {
         plot_traffic = true;    // Opcion predeterminada.
     }
@@ -767,21 +736,6 @@ int main(int argc, char* argv[])
     {
         cout << "Midiendo gasto vs densidad de autos." << endl;
         r = ex_discharge_vs_density(param);
-    }
-    if (discharge_vs_density_fractal)
-    {
-        cout << "Creando fractal de gasto vs densidad de autos." << endl;
-        r = ex_discharge_vs_density_fratal(param);
-    }
-    if (dimension_vs_density)
-    {
-        cout << "Midiendo dimension fractal vs densidad de autos." << endl;
-        r = ex_dimension_vs_density(param);
-    }
-    if (dimension_vs_density_threaded)
-    {
-        cout << "Midiendo dimension fractal vs densidad de autos." << endl;
-        r = ex_dimension_vs_density_parallel(param);
     }
     if (pentropy_vs_density)
     {

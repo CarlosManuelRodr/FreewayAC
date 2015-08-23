@@ -579,6 +579,11 @@ template <class T> T*& Matrix<T>::operator[](const unsigned int pos)
 *                           *
 ****************************/
 
+enum CoordLbl
+{
+	COORD_X, COORD_Y
+};
+
 /**
 * @class Coord
 * @brief Almacenamiento de coordenadas 2D.
@@ -633,6 +638,19 @@ template <class T> T Coord<T>::GetX()
 template <class T> T Coord<T>::GetY()
 {
     return m_y;
+}
+
+template <class N> std::vector<N> aux_coordvec_to_vec(std::vector<Coord<N>> in, CoordLbl c)
+{
+	std::vector<N> out;
+	for (unsigned i = 0; i < in.size(); ++i)
+	{
+		if (c == COORD_X)
+			out.push_back(in[i].GetX());
+		else
+			out.push_back(in[i].GetY());
+	}
+	return out;
 }
 
 /**
