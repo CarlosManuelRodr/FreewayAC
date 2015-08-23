@@ -772,7 +772,7 @@ int StreetStopCA::DrawHistory(string path, string out_file_name)
     if (writer.IsOpen())
     {
         BMPPixel* bmpData = new BMPPixel[width];
-        for (int i = height-1; i >= 0; i--)
+        for (int i = height-1; i >= 0; --i)
         {
             for (unsigned j = 0; j < width; ++j)
             {
@@ -1321,13 +1321,13 @@ void CellularAutomataML::ChangeLanes()
                 {
                     // Intenta cambiar de carril.
                     bool left = false, right = false;
-                    for (int k = (int)j-1; k <= (int)j+1 && k < (int)m_lanes; k++)
+                    for (int k = (int)j - 1; k <= (int)j + 1 && k < (int)m_lanes; ++k)
                     {
                         // Evita carril inexistente, el mismo y carril ocupado.
-                        if (k<0 || (unsigned)k==j || At(i, k) != -1) continue;
+                        if (k < 0 || (unsigned)k == j || At(i, k) != -1) continue;
 
                         // Busca auto anterior y verifica si puede cambiarse sin chocar.
-                        int v, s=0;
+                        int v, s = 0;
                         for (int l = i-1; s <= m_vmax; ++s, l--)
                         {
                             // Verifica posibilidad de choque.
@@ -1338,7 +1338,7 @@ void CellularAutomataML::ChangeLanes()
                                 if (NextCarDist(i, k) > (At(i, j) + 1))
                                 {
                                     // Marca carril como disponible.
-                                    if ((unsigned)k == j-1) left = true;
+                                    if ((unsigned)k == j - 1) left = true;
                                     else right = true;
                                 }
                                 if (left && right)
@@ -1350,7 +1350,7 @@ void CellularAutomataML::ChangeLanes()
                             if (NextCarDist(i, k) > (At(i, j) + 1))
                             {
                                 // Marca carril como disponible.
-                                if ((unsigned)k == j-1) left = true;
+                                if ((unsigned)k == j - 1) left = true;
                                 else right = true;
                             }
                             if (left && right)
@@ -1370,9 +1370,9 @@ void CellularAutomataML::ChangeLanes()
                         }
                         unsigned new_lane;
                         if (left)
-                            new_lane = j-1;
+                            new_lane = j - 1;
                         else
-                            new_lane = j+1;
+                            new_lane = j + 1;
 
                         At(i, new_lane) = At(i, j);
                         At(i, j) = -1;
@@ -1424,9 +1424,7 @@ void CellularAutomataML::Step()
 void CellularAutomataML::Evolve(const unsigned &iter)
 {
     for (unsigned i = 0; i < iter; ++i)
-    {
         Step();
-    }
 }
 unsigned CellularAutomataML::GetSize()
 {
@@ -1516,7 +1514,7 @@ void CellularAutomataML::PrintHistory()
 {
     for (unsigned i = 0; i < m_ca_history.size(); ++i)
     {
-        for (unsigned k = 0; k < m_lanes; k++)
+        for (unsigned k = 0; k < m_lanes; ++k)
         {
             for (unsigned j = 0; j < m_size; ++j)
             {
@@ -1546,7 +1544,7 @@ bool CellularAutomataML::IsFluxHalted()
     {
         for (unsigned i = 1; i < m_ca_flow_history.size() && halted; ++i)
         {
-            for (unsigned k = 0; k < m_lanes; k++)
+            for (unsigned k = 0; k < m_lanes; ++k)
             {
                 for (unsigned j = 0; j < m_size; ++j)
                 {
@@ -1575,7 +1573,7 @@ vector<double> CellularAutomataML::CalculateOcupancy()
         int sum = 0;
         for (unsigned j = 1; j < height; ++j)
         {
-            for (unsigned k = 0; k < m_lanes; k++)
+            for (unsigned k = 0; k < m_lanes; ++k)
             {
                 if (this->GetAt(i, k, j, CA_HISTORY) != -1)
                     sum++;
@@ -1597,7 +1595,7 @@ vector<double> CellularAutomataML::CalculateFlow()
         int sum = 0;
         for (unsigned j = 1; j < height; ++j)
         {
-            for (unsigned k = 0; k < m_lanes; k++)
+            for (unsigned k = 0; k < m_lanes; ++k)
             {
                 if ((this->GetAt(i, k, j, CA_FLOW_HISTORY) != 0) && (this->GetAt(i+1, k, j, CA_FLOW_HISTORY) != 0))
                     sum++;

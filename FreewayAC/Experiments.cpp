@@ -80,7 +80,7 @@ vector<Coord<double>> measure_permutation_entropy(vector<double> date, vector<do
 
     int n = date.size();
 
-    for (int rep = 0; rep < n - length + 1; rep++)
+    for (int rep = 0; rep < n - length + 1; ++rep)
     {
         selecf.assign(date.begin() + rep, date.begin() + length + rep);
         selecdl.assign(svalues.begin() + rep, svalues.begin() + length + rep);
@@ -90,7 +90,7 @@ vector<Coord<double>> measure_permutation_entropy(vector<double> date, vector<do
         Matrix<double> vp(factorial, 3);
         vp.Assign(0.0);
 
-        for (int i = 0; i < T; i++)
+        for (int i = 0; i < T; ++i)
         {
             neighbors.assign(selecdl.begin() + i, selecdl.begin() + i + order);
             permutation.assign(order, 0);
@@ -103,7 +103,7 @@ vector<Coord<double>> measure_permutation_entropy(vector<double> date, vector<do
             while (pass < (int)neighbors.size() && swap_num == 1)
             {
                 swap_num = 0;
-                for (int m = 0; m < (int)neighbors.size() - pass; m++)
+                for (int m = 0; m < (int)neighbors.size() - pass; ++m)
                 {
                     if (neighbors[m] > neighbors[m + 1])
                     {
@@ -112,11 +112,11 @@ vector<Coord<double>> measure_permutation_entropy(vector<double> date, vector<do
                         swap_num = 1;
                     }
                 }
-                pass++;
+                ++pass;
             }
 
             // Fin orderamiento.
-            for (int j = 0; j < order; j++)
+            for (int j = 0; j < order; ++j)
                 permutation[permu[j] - 1] = j + 1;
 
             p_value = 0;
@@ -124,11 +124,11 @@ vector<Coord<double>> measure_permutation_entropy(vector<double> date, vector<do
             reverse(perminv.begin(), perminv.end());
 
             // Ciclo para obtener el valor de la permutación.
-            for (int j = 0; j < order; j++)
+            for (int j = 0; j < order; ++j)
                 p_value += permutation[j] * pow(10.0, j);
 
             // Ciclo para acumular valores de permutationes repetidas.
-            for (int l = 0; l < T; l++)
+            for (int l = 0; l < T; ++l)
             {
                 if (p_value == vp[l][0])
                 {
@@ -147,7 +147,7 @@ vector<Coord<double>> measure_permutation_entropy(vector<double> date, vector<do
             }
         }
 
-        for (int j = 0; j < factorial; j++)
+        for (int j = 0; j < factorial; ++j)
         {
             if (vp[j][0] == 0)
                 continue;
