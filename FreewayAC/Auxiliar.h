@@ -14,6 +14,7 @@
 #include <random>
 #include <functional>
 #include <thread>
+#include <sstream>
 #include "ThreadPool.h"
 
 /****************************
@@ -72,9 +73,11 @@ void aux_beep();
 * @param report_type Cadena de texto que indica el tipo de dato a reportar.
 * @param report_value  Valor a reportar.
 */
-template <class N> void aux_report(const std::string &report_type, N report_value)
+template <class N> std::string aux_report(const std::string &report_type, N report_value)
 {
-    std::cout << report_type << ": " << report_value << "." << std::endl;
+	stringstream ss;
+	ss << report_type << ": " << report_value << ".\n";
+	return ss.str();
 }
 
 /**

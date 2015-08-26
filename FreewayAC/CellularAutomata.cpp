@@ -1393,26 +1393,26 @@ void CellularAutomataML::Step()
         for (unsigned j = 0; j < m_lanes; ++j)
         {
             // Encuentra vehículo.
-            if (At(i, j) != -1)
+            if (m_ca[i][j] != -1)
             {
                 // Aceleracion.
-                if ((At(i, j) < m_vmax) && (NextCarDist(i, j) > (At(i, j) + 1)))
-                    At(i, j)++;
+                if ((m_ca[i][j] < m_vmax) && (NextCarDist(i, j) > m_ca[i][j] + 1))
+					m_ca[i][j]++;
                 else
                 {
                     // Frenado.
-                    if (At(i, j) > 0)
+                    if (m_ca[i][j] > 0)
                     {
                         int nd = NextCarDist(i, j);
-                        if (nd <= At(i, j))
-                            At(i, j) = nd - 1;
+                        if (nd <= m_ca[i][j])
+							m_ca[i][j] = nd - 1;
                     }
                 }
 
                 // Aleatoriedad.
                 bool rnd = Randomization();
-                if ((At(i, j) > 0) && rnd)
-                    At(i, j)--;
+                if ((m_ca[i][j] > 0) && rnd)
+					m_ca[i][j]--;
             }
         }
     }

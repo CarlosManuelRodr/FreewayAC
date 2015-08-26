@@ -14,43 +14,51 @@ using namespace std;
 
 void ExParam::Report()
 {
-    cout << "Parametros:" << endl;
-    aux_report("size", size);
-    aux_report("iterations", iterations);
-    aux_report("lanes", lanes);
-    aux_report("vmax", vmax);
-    aux_report("vmax_min", vmax_min);
-    aux_report("vmax_max", vmax_max);
-    aux_report("random_seed", random_seed);
-    aux_report("partitions", partitions);
-    aux_report("density", density);
-    aux_report("density_min", density_min);
-    aux_report("density_max", density_max);
-    aux_report("rand_prob", rand_prob);
-    aux_report("rand_prob_min", rand_prob_min);
-    aux_report("rand_prob_max", rand_prob_max);
-    aux_report("init_vel", init_vel);
-    aux_report("aut_car_density_min", aut_car_density_min);
-    aux_report("aut_car_density_max", aut_car_density_max);
-    aux_report("new_car_prob_min", new_car_prob_min);
-    aux_report("new_car_prob_max", new_car_prob_max);
-    aux_report("stop_density_min", stop_density_min);
-    aux_report("stop_density_max", stop_density_max);
-    aux_report("semaphore_density_min", semaphore_density_min);
-    aux_report("semaphore_density_max", semaphore_density_max);
-    aux_report("dt", dt);
-    aux_report("random_semaphores", random_semaphores);
-    aux_report("show_progress", show_progress);
-    aux_report("path", path);
-    aux_report("out_file_name", out_file_name);
+	string out;
+    out = "Parametros:\n";
+    out += aux_report("size", size);
+	out += aux_report("iterations", iterations);
+	out += aux_report("lanes", lanes);
+	out += aux_report("vmax", vmax);
+	out += aux_report("vmax_min", vmax_min);
+	out += aux_report("vmax_max", vmax_max);
+	out += aux_report("random_seed", random_seed);
+	out += aux_report("partitions", partitions);
+	out += aux_report("density", density);
+	out += aux_report("density_min", density_min);
+	out += aux_report("density_max", density_max);
+	out += aux_report("rand_prob", rand_prob);
+	out += aux_report("rand_prob_min", rand_prob_min);
+	out += aux_report("rand_prob_max", rand_prob_max);
+	out += aux_report("init_vel", init_vel);
+	out += aux_report("aut_car_density_min", aut_car_density_min);
+	out += aux_report("aut_car_density_max", aut_car_density_max);
+	out += aux_report("new_car_prob_min", new_car_prob_min);
+	out += aux_report("new_car_prob_max", new_car_prob_max);
+	out += aux_report("stop_density_min", stop_density_min);
+	out += aux_report("stop_density_max", stop_density_max);
+	out += aux_report("semaphore_density_min", semaphore_density_min);
+	out += aux_report("semaphore_density_max", semaphore_density_max);
+	out += aux_report("dt", dt);
+	out += aux_report("random_semaphores", random_semaphores);
+	out += aux_report("show_progress", show_progress);
+	out += aux_report("path", path);
+	out += aux_report("out_file_name", out_file_name);
+
+	cout << out;
+	ofstream file;
+	file.open(GetFilePath("Report.txt"), std::ofstream::out);
+	file << out;
+	file.close();
 }
 string ExParam::GetFilePath(string filename)
 {
+	string out_file_path;
     if (out_file_name.empty())
-        out_file_name = path + filename;
+		out_file_path = path + filename;
     else
-        out_file_name = path + out_file_name;
-    return out_file_name;
+		out_file_path = path + out_file_name;
+    return out_file_path;
 }
 
 
