@@ -51,10 +51,10 @@ int export_map(Matrix<int> data, const string filename)
         {
             for (unsigned j = 0; j < width; ++j)
             {
-				if (data[i][j] == 1)
-					bmp_data[i] = black;
-				else
-					bmp_data[i] = white;
+                if (data[i][j] == 1)
+                    bmp_data[i] = black;
+                else
+                    bmp_data[i] = white;
             }
             writer.WriteLine(bmp_data);
         }

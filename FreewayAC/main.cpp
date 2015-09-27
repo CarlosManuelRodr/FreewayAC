@@ -3,6 +3,11 @@
 #include "CellularAutomata.h"
 #include "optionparser.h"
 #include "Experiments.h"
+
+#if defined(_WIN32)
+#include <windows.h>
+#endif
+
 using namespace std;
 
 
@@ -31,7 +36,7 @@ struct Arg: public option::Arg
     }
 };
 
-enum  OptionIndex { UNKNOWN, SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,
+enum  OptionIndex { UNKNOWN, FWSIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,
 
                     PLOT_TRAFFIC, PLOT_FLOW, MEASURE_OCUPANCY, MEASURE_FLOW,
                     FLOW_VS_DENSITY, FLOW_PER_DENSITY, FLOW_VS_VMAX, FLOW_VS_RAND_PROB, FLOW_VS_AUT_CARS,
@@ -48,12 +53,12 @@ enum  OptionIndex { UNKNOWN, SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VE
                     STOP_DENSITY_MIN, STOP_DENSITY_MAX, NEW_CAR_MIN, NEW_CAR_MAX, RAND_PROB_MAX, SEMAPHORE_DENSITY_MIN,
                     SEMAPHORE_DENSITY_MAX,
 
-                    OUT_FILE_NAME, PATH, EXPORT_FORMAT, SHOW_PROGRESS, TEST, REPORT, BEEP, HELP };
+                    OUT_FILE_NAME, PATH, EXPORT_FORMAT, SHOW_PROGRESS, TEST, REPORT, BEEP, LOW_PRIORITY, HELP };
 
 const option::Descriptor usage[] =
 {
     {UNKNOWN, 0, "", "",Arg::None, "INSTRUCCIONES: FreewayAC [opciones]\n"},
-    {SIZE,  0,"s", "size", Arg::Required, "  -s <arg>, \t--size=<arg>  \tTamagno del AC." },
+    {FWSIZE,  0,"s", "size", Arg::Required, "  -s <arg>, \t--size=<arg>  \tTamagno del AC." },
     {ITERATIONS,  0,"i", "iter", Arg::Required, "  -i <arg>, \t--iter=<arg>  \tIteraciones del AC." },
     {VMAX,  0,"v", "vmax", Arg::Required, "  -v <arg>, \t--vmax=<arg>  \tVelocidad maxima de auto." },
     {DENSITY,  0,"d", "density", Arg::Required, "  -d <arg>, \t--density=<arg>  \tDensidad de autos." },
@@ -152,7 +157,8 @@ const option::Descriptor usage[] =
     {TEST,    0,"", "test", Arg::None,    "  \t--test  \tRealiza pruebas para garantizar la fiabilidad de resultados." },
     {REPORT,    0,"", "report", Arg::None,    "  \t--report  \tReporta lo parametros que se usan en la ejecucion." },
     {BEEP,    0,"", "beep", Arg::None,    "  \t--beep  \tEmite alerta sonora al terminar la ejecucion." },
-    {HELP,    0,"", "help", Arg::None,    "  \t--help  \tMuestra instrucciones detalladas de cada experimento." },
+    {LOW_PRIORITY, 0,"", "low_priority", Arg::None, "  \t--low_priority  \tEstablece la prioridad del proceso debajo de lo normal. Solo en Windows." },
+    {HELP, 0,"", "help", Arg::None,    "  \t--help  \tMuestra instrucciones detalladas de cada experimento." },
     {0,0,0,0,0,0}
 };
 
@@ -265,7 +271,7 @@ int main(int argc, char* argv[])
     double aut_min = 0.0, aut_max = 1.0, new_car_min = 0.0, new_car_max = 1.0, stop_density_min = 0.0;
     double stop_density_max = 1.0, semaphore_density_min = 0.0, semaphore_density_max = 1.0;
 
-    bool report = false, beep = false;
+    bool report = false, beep = false, low_priority = false;
     CA_TYPE ca_type = CIRCULAR_CA;
     double new_car_prob = 0.1, aut_density = 0.1, stop_density = 0.1, semaphore_density = 0.1;
     int porder = 6, pinterval = -1;
@@ -298,7 +304,7 @@ int main(int argc, char* argv[])
         option::Option& opt = buffer[i];
         switch (opt.index())
         {
-            case SIZE:
+            case FWSIZE:
             size = aux_string_to_num<unsigned>(opt.arg);
             break;
 
@@ -553,11 +559,20 @@ int main(int argc, char* argv[])
             case BEEP:
             beep = true;
             break;
+
+            case LOW_PRIORITY:
+            low_priority = true;
+            break;
         }
     }
 
     delete[] options;
     delete[] buffer;
+
+#if defined(_WIN32)
+    if (low_priority)
+        SetPriorityClass(GetCurrentProcess(), BELOW_NORMAL_PRIORITY_CLASS);
+#endif
 
     // Verifica opciones.
     if (!path.empty() && !df_directory_exist(path))

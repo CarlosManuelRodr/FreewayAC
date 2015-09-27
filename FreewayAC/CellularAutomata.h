@@ -644,57 +644,57 @@ public:
 
 class CaHandler
 {
-	CellularAutomata* cellularautomata;
-	CircularCA* circularca;
-	OpenCA* openca;
-	AutonomousCA* smartca;
-	StreetStopCA* streetstopca;
-	SemaphoreCA* semaphoreca;
-	SimpleJunctionCA* simplejunctionca;
-	CellularAutomataML* cellularautomataml;
-	CircularCAML* circularcaml;
-	OpenCAML* opencaml;
+    CellularAutomata* cellularautomata;
+    CircularCA* circularca;
+    OpenCA* openca;
+    AutonomousCA* smartca;
+    StreetStopCA* streetstopca;
+    SemaphoreCA* semaphoreca;
+    SimpleJunctionCA* simplejunctionca;
+    CellularAutomataML* cellularautomataml;
+    CircularCAML* circularcaml;
+    OpenCAML* opencaml;
 
-	bool multilane;
+    bool multilane;
 
 public:
-	CaHandler();
-	CaHandler(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax,
-		const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed = -1);
-	CaHandler(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density, const int &vmax,
-		const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed = -1);
-	~CaHandler();
+    CaHandler();
+    CaHandler(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax,
+        const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed = -1);
+    CaHandler(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density, const int &vmax,
+        const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed = -1);
+    ~CaHandler();
 
-	void CreateCa(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax,
-		const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed = -1);
-	void CreateCa(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density, const int &vmax,
-		const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed = -1);
-	void DeleteCa();
-	int Status();
+    void CreateCa(CA_TYPE ca, const unsigned &size, const double &density, const int &vmax,
+        const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed = -1);
+    void CreateCa(CA_TYPE ca, const unsigned &size, const unsigned &lanes, const double &density, const int &vmax,
+        const double &rand_prob, const int &init_vel, Args args, const int &custom_random_seed = -1);
+    void DeleteCa();
+    int Status();
 
-	void Evolve(const unsigned &iter);
+    void Evolve(const unsigned &iter);
     int NextCarDist(const int &pos, const unsigned &lane);
-	bool Randomization(const double &prob = -1.0);
-	int &At(const int &i, const unsigned &lane, const CAS &ca = CA);
-	int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca);
-	int GetAt(const unsigned &i, const unsigned &lane, const CAS &ca = CA);
-	int GetAt(const unsigned &i, const unsigned &lane, const unsigned &j, const CAS &ca);
-	void Connect(CellularAutomata* connect, unsigned connect_pos);
+    bool Randomization(const double &prob = -1.0);
+    int &At(const int &i, const unsigned &lane, const CAS &ca = CA);
+    int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca);
+    int GetAt(const unsigned &i, const unsigned &lane, const CAS &ca = CA);
+    int GetAt(const unsigned &i, const unsigned &lane, const unsigned &j, const CAS &ca);
+    void Connect(CellularAutomata* connect, unsigned connect_pos);
     void Connect(CellularAutomataML* connect, unsigned connect_pos);
-	int DrawHistory(std::string path = "", std::string out_file_name = "");
-	int DrawFlowHistory(std::string path = "", std::string out_file_name = "");
-	void Print();
-	unsigned GetSize();
-	unsigned GetHistorySize();
-	unsigned GetLanes();
-	unsigned CountCars();
-	bool IsFluxHalted();
-	void PrintHistory();
-	void Step();
-	void Move();
-	std::vector<double> CalculateOcupancy();
-	std::vector<double> CalculateFlow();
-	double CalculateMeanFlow();
+    int DrawHistory(std::string path = "", std::string out_file_name = "");
+    int DrawFlowHistory(std::string path = "", std::string out_file_name = "");
+    void Print();
+    unsigned GetSize();
+    unsigned GetHistorySize();
+    unsigned GetLanes();
+    unsigned CountCars();
+    bool IsFluxHalted();
+    void PrintHistory();
+    void Step();
+    void Move();
+    std::vector<double> CalculateOcupancy();
+    std::vector<double> CalculateFlow();
+    double CalculateMeanFlow();
 };
 
 #endif

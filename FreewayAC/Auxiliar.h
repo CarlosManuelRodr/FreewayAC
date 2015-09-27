@@ -75,9 +75,9 @@ void aux_beep();
 */
 template <class N> std::string aux_report(const std::string &report_type, N report_value)
 {
-	stringstream ss;
-	ss << report_type << ": " << report_value << ".\n";
-	return ss.str();
+    stringstream ss;
+    ss << report_type << ": " << report_value << ".\n";
+    return ss.str();
 }
 
 /**
@@ -584,7 +584,7 @@ template <class T> T*& Matrix<T>::operator[](const unsigned int pos)
 
 enum CoordLbl
 {
-	COORD_X, COORD_Y
+    COORD_X, COORD_Y
 };
 
 /**
@@ -645,15 +645,15 @@ template <class T> T Coord<T>::GetY()
 
 template <class N> std::vector<N> aux_coordvec_to_vec(std::vector<Coord<N>> in, CoordLbl c)
 {
-	std::vector<N> out;
-	for (unsigned i = 0; i < in.size(); ++i)
-	{
-		if (c == COORD_X)
-			out.push_back(in[i].GetX());
-		else
-			out.push_back(in[i].GetY());
-	}
-	return out;
+    std::vector<N> out;
+    for (unsigned i = 0; i < in.size(); ++i)
+    {
+        if (c == COORD_X)
+            out.push_back(in[i].GetX());
+        else
+            out.push_back(in[i].GetY());
+    }
+    return out;
 }
 
 /**
