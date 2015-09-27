@@ -75,7 +75,7 @@ void aux_beep();
 */
 template <class N> std::string aux_report(const std::string &report_type, N report_value)
 {
-    stringstream ss;
+    std::stringstream ss;
     ss << report_type << ": " << report_value << ".\n";
     return ss.str();
 }
