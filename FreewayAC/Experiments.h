@@ -26,8 +26,8 @@ class ExParam
 public:
     CA_TYPE type;
     unsigned size, iterations, lanes;
-    int vmax, vmax_min, vmax_max;
-    int random_seed, init_vel, partitions;
+    int vmax, vmax_min, vmax_max, init_vel;
+    int random_seed, partitions;
     int porder, pinterval;
 
     double density, density_min, density_max;
@@ -47,7 +47,6 @@ public:
     ExportFormat export_format;
 
     void Report();
-	void ReportToFile();
     std::string GetFilePath(std::string filename);
 };
 

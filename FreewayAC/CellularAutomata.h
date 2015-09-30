@@ -156,6 +156,7 @@ public:
     void PrintHistory();            ///< Escribe los valores históricos del AC en la terminal.
     virtual void Step();            ///< Aplica reglas de evolución temporal del AC.
     virtual void Move();            ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
+    void AssignChanges();           ///< Asigna cambios de los arrays teporales al array m_ca e historico.
 };
 
 
@@ -538,6 +539,7 @@ public:
     virtual void Step();        ///< Aplica reglas de evolución temporal del AC.
     virtual void ChangeLanes(); ///< Aplica las reglas de cambio carril.
     virtual void Move();        ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
+    void AssignChanges();           ///< Asigna cambios de los arrays teporales al array m_ca e historico.
 };
 
 /****************************

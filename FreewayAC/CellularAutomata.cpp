@@ -89,12 +89,12 @@ CellularAutomata::~CellularAutomata() {}
 void CellularAutomata::Print()
 {
     // Imprime valores del automata celular en la terminal.
-    for (unsigned i = 0; i < m_ca.size(); ++i)
+    for (auto ca : m_ca)
     {
-        if (m_ca[i] == -1)
+        if (ca == -1)
             cout << "-";
         else
-            cout << m_ca[i];
+            cout <<ca;
     }
     cout << endl;
 }
@@ -188,7 +188,7 @@ int CellularAutomata::DrawFlowHistory(string path, string out_file_name)
     else
         return 1;
 }
-void CellularAutomata::Step()
+inline void CellularAutomata::Step()
 {
     // Iterar sobre AC hasta encotrar vehiculo.
     for (unsigned i = 0; i < m_ca.size(); ++i)
@@ -220,10 +220,8 @@ void CellularAutomata::Step()
     Move();
     m_ca_history.push_back(m_ca);
 }
-void CellularAutomata::Move()
+inline void CellularAutomata::Move()
 {
-    m_ca_flow_temp.assign(m_size, 0);
-    m_ca_temp.assign(m_size, -1);
     for (unsigned i = 0; i < m_ca.size(); ++i)
     {
         if (m_ca[i] != -1)
@@ -239,8 +237,14 @@ void CellularAutomata::Move()
                 At(j, CA_FLOW_TEMP) = 1;
         }
     }
+    AssignChanges();
+}
+inline void CellularAutomata::AssignChanges()
+{
     m_ca_flow_history.push_back(m_ca_flow_temp);
     m_ca.assign(m_ca_temp.begin(), m_ca_temp.end());
+    m_ca_flow_temp.assign(m_size, 0);
+    m_ca_temp.assign(m_size, -1);
 }
 void CellularAutomata::Evolve(const unsigned &iter)
 {
@@ -573,8 +577,6 @@ AutonomousCA::AutonomousCA(const vector<int> &ca, vector<int> smart_cars, const 
 }
 void AutonomousCA::Move()
 {
-    m_ca_flow_temp.assign(m_size, 0);
-    m_ca_temp.assign(m_size, -1);
     for (unsigned i = 0; i < m_ca.size(); ++i)
     {
         if (m_ca[i] != -1)
@@ -591,8 +593,7 @@ void AutonomousCA::Move()
                 At(j, CA_FLOW_TEMP) = 1;
         }
     }
-    m_ca_flow_history.push_back(m_ca_flow_temp);
-    m_ca.assign(m_ca_temp.begin(), m_ca_temp.end());
+    AssignChanges();
 }
 void AutonomousCA::Step()
 {
@@ -1309,7 +1310,6 @@ bool CellularAutomataML::Randomization(const double &prob)
 }
 void CellularAutomataML::ChangeLanes()
 {
-    // Primero hace los cambios de carril.
     if (m_lanes > 1)
     {
         for (unsigned i = 0; i < m_ca.size(); ++i)
@@ -1361,13 +1361,10 @@ void CellularAutomataML::ChangeLanes()
                     // Si el carril está disponible adelenta.
                     if (left || right)
                     {
-                        // Si ambos están disponibles apaga uno al azar.
+                        // Si ambos están disponibles, tiende a adelantar por la izquierda.
                         if (left && right)
-                        {
-                            int select = RandomGen::GetInt(2);
-                            if (select == 1) right = false;
-                            else left = false;
-                        }
+                            right = false;
+
                         unsigned new_lane;
                         if (left)
                             new_lane = j - 1;
@@ -1507,6 +1504,16 @@ void CellularAutomataML::Move()
             }
         }
     }
+    AssignChanges();
+}
+inline void CellularAutomataML::AssignChanges()
+{
+    m_ca_flow_temp.assign(m_size, CAElement(m_lanes, 0));
+    for (unsigned i = 0; i < m_ca_temp.size(); ++i)
+    {
+        for (unsigned j = 0; j < m_lanes; ++j)
+            m_ca_temp[i][j] = -1;
+    }
     m_ca_flow_history.push_back(m_ca_flow_temp);
     m_ca.assign(m_ca_temp.begin(), m_ca_temp.end());
 }
@@ -1601,7 +1608,7 @@ vector<double> CellularAutomataML::CalculateFlow()
                     sum++;
             }
         }
-        flow[i] = (double)sum/((double)height*(double)m_lanes);
+        flow[i] = (double)sum/(double)height;
     }
     return flow;
 }
@@ -2054,6 +2061,13 @@ unsigned CaHandler::GetHistorySize()
         return cellularautomataml->GetHistorySize();
     else
         return cellularautomata->GetHistorySize();
+}
+unsigned CaHandler::GetLanes()
+{
+    if (multilane)
+        return cellularautomataml->GetLanes();
+    else
+        return 1;
 }
 unsigned CaHandler::CountCars()
 {

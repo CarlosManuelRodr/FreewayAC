@@ -163,10 +163,10 @@ std::vector<R> aux_parallel_function(std::function<R(T, Arg)> f, T min_val, T ma
     for (T val = min_val; val <= max_val; val += dt)
         result.push_back(pool.enqueue(f, val, arg));
 
-    for (unsigned i = 0; i < result.size(); ++i)
+    for (auto& r : result)
     {
-        aux_progress_bar(i, 0, result.size(), 1);
-        result_values.push_back(result[i].get());
+        aux_progress_bar(&r - &result[0], 0, result.size(), 1);
+        result_values.push_back(r.get());
     }
     aux_progress_bar(1, 0, result.size(), 1);
     return result_values;
@@ -478,9 +478,7 @@ template <class T> int Matrix<T>::SetMatrix(unsigned int rows, unsigned int cols
             m_matrix[i] = new T[m_ncols];
     }
     catch (std::bad_alloc&)
-    {
         return 1;
-    }
 
     // Assigna valores.
     if (inputMatrix != nullptr)
@@ -516,6 +514,7 @@ template <class T> int Matrix<T>::SetMatrix(unsigned int rows, unsigned int cols
     {
         return 1;
     }
+
     return 0;
 }
 template <class T> void Matrix<T>::Assign(T val)
@@ -646,12 +645,15 @@ template <class T> T Coord<T>::GetY()
 template <class N> std::vector<N> aux_coordvec_to_vec(std::vector<Coord<N>> in, CoordLbl c)
 {
     std::vector<N> out;
-    for (unsigned i = 0; i < in.size(); ++i)
+    if (c == COORD_X)
     {
-        if (c == COORD_X)
-            out.push_back(in[i].GetX());
-        else
-            out.push_back(in[i].GetY());
+        for (auto i : in)
+            out.push_back(i.GetX());
+    }
+    else
+    {
+        for (auto i : in)
+            out.push_back(i.GetY());
     }
     return out;
 }
