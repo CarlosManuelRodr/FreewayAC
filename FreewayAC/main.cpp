@@ -1,5 +1,6 @@
 #include <sstream>
 #include <string>
+#include <chrono>
 #include "CellularAutomata.h"
 #include "optionparser.h"
 #include "Experiments.h"
@@ -53,7 +54,7 @@ enum  OptionIndex { UNKNOWN, FWSIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_
                     STOP_DENSITY_MIN, STOP_DENSITY_MAX, NEW_CAR_MIN, NEW_CAR_MAX, RAND_PROB_MAX, SEMAPHORE_DENSITY_MIN,
                     SEMAPHORE_DENSITY_MAX,
 
-                    OUT_FILE_NAME, PATH, EXPORT_FORMAT, SHOW_PROGRESS, TEST, REPORT, BEEP, LOW_PRIORITY, HELP };
+                    OUT_FILE_NAME, PATH, EXPORT_FORMAT, SHOW_PROGRESS, TEST, REPORT, BEEP, LOW_PRIORITY, THREADS, BENCHMARK, HELP };
 
 const option::Descriptor usage[] =
 {
@@ -158,6 +159,8 @@ const option::Descriptor usage[] =
     {REPORT,    0,"", "report", Arg::None,    "  \t--report  \tReporta lo parametros que se usan en la ejecucion." },
     {BEEP,    0,"", "beep", Arg::None,    "  \t--beep  \tEmite alerta sonora al terminar la ejecucion." },
     {LOW_PRIORITY, 0,"", "low_priority", Arg::None, "  \t--low_priority  \tEstablece la prioridad del proceso debajo de lo normal. Solo en Windows." },
+    {THREADS, 0,"", "threads", Arg::Required, "  \t--threads  \tNumero de threads a usar." },
+    {BENCHMARK, 0,"", "benchmark", Arg::None,    "  \t--benchmark  \tMide el tiempo de ejecucion." },
     {HELP, 0,"", "help", Arg::None,    "  \t--help  \tMuestra instrucciones detalladas de cada experimento." },
     {0,0,0,0,0,0}
 };
@@ -271,11 +274,12 @@ int main(int argc, char* argv[])
     double aut_min = 0.0, aut_max = 1.0, new_car_min = 0.0, new_car_max = 1.0, stop_density_min = 0.0;
     double stop_density_max = 1.0, semaphore_density_min = 0.0, semaphore_density_max = 1.0;
 
-    bool report = false, beep = false, low_priority = false;
+    bool report = false, beep = false, low_priority = false, benchmark = false;
     CA_TYPE ca_type = CIRCULAR_CA;
     double new_car_prob = 0.1, aut_density = 0.1, stop_density = 0.1, semaphore_density = 0.1;
     int porder = 6, pinterval = -1;
     int new_car_speed = 1, target_lane = 0, lanes = 2, random_seed = -1, partitions = 50;
+    int threads = -1;
     string random_generator = "", export_format = "", out_file_name = "", path = "";
 
     // Ejecuta parser de argumentos.
@@ -563,11 +567,21 @@ int main(int argc, char* argv[])
             case LOW_PRIORITY:
             low_priority = true;
             break;
+
+            case THREADS:
+            threads = aux_string_to_num<int>(opt.arg);
+            break;
+
+            case BENCHMARK:
+            benchmark = true;
+            break;
         }
     }
 
     delete[] options;
     delete[] buffer;
+
+    auto start = chrono::high_resolution_clock::now();
 
 #if defined(_WIN32)
     if (low_priority)
@@ -580,6 +594,8 @@ int main(int argc, char* argv[])
         cout << "Path no valido." << endl;
         return 1;
     }
+    if (threads < 1 && threads != -1)
+        threads = -1;
 
     if(random_generator == "LCG")
         RandomGen::SetAlgorithm(LCG);
@@ -655,6 +671,7 @@ int main(int argc, char* argv[])
     param.out_file_name = out_file_name;
     param.args = args;
     param.dt = dt;
+    param.threads = threads;
 
     if (!export_format.empty())
     {
@@ -765,6 +782,12 @@ int main(int argc, char* argv[])
 
     if (beep)
         aux_beep();
+
+    if (benchmark)
+    {
+        auto end = chrono::high_resolution_clock::now();
+        cout << "Tiempo de ejecucion: " << chrono::duration <double, milli>(end - start).count() << " ms" << endl;
+    }
 
     return 0;
 }

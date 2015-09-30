@@ -1,3 +1,4 @@
 ﻿- Implementar decisión de carril en unión.
 - Flujo y ocupación no se miden correctament en unión.
-- Implementación de At es ineficiente.
+- Fix: CellularAutomataML::CellularAutomataML(const vector<CAElement> &ca, const vector<bool> &rand_values,
+                                       const int &vmax)

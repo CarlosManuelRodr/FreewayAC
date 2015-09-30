@@ -44,6 +44,7 @@ void ExParam::Report()
     out += aux_report("show_progress", show_progress);
     out += aux_report("path", path);
     out += aux_report("out_file_name", out_file_name);
+    out += aux_report("threads", threads);
 
     cout << out;
     ofstream file;
@@ -226,7 +227,7 @@ Coord<double> ex_flow_vs_density_thread(double d, ExParam &p)
 
 int ex_flow_vs_density(ExParam p)
 {
-    vector<Coord<double>> dens_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_density_thread, p.density_min, p.density_max, p.dt, p);
+    vector<Coord<double>> dens_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_density_thread, p.density_min, p.density_max, p.dt, p, p.threads);
 
     // Escribe a archivo.
     string filename;
@@ -253,7 +254,7 @@ Coord<double> ex_flow_vs_vmax_thread(int v, ExParam &p)
 
 int ex_flow_vs_vmax(ExParam p)
 {
-    vector<Coord<double>> vmax_flow = aux_parallel_function<Coord<double>, int, ExParam&>(ex_flow_vs_vmax_thread, p.vmax_min, p.vmax_max, (int)p.dt, p);
+    vector<Coord<double>> vmax_flow = aux_parallel_function<Coord<double>, int, ExParam&>(ex_flow_vs_vmax_thread, p.vmax_min, p.vmax_max, (int)p.dt, p, p.threads);
     return export_data(vmax_flow, p.GetFilePath("flow_vs_vmax.csv"), p.export_format);
 }
 
@@ -272,7 +273,7 @@ Coord<double> ex_flow_vs_rand_prob_thread(double r, ExParam &p)
 
 int ex_flow_vs_rand_prob(ExParam p)
 {
-    vector<Coord<double>> rand_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_rand_prob_thread, p.rand_prob_min, p.rand_prob_max, p.dt, p);
+    vector<Coord<double>> rand_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_rand_prob_thread, p.rand_prob_min, p.rand_prob_max, p.dt, p, p.threads);
     return export_data(rand_flow, p.GetFilePath("flow_vs_rand_prob.csv"), p.export_format);
 }
 
@@ -291,7 +292,7 @@ Coord<double> ex_flow_vs_aut_cars_thread(double s, ExParam &p)
 
 int ex_flow_vs_aut_cars(ExParam p)
 {
-    vector<Coord<double>> aut_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_aut_cars_thread, p.aut_car_density_min, p.aut_car_density_max, p.dt, p);
+    vector<Coord<double>> aut_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_aut_cars_thread, p.aut_car_density_min, p.aut_car_density_max, p.dt, p, p.threads);
     return export_data(aut_flow, p.GetFilePath("flow_vs_aut_cars.csv"), p.export_format);
 }
 
@@ -328,7 +329,7 @@ int ex_flow_vs_new_car_prob(ExParam p)
     else
         filename = "flow_vs_new_car_prob.csv";
 
-    vector<Coord<double>> new_car_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_new_car_prob_thread, p.new_car_prob_min, p.new_car_prob_max, p.dt, p);
+    vector<Coord<double>> new_car_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_new_car_prob_thread, p.new_car_prob_min, p.new_car_prob_max, p.dt, p, p.threads);
     return export_data(new_car_flow, p.GetFilePath(filename), p.export_format);
 }
 
@@ -347,7 +348,7 @@ Coord<double> ex_flow_vs_stop_density_thread(double d, ExParam &p)
 
 int ex_flow_vs_stop_density(ExParam p)
 {
-    vector<Coord<double>> stop_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_stop_density_thread, p.stop_density_min, p.stop_density_max, p.dt, p);
+    vector<Coord<double>> stop_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_stop_density_thread, p.stop_density_min, p.stop_density_max, p.dt, p, p.threads);
     return export_data(stop_flow, p.GetFilePath("flow_vs_stop_density.csv"), p.export_format);
 }
 
@@ -366,7 +367,7 @@ Coord<double> ex_flow_vs_semaphore_density_thread(double d, ExParam &p)
 
 int ex_flow_vs_semaphore_density(ExParam p)
 {
-    vector<Coord<double>> semaphore_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_semaphore_density_thread, p.semaphore_density_min, p.semaphore_density_max, p.dt, p);
+    vector<Coord<double>> semaphore_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_semaphore_density_thread, p.semaphore_density_min, p.semaphore_density_max, p.dt, p, p.threads);
     return export_data(semaphore_flow, p.GetFilePath("flow_vs_semaphore_density.csv"), p.export_format);
 }
 
@@ -397,7 +398,7 @@ int ex_escape_time_vs_density(ExParam p)
         p.type = OPEN_CA;
     }
 
-    vector<Coord<double>> dens_escape = aux_parallel_function<Coord<double>, double, ExParam&>(ex_escape_time_vs_density_thread, p.density_min, p.density_max, p.dt, p);
+    vector<Coord<double>> dens_escape = aux_parallel_function<Coord<double>, double, ExParam&>(ex_escape_time_vs_density_thread, p.density_min, p.density_max, p.dt, p, p.threads);
     return export_data(dens_escape, p.GetFilePath("escape_time_vs_density.csv"), p.export_format);
 }
 
@@ -428,7 +429,7 @@ int ex_escape_time_vs_rand_prob(ExParam p)
         p.type = OPEN_CA;
     }
 
-    vector<Coord<double>> rand_escape = aux_parallel_function<Coord<double>, double, ExParam&>(ex_escape_time_vs_rand_prob_thread, p.rand_prob_min, p.rand_prob_max, p.dt, p);
+    vector<Coord<double>> rand_escape = aux_parallel_function<Coord<double>, double, ExParam&>(ex_escape_time_vs_rand_prob_thread, p.rand_prob_min, p.rand_prob_max, p.dt, p, p.threads);
     return export_data(rand_escape, p.GetFilePath("escape_time_vs_rand_prob.csv"), p.export_format);
 }
 
@@ -459,7 +460,7 @@ int ex_escape_time_vs_vmax(ExParam p)
         p.type = OPEN_CA;
     }
 
-    vector<Coord<double>> vmax_escape = aux_parallel_function<Coord<double>, int, ExParam&>(ex_escape_time_vs_vmax_thread, p.vmax_min, p.vmax_max, (int)p.dt, p);
+    vector<Coord<double>> vmax_escape = aux_parallel_function<Coord<double>, int, ExParam&>(ex_escape_time_vs_vmax_thread, p.vmax_min, p.vmax_max, (int)p.dt, p, p.threads);
     return export_data(vmax_escape, p.GetFilePath("escape_time_vs_vmax.csv"), p.export_format);
 }
 
@@ -490,7 +491,7 @@ int ex_discharge_vs_density(ExParam p)
         p.type = OPEN_CA;
     }
 
-    vector<Coord<double>> dens_discharge = aux_parallel_function<Coord<double>, double, ExParam&>(ex_discharge_vs_density_thread, p.density_min, p.density_max, p.dt, p);
+    vector<Coord<double>> dens_discharge = aux_parallel_function<Coord<double>, double, ExParam&>(ex_discharge_vs_density_thread, p.density_min, p.density_max, p.dt, p, p.threads);
     return export_data(dens_discharge, "discharge_vs_density.csv", p.export_format);
 }
 
@@ -504,7 +505,7 @@ int ex_pentropy_vs_density(ExParam p)
         ca_type = OPEN_CA;
     }
 
-    vector<Coord<double>> dens_discharge = aux_parallel_function<Coord<double>, double, ExParam&>(ex_discharge_vs_density_thread, p.density_min, p.density_max, p.dt, p);
+    vector<Coord<double>> dens_discharge = aux_parallel_function<Coord<double>, double, ExParam&>(ex_discharge_vs_density_thread, p.density_min, p.density_max, p.dt, p, p.threads);
     int r = export_data(dens_discharge, "discharge_vs_density.csv", p.export_format);
     if (r != 0)
         return r;

@@ -29,6 +29,7 @@ public:
     int vmax, vmax_min, vmax_max, init_vel;
     int random_seed, partitions;
     int porder, pinterval;
+    int threads;
 
     double density, density_min, density_max;
     double rand_prob, rand_prob_min, rand_prob_max;

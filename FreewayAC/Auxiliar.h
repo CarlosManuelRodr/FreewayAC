@@ -154,9 +154,15 @@ template <class N> double aux_mean(std::vector<N> v)
 * @param arg Argumento extra que se le pasa a la función.
 */
 template<typename R, typename T, typename Arg>
-std::vector<R> aux_parallel_function(std::function<R(T, Arg)> f, T min_val, T max_val, T dt, Arg arg)
+std::vector<R> aux_parallel_function(std::function<R(T, Arg)> f, T min_val, T max_val, T dt, Arg arg, int threads = -1)
 {
-    ThreadPool pool(std::thread::hardware_concurrency());
+    unsigned int hc;
+    if (threads == -1)
+        hc = std::thread::hardware_concurrency();
+    else
+        hc = threads;
+
+    ThreadPool pool(hc);
     std::vector<std::future<R>> result;
     std::vector<R> result_values;
 

@@ -107,25 +107,17 @@ public:
 
     ///@brief Devuelve referencia a elemento del AC considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
-    ///@param ca Tipo de AC.
-    int &At(const int &i, const CAS &ca = CA);
+    virtual int &At(const int &i) = 0;
+	virtual int &AtTemp(const int &i) = 0;
+	virtual int &AtFlowTemp(const int &i) = 0;
 
-    ///@brief Devuelve referencia a  elemento de valores del autómata celular considerando las condiciones de frontera.
-    ///@param i Posición dentro del AC.
-    ///@param j Posición temporal del AC.
-    ///@param ca Tipo de autómata celular.
-    virtual int &At(const unsigned &i, const unsigned &j, const CAS &ca) = 0;
+	///@brief Devuelve elemento del AC.
+	///@param i Posición dentro del AC.
+	int GetAt(const int &i);
 
-    ///@brief Similar a AC pero sólo devuelve el valor y en AC de uniones puede apuntar a un carril en específico.
-    ///@param i Posición dentro del AC.
-    ///@param ca Tipo de AC.
-    int GetAt(const unsigned &i, const CAS &ca = CA);
-
-    ///@brief Similar a AC pero sólo devuelve el valor y en AC de uniones puede apuntar a un carril en específico.
-    ///@param i Posición dentro del AC.
-    ///@param j Posición temporal del AC.
-    ///@param ca Tipo de autómata celular.
-    virtual int GetAt(const unsigned &i, const unsigned &j, const CAS &ca);
+	///@brief Devuelve referencia a elemento del AC en conexión.
+	///@param i Posición dentro del AC.
+	int &AtConnected(const int &i);
 
     ///@brief Conecta AC con otro. El flujo de autos ocurre desde el que realiza la conexión al objetivo.
     ///@param connect Puntero a AC objetivo.
@@ -189,10 +181,9 @@ public:
 
     ///@brief Devuelve elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
-    ///@param j Posición temporal del AC.
-    ///@param ca Tipo de autómata celular.
-    using CellularAutomata::At;
-    int &At(const unsigned &i, const unsigned &j, const CAS &ca);
+    int &At(const int &i);
+	int &AtTemp(const int &i);
+	int &AtFlowTemp(const int &i);
 
     ///@brief Evoluciona (itera) el AC. Verifica si se conserva la cantidad de autos.
     ///@param iter Número de iteraciones.
@@ -213,7 +204,8 @@ public:
 class OpenCA : public CellularAutomata
 {
 protected:
-    int m_empty;            ///< Se usa para devolver referencia de lugar vacío.
+    int m_ca_empty;            ///< Se usa para devolver referencia de lugar vacío.
+    int m_ca_flow_empty;
     double m_new_car_prob;  ///< Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
     int m_new_car_speed;    ///< Velocidad de nuevo auto cuando ingresa a la pista.
 public:
@@ -237,10 +229,9 @@ public:
 
     ///@brief Devuelve elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
-    ///@param j Posición temporal del AC.
-    ///@param ca Tipo de autómata celular.
-    using CellularAutomata::At;
-    int &At(const unsigned &i, const unsigned &j, const CAS &ca);
+	int &At(const int &i);
+	int &AtTemp(const int &i);
+	int &AtFlowTemp(const int &i);
 
     void Step();    ///< Aplica reglas de evolución temporal del AC.
 };
@@ -393,12 +384,6 @@ public:
     ///@param iter Número de iteraciones.
     void Evolve(const unsigned &iter);
 
-    ///@brief Devuelve el valor de AC apuntando al carril m_target_lane.
-    ///@param i Posición dentro del AC.
-    ///@param j Posición temporal del AC.
-    ///@param ca Tipo de autómata celular.
-    int GetAt(const unsigned &i, const unsigned &j, const CAS &ca);
-
     ///@brief Dibuja mapa histórico del AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
@@ -476,29 +461,17 @@ public:
     ///@param iter Número de iteraciones.
     void Evolve(const unsigned &iter);
 
-    ///@brief Devuelve referencia a elemento del AC considerando las condiciones de frontera.
-    ///@param i Posición dentro del AC.
-    ///@param lane Carril objetivo.
-    ///@param ca Tipo de AC.
-    int &At(const int &i, const unsigned &lane, const CAS &ca = CA);
-
     ///@brief Devuelve referencia a  elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
     ///@param lane Carril objetivo.
-    ///@param j Posición temporal del AC.
-    ///@param ca Tipo de autómata celular.
-    virtual int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca) = 0;
+    virtual int &At(const int &i, const unsigned &lane) = 0;
+    virtual int &AtTemp(const int &i, const unsigned &lane) = 0;
+    virtual int &AtFlowTemp(const int &i, const unsigned &lane) = 0;
 
     ///@brief Similar a AC pero sólo devuelve el valor y en AC de uniones puede apuntar a un carril en específico.
     ///@param i Posición dentro del AC.
     ///@param ca Tipo de AC.
-    int GetAt(const unsigned &i, const unsigned &lane, const CAS &ca = CA);
-
-    ///@brief Similar a AC pero sólo devuelve el valor y en AC de uniones puede apuntar a un carril en específico.
-    ///@param i Posición dentro del AC.
-    ///@param j Posición temporal del AC.
-    ///@param ca Tipo de autómata celular.
-    virtual int GetAt(const unsigned &i, const unsigned &lane, const unsigned &j, const CAS &ca);
+    int GetAt(const unsigned &i, const unsigned &lane);
 
     ///@brief Conecta AC con otro. El flujo de autos ocurre desde el que realiza la conexión al objetivo.
     ///@param connect Puntero a AC objetivo.
@@ -575,10 +548,9 @@ public:
     ///@brief Devuelve referencia a  elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
     ///@param lane Carril objetivo.
-    ///@param j Posición temporal del AC.
-    ///@param ca Tipo de autómata celular.
-    using CellularAutomataML::At;
-    int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca);
+    int &At(const int &i, const unsigned &lane);
+    int &AtTemp(const int &i, const unsigned &lane);
+    int &AtFlowTemp(const int &i, const unsigned &lane);
 
     ///@brief Evoluciona (itera) el AC. Verifica si se conserva la cantidad de autos.
     ///@param iter Número de iteraciones.
@@ -599,7 +571,8 @@ public:
 class OpenCAML : public CellularAutomataML
 {
 protected:
-    int m_empty;            ///< Se usa para devolver referencia de lugar vacío.
+    int m_ca_empty;         ///< Se usa para devolver referencia de lugar vacío.
+    int m_ca_flow_empty;
     double m_new_car_prob;  ///< Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
     int m_new_car_speed;    ///< Velocidad de nuevo auto cuando ingresa a la pista.
 public:
@@ -622,12 +595,12 @@ public:
     OpenCAML(const std::vector<CAElement> &ca, const std::vector<bool> &rand_values, const int &vmax,
              const int &new_car_speed);
 
-    ///@brief Devuelve elemento de valores del autómata celular considerando las condiciones de frontera.
+    ///@brief Devuelve referencia a  elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
-    ///@param j Posición temporal del AC.
-    ///@param ca Tipo de autómata celular.
-    using CellularAutomataML::At;
-    int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca);
+    ///@param lane Carril objetivo.
+    int &At(const int &i, const unsigned &lane);
+    int &AtTemp(const int &i, const unsigned &lane);
+    int &AtFlowTemp(const int &i, const unsigned &lane);
 
     void Step();    ///< Aplica reglas de evolución temporal del AC.
 };
@@ -677,10 +650,8 @@ public:
     void Evolve(const unsigned &iter);
     int NextCarDist(const int &pos, const unsigned &lane);
     bool Randomization(const double &prob = -1.0);
-    int &At(const int &i, const unsigned &lane, const CAS &ca = CA);
-    int &At(const int &i, const unsigned &lane, const unsigned &j, const CAS &ca);
-    int GetAt(const unsigned &i, const unsigned &lane, const CAS &ca = CA);
-    int GetAt(const unsigned &i, const unsigned &lane, const unsigned &j, const CAS &ca);
+    int &At(const int &i, const unsigned &lane);
+    int GetAt(const unsigned &i, const unsigned &lane);
     void Connect(CellularAutomata* connect, unsigned connect_pos);
     void Connect(CellularAutomataML* connect, unsigned connect_pos);
     int DrawHistory(std::string path = "", std::string out_file_name = "");
