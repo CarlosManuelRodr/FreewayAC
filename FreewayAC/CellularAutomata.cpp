@@ -79,7 +79,7 @@ CellularAutomata::CellularAutomata(const vector<int> &ca, const vector<bool> &ra
     m_rand_prob = 0;
     m_ca_temp.assign(m_size, -1);
     m_ca_history.clear();
-    m_ca_flow_history.clear();
+	m_ca_flow_temp.assign(m_size, 0);
     m_ca_history.push_back(m_ca);
     m_connect = NULL;
     m_connect_pos = -1;
@@ -246,6 +246,13 @@ inline void CellularAutomata::AssignChanges()
     m_ca_flow_temp.assign(m_size, 0);
     m_ca_temp.assign(m_size, -1);
 }
+inline int CellularAutomata::NextCarDist(const int &pos)
+{
+	int dist = 1;
+	while ((At(pos + dist) == -1) && (dist < 2 * (int)m_size))
+		dist++;
+	return dist;
+}
 void CellularAutomata::Evolve(const unsigned &iter)
 {
     for (unsigned i = 0; i < iter; ++i)
@@ -342,13 +349,6 @@ void CellularAutomata::Connect(CellularAutomata* connect, unsigned connect_pos)
         m_connect_pos = m_size / 2;
         cout << "Valor incorrecto de posicion de conexion. Cambiando a " << m_connect_pos << endl;
     }
-}
-int CellularAutomata::NextCarDist(const int &pos)
-{
-    int dist = 1;
-    while ((At(pos+dist) == -1) && (dist < 2*(int)m_size))
-        dist++;
-    return dist;
 }
 vector<double> CellularAutomata::CalculateOcupancy()
 {

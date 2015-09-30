@@ -1,1 +1,3 @@
 ﻿- Implementar decisión de carril en unión.
+- Flujo y ocupación no se miden correctament en unión.
+- Implementación de At es ineficiente.
