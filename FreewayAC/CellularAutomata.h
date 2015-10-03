@@ -156,7 +156,6 @@ public:
     unsigned GetSize() const;             ///< Devuelve tamaño del AC.
     unsigned GetHistorySize() const;      ///< Devuelve tamaño de la lista histórica de evolución del AC.
     unsigned CountCars() const;           ///< Cuenta la cantidad de autos en AC.
-    bool IsFluxHalted() const;            ///< Informa si el flujo está estancado.
     void PrintHistory() const;            ///< Escribe los valores históricos del AC en la terminal.
     virtual void Step();            ///< Aplica reglas de evolución temporal del AC.
     virtual void Move();            ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
@@ -528,7 +527,6 @@ public:
     CaSize GetHistorySize() const;    ///< Devuelve tamaño de la lista histórica de evolución del AC.
     CaLane GetLanes() const;        ///< Devuelve el número de carriles.
     unsigned CountCars() const;       ///< Cuenta la cantidad de autos en AC.
-    bool IsFluxHalted() const;        ///< Informa si el flujo está estancado.
     void PrintHistory() const;        ///< Escribe los valores históricos del AC en la terminal.
     virtual void Step();        ///< Aplica reglas de evolución temporal del AC.
     virtual void ChangeLanes(); ///< Aplica las reglas de cambio carril.
@@ -684,7 +682,6 @@ public:
     CaSize GetHistorySize() const;
     CaLane GetLanes() const;
     unsigned CountCars() const;
-    bool IsFluxHalted() const;
     void PrintHistory() const;
     void Step();
     void Move();

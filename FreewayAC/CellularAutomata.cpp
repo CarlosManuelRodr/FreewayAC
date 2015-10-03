@@ -81,7 +81,7 @@ CellularAutomata::CellularAutomata(const vector<int> &ca, const vector<bool> &ra
     m_ca_history.clear();
     m_ca_flow_temp.assign(m_size, NO_FLOW);
     m_ca_history.push_back(m_ca);
-    m_connect = NULL;
+    m_connect = nullptr;
     m_connect_pos = -1;
     m_init_vel = 1;
 }
@@ -272,34 +272,7 @@ unsigned CellularAutomata::GetHistorySize() const
 }
 unsigned CellularAutomata::CountCars() const
 {
-    unsigned count = 0;
-    for (unsigned i = 0; i < m_ca.size(); ++i)
-    {
-        if (m_ca[i] != CA_EMPTY)
-            count++;
-    }
-    return count;
-}
-bool CellularAutomata::IsFluxHalted() const
-{
-    bool halted = true;
-    if (m_ca_flow_history.size() > 1)
-    {
-        for (unsigned i = 1; i < m_ca_flow_history.size() && halted; ++i)
-        {
-            for (unsigned j = 0; j < m_size; ++j)
-            {
-                if (m_ca_flow_history[i][j] != NO_FLOW)
-                {
-                    halted = false;
-                    break;
-                }
-            }
-        }
-        return halted;
-    }
-    else
-        return false;
+    return count_if(m_ca.begin(), m_ca.end(), [](CaVelocity i) {return i != CA_EMPTY; });
 }
 bool CellularAutomata::Randomization(const double prob)
 {
@@ -447,31 +420,19 @@ OpenCA::OpenCA(const vector<int> &ca, const vector<bool> &rand_values, const int
 }
 inline CaVelocity &OpenCA::At(const CaPosition i)
 {
-    if ((unsigned)i >= m_ca.size())
-        return m_ca_empty;
-    else
-        return m_ca[i];
+    return ((unsigned)i >= m_ca.size()) ? m_ca_empty : m_ca[i];
 }
 inline CaVelocity &OpenCA::AtTemp(const CaPosition i)
 {
-    if ((unsigned)i >= m_ca.size())
-        return m_ca_empty;
-    else
-        return m_ca_temp[i];
+    return ((unsigned)i >= m_ca.size()) ? m_ca_empty : m_ca_temp[i];
 }
 inline CaVelocity &OpenCA::AtFlowTemp(const CaPosition i)
 {
-    if ((unsigned)i >= m_ca.size())
-        return m_ca_flow_empty;
-    else
-        return m_ca_flow_temp[i];
+    return ((unsigned)i >= m_ca.size()) ? m_ca_flow_empty : m_ca_flow_temp[i];
 }
 inline CaVelocity OpenCA::GetAt(const CaPosition i) const
 {
-    if ((unsigned)i >= m_ca.size())
-        return CA_EMPTY;
-    else
-        return m_ca[i];
+    return ((unsigned)i >= m_ca.size()) ? CA_EMPTY : m_ca[i];
 }
 void OpenCA::Step()
 {
@@ -1501,30 +1462,6 @@ void CellularAutomataML::PrintHistory() const
         cout << endl;
     }
 }
-bool CellularAutomataML::IsFluxHalted() const
-{
-    bool halted = true;
-    if (m_ca_flow_history.size() > 1)
-    {
-        for (unsigned i = 1; i < m_ca_flow_history.size() && halted; ++i)
-        {
-            for (unsigned k = 0; k < m_lanes; ++k)
-            {
-                for (unsigned j = 0; j < m_size; ++j)
-                {
-                    if (m_ca_flow_history[i][k][j] != NO_FLOW)
-                    {
-                        halted = false;
-                        break;
-                    }
-                }
-            }
-        }
-        return halted;
-    }
-    else
-        return false;
-}
 vector<double> CellularAutomataML::CalculateOcupancy() const
 {
     vector<double> ocupancy;
@@ -1652,31 +1589,19 @@ OpenCAML::OpenCAML(const vector<CaElementVel> &ca, const vector<bool> &rand_valu
 }
 inline CaVelocity &OpenCAML::At(const CaPosition i, const CaLane lane)
 {
-    if (i < 0 || (unsigned)i >= m_ca.size())
-        return m_ca_empty;
-    else
-        return m_ca[i][lane];
+    return (i < 0 || (unsigned)i >= m_ca.size()) ? m_ca_empty : m_ca[i][lane];
 }
 inline CaVelocity &OpenCAML::AtTemp(const CaPosition i, const CaLane lane)
 {
-    if ((unsigned)i >= m_ca.size())
-        return m_ca_empty;
-    else
-        return m_ca_temp[i][lane];
+    return (i < 0 || (unsigned)i >= m_ca.size()) ? m_ca_empty : m_ca_temp[i][lane];
 }
 inline CaVelocity &OpenCAML::AtFlowTemp(const CaPosition i, const CaLane lane)
 {
-    if ((unsigned)i >= m_ca.size())
-        return m_ca_flow_empty;
-    else
-        return m_ca_flow_temp[i][lane];
+    return (i < 0 || (unsigned)i >= m_ca.size()) ? m_ca_flow_empty : m_ca_flow_temp[i][lane];
 }
 inline CaVelocity OpenCAML::GetAt(const CaPosition i, const CaLane lane) const
 {
-    if (i < 0 || (unsigned)i >= m_ca.size())
-        return CA_EMPTY;
-    else
-        return m_ca[i][lane];
+    return (i < 0 || (unsigned)i >= m_ca.size()) ? CA_EMPTY : m_ca[i][lane];
 }
 void OpenCAML::Step()
 {
@@ -2007,13 +1932,6 @@ unsigned CaHandler::CountCars() const
         return cellularautomataml->CountCars();
     else
         return cellularautomata->CountCars();
-}
-bool CaHandler::IsFluxHalted() const
-{
-    if (multilane)
-        return cellularautomataml->IsFluxHalted();
-    else
-        return cellularautomata->IsFluxHalted();
 }
 void CaHandler::PrintHistory() const
 {
