@@ -20,7 +20,7 @@ using namespace std;
 *                           *
 ****************************/
 
-CellularAutomata::CellularAutomata(const unsigned size, const double density, const int vmax, const double rand_prob, const int init_vel)
+CellularAutomata::CellularAutomata(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob, const CaVelocity init_vel)
 {
     // Inicializa variables.
     m_test = false;
@@ -28,9 +28,9 @@ CellularAutomata::CellularAutomata(const unsigned size, const double density, co
     m_vmax = vmax;
     m_rand_prob = rand_prob;
     m_init_vel = init_vel;
-    m_ca.assign(size, -1);
-    m_ca_temp.assign(size, -1);
-    m_ca_flow_temp.assign(size, 0);
+    m_ca.assign(size, CA_EMPTY);
+    m_ca_temp.assign(size, CA_EMPTY);
+    m_ca_flow_temp.assign(size, NO_FLOW);
     m_ca_history.clear();
     m_ca_flow_history.clear();
     m_connect = nullptr;
@@ -68,7 +68,7 @@ CellularAutomata::CellularAutomata(const unsigned size, const double density, co
     m_ca_history.push_back(m_ca);
     m_ca_flow_history.push_back(m_ca_flow_temp);
 }
-CellularAutomata::CellularAutomata(const vector<int> &ca, const vector<bool> &rand_values, const int vmax)
+CellularAutomata::CellularAutomata(const vector<int> &ca, const vector<bool> &rand_values, const CaVelocity vmax)
 {
     // Inicializa variables.
     m_test = true;
@@ -77,9 +77,9 @@ CellularAutomata::CellularAutomata(const vector<int> &ca, const vector<bool> &ra
     m_size = m_ca.size();
     m_vmax = vmax;
     m_rand_prob = 0;
-    m_ca_temp.assign(m_size, -1);
+    m_ca_temp.assign(m_size, CA_EMPTY);
     m_ca_history.clear();
-	m_ca_flow_temp.assign(m_size, 0);
+    m_ca_flow_temp.assign(m_size, NO_FLOW);
     m_ca_history.push_back(m_ca);
     m_connect = NULL;
     m_connect_pos = -1;
@@ -91,7 +91,7 @@ void CellularAutomata::Print() const
     // Imprime valores del automata celular en la terminal.
     for (auto ca : m_ca)
     {
-        if (ca == -1)
+        if (ca == CA_EMPTY)
             cout << "-";
         else
             cout <<ca;
@@ -104,16 +104,16 @@ void CellularAutomata::PrintHistory() const
     {
         for (unsigned j = 0; j < m_size; ++j)
         {
-            if (j != m_size -1)
+            if (j != m_size - 1)
             {
-                if (m_ca_history[i][j] == -1)
+                if (m_ca_history[i][j] == CA_EMPTY)
                     cout << " , ";
                 else
                     cout << m_ca_history[i][j] << ", ";
             }
             else
             {
-                if (m_ca_history[i][j] == -1)
+                if (m_ca_history[i][j] == CA_EMPTY)
                     cout << " ";
                 else
                     cout << m_ca_history[i][j];
@@ -140,7 +140,7 @@ int CellularAutomata::DrawHistory(string path, string out_file_name) const
             for (unsigned j = 0; j < width; ++j)
             {
                 BMPPixel color;
-                if (m_ca_history[i][j] == -1)
+                if (m_ca_history[i][j] == CA_EMPTY)
                     color = BMPPixel((char)255, (char)255, (char)255);
                 else
                     color = BMPPixel(0, 0, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
@@ -193,10 +193,10 @@ inline void CellularAutomata::Step()
     // Iterar sobre AC hasta encotrar vehiculo.
     for (unsigned i = 0; i < m_ca.size(); ++i)
     {
-        if (m_ca[i] != -1)
+        if (m_ca[i] != CA_EMPTY)
         {
             // Aceleracion.
-            if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
+            if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (CaSize)(m_ca[i] + 1)))
                 m_ca[i]++;
             else
             {
@@ -224,17 +224,17 @@ inline void CellularAutomata::Move()
 {
     for (unsigned i = 0; i < m_ca.size(); ++i)
     {
-        if (m_ca[i] != -1)
+        if (m_ca[i] != CA_EMPTY)
         {
             // Cambia las posiciones de los autos en AC.
-            if ((i + m_ca[i] >= m_size) && m_connect != NULL)
+            if ((i + m_ca[i] >= m_size) && m_connect != nullptr)
                 AtConnected(i + m_ca[i]) = m_ca[i];
             else
                 AtTemp(i + m_ca[i]) = m_ca[i];
 
             // Marca las casillas donde hay flujo de autos.
             for (unsigned j = i; j < i + m_ca[i]; ++j)
-                AtFlowTemp(j) = 1;
+                AtFlowTemp(j) = IS_FLOW;
         }
     }
     AssignChanges();
@@ -243,19 +243,19 @@ inline void CellularAutomata::AssignChanges()
 {
     m_ca_flow_history.push_back(m_ca_flow_temp);
     m_ca.assign(m_ca_temp.begin(), m_ca_temp.end());
-    m_ca_flow_temp.assign(m_size, 0);
-    m_ca_temp.assign(m_size, -1);
+    m_ca_flow_temp.assign(m_size, NO_FLOW);
+    m_ca_temp.assign(m_size, CA_EMPTY);
 }
-inline int CellularAutomata::NextCarDist(const CaPosition pos) const
+inline CaSize CellularAutomata::NextCarDist(const CaPosition pos) const
 {
-	int dist = 1;
-	while ((GetAt(pos + dist) == -1) && (dist < 2 * (int)m_size))
-		dist++;
-	return dist;
+    CaSize dist = 1;
+    while ((GetAt(pos + dist) == CA_EMPTY) && (dist < 2 * m_size))
+        dist++;
+    return dist;
 }
 inline int &CellularAutomata::AtConnected(const CaPosition i)
 {
-	return m_connect->At(i - m_size + m_connect_pos);
+    return m_connect->At(i - m_size + m_connect_pos);
 }
 void CellularAutomata::Evolve(const unsigned iter)
 {
@@ -275,7 +275,7 @@ unsigned CellularAutomata::CountCars() const
     unsigned count = 0;
     for (unsigned i = 0; i < m_ca.size(); ++i)
     {
-        if (m_ca[i] != -1)
+        if (m_ca[i] != CA_EMPTY)
             count++;
     }
     return count;
@@ -289,7 +289,7 @@ bool CellularAutomata::IsFluxHalted() const
         {
             for (unsigned j = 0; j < m_size; ++j)
             {
-                if (m_ca_flow_history[i][j] != 0)
+                if (m_ca_flow_history[i][j] != NO_FLOW)
                 {
                     halted = false;
                     break;
@@ -329,13 +329,9 @@ bool CellularAutomata::Randomization(const double prob)
             return false;
     }
 }
-inline int CellularAutomata::GetAt(const CaPosition i) const
-{
-    return m_ca[i];
-}
 void CellularAutomata::Connect(CellularAutomata* connect, CaPosition from, CaPosition to)
 {
-    
+
 }
 vector<double> CellularAutomata::CalculateOcupancy() const
 {
@@ -349,7 +345,7 @@ vector<double> CellularAutomata::CalculateOcupancy() const
         int sum = 0;
         for (unsigned j = 1; j < height; ++j)
         {
-            if (m_ca_history[j][i] != -1)
+            if (m_ca_history[j][i] != CA_EMPTY)
                 sum++;
         }
         ocupancy[i] = (double)sum/(double)height;
@@ -368,7 +364,7 @@ vector<double> CellularAutomata::CalculateFlow() const
         int sum = 0;
         for (unsigned j = 1; j < height; ++j)
         {
-            if ((m_ca_flow_history[j][i] != 0) && (m_ca_flow_history[j][i + 1] != 0))
+            if ((m_ca_flow_history[j][i] != NO_FLOW) && (m_ca_flow_history[j][i + 1] != NO_FLOW))
                 sum++;
         }
         flow[i] = (double)sum/(double)height;
@@ -387,21 +383,25 @@ double CellularAutomata::CalculateMeanFlow() const
 *                           *
 ****************************/
 
-CircularCA::CircularCA(const unsigned size, const double density, const int vmax, const double rand_prob, const int init_vel)
+CircularCA::CircularCA(const CaSize size, const double density, const int vmax, const double rand_prob, const int init_vel)
     : CellularAutomata(size, density, vmax, rand_prob, init_vel) {}
 CircularCA::CircularCA(const vector<int> &ca, const vector<bool> &rand_values, const int vmax)
     : CellularAutomata(ca, rand_values, vmax) {}
-inline int &CircularCA::At(const CaPosition i)
+inline CaVelocity &CircularCA::At(const CaPosition i)
 {
-	return m_ca[i % m_ca.size()];
+    return m_ca[i % m_ca.size()];
 }
-inline int &CircularCA::AtTemp(const CaPosition i)
+inline CaVelocity &CircularCA::AtTemp(const CaPosition i)
 {
-	return m_ca_temp[i % m_ca.size()];
+    return m_ca_temp[i % m_ca.size()];
 }
-inline int &CircularCA::AtFlowTemp(const CaPosition i)
+inline CaVelocity &CircularCA::AtFlowTemp(const CaPosition i)
 {
-	return m_ca_flow_temp[i % m_ca.size()];
+    return m_ca_flow_temp[i % m_ca.size()];
+}
+inline CaVelocity CircularCA::GetAt(const CaPosition i) const
+{
+    return m_ca[i % m_ca.size()];
 }
 void CircularCA::Evolve(const unsigned iter)
 {
@@ -420,14 +420,14 @@ void CircularCA::Evolve(const unsigned iter)
 *                           *
 ****************************/
 
-OpenCA::OpenCA(const unsigned size, const double density, const int vmax, const double rand_prob, const int init_vel,
+OpenCA::OpenCA(const CaSize size, const double density, const int vmax, const double rand_prob, const int init_vel,
                const double new_car_prob, const int new_car_speed)
     : CellularAutomata(size, density, vmax, rand_prob, init_vel)
 {
     m_new_car_prob = new_car_prob;
     m_new_car_speed = new_car_speed;
-    m_ca_empty = -1;
-	m_ca_flow_empty = 0;
+    m_ca_empty = CA_EMPTY;
+	m_ca_flow_empty = NO_FLOW;
 
     // Verifica argumento.
     if (m_new_car_prob < 0 || m_new_car_prob > 1)
@@ -442,39 +442,46 @@ OpenCA::OpenCA(const vector<int> &ca, const vector<bool> &rand_values, const int
 {
     m_new_car_prob = -1.0;
     m_new_car_speed = new_car_speed;
-    m_ca_empty = -1;
-	m_ca_flow_empty = 0;
+    m_ca_empty = CA_EMPTY;
+    m_ca_flow_empty = NO_FLOW;
 }
-inline int &OpenCA::At(const CaPosition i)
+inline CaVelocity &OpenCA::At(const CaPosition i)
 {
-	if ((unsigned)i >= m_ca.size())
-		return m_ca_empty;
-	else
-		return m_ca[i];
+    if ((unsigned)i >= m_ca.size())
+        return m_ca_empty;
+    else
+        return m_ca[i];
 }
-inline int &OpenCA::AtTemp(const CaPosition i)
+inline CaVelocity &OpenCA::AtTemp(const CaPosition i)
 {
-	if ((unsigned)i >= m_ca.size())
-		return m_ca_empty;
-	else
-		return m_ca_temp[i];
+    if ((unsigned)i >= m_ca.size())
+        return m_ca_empty;
+    else
+        return m_ca_temp[i];
 }
-inline int &OpenCA::AtFlowTemp(const CaPosition i)
+inline CaVelocity &OpenCA::AtFlowTemp(const CaPosition i)
 {
-	if ((unsigned)i >= m_ca.size())
-		return m_ca_flow_empty;
-	else
-		return m_ca_flow_temp[i];
+    if ((unsigned)i >= m_ca.size())
+        return m_ca_flow_empty;
+    else
+        return m_ca_flow_temp[i];
+}
+inline CaVelocity OpenCA::GetAt(const CaPosition i) const
+{
+    if ((unsigned)i >= m_ca.size())
+        return CA_EMPTY;
+    else
+        return m_ca[i];
 }
 void OpenCA::Step()
 {
     // Iterar sobre AC hasta encotrar vehiculo.
     for (unsigned i = 0; i < m_ca.size(); ++i)
     {
-        if (m_ca[i] != -1)
+        if (m_ca[i] != CA_EMPTY)
         {
             // Aceleracion.
-            if ((m_ca[i] < m_vmax) && (NextCarDist(i) >(m_ca[i] + 1)))
+            if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (CaSize)(m_ca[i] + 1)))
                 m_ca[i]++;
             else
             {
@@ -498,7 +505,7 @@ void OpenCA::Step()
     Move();
 
     // Añade coche con probabilidad aleatoria.
-    if (m_ca[0] == -1 && Randomization(m_new_car_prob))
+    if (m_ca[0] == CA_EMPTY && Randomization(m_new_car_prob))
         m_ca[0] = m_new_car_speed;
 
     m_ca_history.push_back(m_ca);
@@ -511,7 +518,7 @@ void OpenCA::Step()
 *                           *
 ****************************/
 
-AutonomousCA::AutonomousCA(const unsigned size, const double density, const int vmax, const double rand_prob,
+AutonomousCA::AutonomousCA(const CaSize size, const double density, const int vmax, const double rand_prob,
                            const int init_vel, const double aut_density)
     : CircularCA(size, density, vmax, rand_prob, init_vel)
 {
@@ -528,7 +535,7 @@ AutonomousCA::AutonomousCA(const unsigned size, const double density, const int 
     vector<int> aut_car_positions;
     for (unsigned i = 0; i < m_size; ++i)
     {
-        if (m_ca[i] != -1)
+        if (m_ca[i] != CA_EMPTY)
             aut_car_positions.push_back(i);
     }
 
@@ -537,7 +544,7 @@ AutonomousCA::AutonomousCA(const unsigned size, const double density, const int 
         m_aut_cars.push_back(aut_car_positions[i]);
 }
 AutonomousCA::AutonomousCA(const vector<int> &ca, vector<int> &aut_cars, const vector<bool> &rand_values,
-                 const int vmax)
+                           const int vmax)
                  : CircularCA(ca, rand_values, vmax)
 {
     m_aut_cars = aut_cars;
@@ -546,18 +553,18 @@ void AutonomousCA::Move()
 {
     for (unsigned i = 0; i < m_ca.size(); ++i)
     {
-        if (m_ca[i] != -1)
+        if (m_ca[i] != CA_EMPTY)
         {
             int pos = aux_find_pos<int>(m_aut_cars, i);
-            if (pos != -1)
-                m_aut_cars[pos] = (i+m_ca[i]) % m_size;
+            if (pos != CA_EMPTY)
+                m_aut_cars[pos] = (i + m_ca[i]) % m_size;
 
             // Cambia las posiciones de los autos en AC.
-            AtTemp(i+m_ca[i]) = m_ca[i];
+            AtTemp(i + m_ca[i]) = m_ca[i];
 
             // Marca las casillas donde hay flujo de autos.
             for (unsigned j = i; j < i+m_ca[i]; ++j)
-                AtFlowTemp(j) = 1;
+                AtFlowTemp(j) = IS_FLOW;
         }
     }
     AssignChanges();
@@ -567,18 +574,17 @@ void AutonomousCA::Step()
     // Iterar sobre AC hasta encotrar vehiculo.
     for (unsigned i = 0; i < m_ca.size(); ++i)
     {
-        if (m_ca[i] != -1)
+        if (m_ca[i] != CA_EMPTY)
         {
-
             bool smart = aux_is_in<int>(m_aut_cars, i);
             if (smart)
             {
                 // Auto inteligente.
                 int nc = i + NextCarDist(i);
                 nc %= m_size;
-                if ((m_ca[nc] < m_vmax) && (NextCarDist(nc) > (m_ca[nc] + 1)) && (NextCarDist(i) <= m_ca[i]))
+                if ((m_ca[nc] < m_vmax) && (NextCarDist(nc) > (CaSize)(m_ca[nc] + 1)) && (NextCarDist(i) <= (CaSize)m_ca[i]))
                 {
-                    if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
+                    if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (CaSize)(m_ca[i] + 1)))
                         m_ca[i]++;
                     else
                     {
@@ -602,7 +608,7 @@ void AutonomousCA::Step()
                 else
                 {
                     // Aceleracion.
-                    if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
+                    if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (CaSize)(m_ca[i] + 1)))
                         m_ca[i]++;
                     else
                     {
@@ -619,7 +625,7 @@ void AutonomousCA::Step()
             else
             {
                 // Aceleracion.
-                if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
+                if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (CaSize)(m_ca[i] + 1)))
                     m_ca[i]++;
                 else
                 {
@@ -654,7 +660,7 @@ void AutonomousCA::Step()
 *                           *
 ****************************/
 
-StreetStopCA::StreetStopCA(const unsigned size, const double density, const int vmax, 
+StreetStopCA::StreetStopCA(const CaSize size, const double density, const int vmax,
                            const double rand_prob, const int init_vel, const double stop_density)
                            : CircularCA(size, density, vmax, rand_prob, init_vel)
 {
@@ -679,10 +685,10 @@ void StreetStopCA::Step()
     // Iterar sobre AC hasta encotrar vehiculo.
     for (unsigned i = 0; i < m_ca.size(); ++i)
     {
-        if (m_ca[i] != -1)
+        if (m_ca[i] != CA_EMPTY)
         {
             // Aceleracion.
-            if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (m_ca[i] + 1)))
+            if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (CaSize)(m_ca[i] + 1)))
                 m_ca[i]++;
             else
             {
@@ -700,7 +706,7 @@ void StreetStopCA::Step()
                 m_ca[i]--;
 
             // Tope.
-            if ((NextStopDist(i) < 2*m_vmax) && (m_ca[i] > 1))
+            if ((NextStopDist(i) < (CaSize)(2*m_vmax)) && (m_ca[i] > 1))
                 m_ca[i]--;
         }
     }
@@ -709,11 +715,11 @@ void StreetStopCA::Step()
     Move();
     m_ca_history.push_back(m_ca);
 }
-int StreetStopCA::NextStopDist(const CaPosition pos) const
+CaSize StreetStopCA::NextStopDist(const CaPosition pos) const
 {
     if (!m_stop_pos.empty())
     {
-        vector<unsigned> dist;
+        vector<CaSize> dist;
         for (unsigned i = 0; i < m_stop_pos.size(); ++i)
         {
             int tmp_dist = pos - m_stop_pos[i];
@@ -725,7 +731,7 @@ int StreetStopCA::NextStopDist(const CaPosition pos) const
         return *min_element(dist.begin(), dist.end());
     }
     else
-        return numeric_limits<int>::max();
+        return numeric_limits<CaSize>::max();
 }
 int StreetStopCA::DrawHistory(string path, string out_file_name) const
 {
@@ -747,14 +753,14 @@ int StreetStopCA::DrawHistory(string path, string out_file_name) const
                 BMPPixel color;
                 if (aux_is_in_const(m_stop_pos, j))
                 {
-                    if (m_ca_history[i][j] == -1)
+                    if (m_ca_history[i][j] == CA_EMPTY)
                         color = BMPPixel((char)0, (char)255, (char)0);
                     else
                         color = BMPPixel(0, (char)255, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
                 }
                 else
                 {
-                    if (m_ca_history[i][j] == -1)
+                    if (m_ca_history[i][j] == CA_EMPTY)
                         color = BMPPixel((char)255, (char)255, (char)255);
                     else
                         color = BMPPixel(0, 0, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
@@ -777,7 +783,7 @@ int StreetStopCA::DrawHistory(string path, string out_file_name) const
 *                           *
 ****************************/
 
-SemaphoreCA::SemaphoreCA(const unsigned size, const double density, const int vmax, 
+SemaphoreCA::SemaphoreCA(const CaSize size, const double density, const int vmax,
                          const double rand_prob, const int init_vel, const double semaphore_density,
                          const bool random_semaphores)
                        : CircularCA(size, density, vmax, rand_prob, init_vel)
@@ -824,10 +830,10 @@ void SemaphoreCA::Step()
     // Iterar sobre AC hasta encotrar vehiculo.
     for (unsigned i = 0; i < m_ca.size(); ++i)
     {
-        if (m_ca[i] != -1)
+        if (m_ca[i] != CA_EMPTY)
         {
             // Aceleracion.
-            if ((m_ca[i] < m_vmax) && ((NextCarDist(i) > (m_ca[i] + 1)) && (NextSemaphoreDist(i) > (m_ca[i] + 1))))
+            if ((m_ca[i] < m_vmax) && ((NextCarDist(i) > (CaSize)(m_ca[i] + 1)) && (NextSemaphoreDist(i) >(CaSize)(m_ca[i] + 1))))
                 m_ca[i]++;
             else
             {
@@ -861,11 +867,11 @@ void SemaphoreCA::Step()
     Move();
     m_ca_history.push_back(m_ca);
 }
-int SemaphoreCA::NextSemaphoreDist(const CaPosition pos) const
+CaSize SemaphoreCA::NextSemaphoreDist(const CaPosition pos) const
 {
     if (!m_semaphore_pos.empty())
     {
-        vector<unsigned> dist;
+        vector<CaSize> dist;
         for (unsigned i = 0; i < m_semaphore_pos.size(); ++i)
         {
             if (m_semaphore_value[i] >= m_semaphore_open)
@@ -880,10 +886,10 @@ int SemaphoreCA::NextSemaphoreDist(const CaPosition pos) const
         if (!dist.empty())
             return *min_element(dist.begin(), dist.end());
         else 
-            return numeric_limits<int>::max();
+            return numeric_limits<CaSize>::max();
     }
     else
-        return numeric_limits<int>::max();
+        return numeric_limits<CaSize>::max();
 }
 int SemaphoreCA::DrawHistory(string path, string out_file_name) const
 {
@@ -946,7 +952,7 @@ int SemaphoreCA::DrawHistory(string path, string out_file_name) const
 *                           *
 ****************************/
 
-SimpleJunctionCA::SimpleJunctionCA(const unsigned size, const double density, const int vmax, 
+SimpleJunctionCA::SimpleJunctionCA(const CaSize size, const double density, const int vmax,
                                    const double rand_prob, const int init_vel, const double new_car_prob,
                                    const int new_car_speed, const int target_lane)
                                  : OpenCA(size, density, vmax, rand_prob, init_vel, new_car_prob, new_car_speed)
@@ -994,14 +1000,14 @@ int SimpleJunctionCA::DrawHistory(string path, string out_file_name) const
                 BMPPixel color;
                 if (j == m_size/2)
                 {
-                    if (m_ca_history[i][j] == -1)
+                    if (m_ca_history[i][j] == CA_EMPTY)
                         color = BMPPixel((char)0, (char)255, (char)0);
                     else
                         color = BMPPixel((char)0, (char)255, (char)(255.0*(double)m_ca_history[i][j] / (double)m_vmax));
                 }
                 else
                 {
-                    if (m_ca_history[i][j] == -1)
+                    if (m_ca_history[i][j] == CA_EMPTY)
                         color = BMPPixel((char)255, (char)255, (char)255);
                     else
                         color = BMPPixel((char)0, (char)0, (char)(255.0*(double)m_ca_history[i][j] / (double)m_vmax));
@@ -1032,13 +1038,18 @@ int SimpleJunctionCA::DrawHistory(string path, string out_file_name) const
 *                           *
 ****************************/
 
-CAElement::CAElement(const int lanes, const int def_val)
+CaElementVel::CaElementVel(const CaLane lanes, const CaPosition def_val)
 {
     this->assign(lanes, def_val);
 }
 
-CellularAutomataML::CellularAutomataML(const unsigned size, const unsigned lanes, const double density, 
-                                       const int vmax, const double rand_prob, const int init_vel)
+CaElementFlow::CaElementFlow(const CaLane lanes, const CaFlow def_val)
+{
+    this->assign(lanes, def_val);
+}
+
+CellularAutomataML::CellularAutomataML(const CaSize size, const CaLane lanes, const double density,
+                                       const CaVelocity vmax, const double rand_prob, const CaVelocity init_vel)
 {
     // Inicializa variables.
     m_test = false;
@@ -1049,9 +1060,9 @@ CellularAutomataML::CellularAutomataML(const unsigned size, const unsigned lanes
     m_init_vel = init_vel;
     m_ca_history.clear();
     m_ca_flow_history.clear();
-    m_ca.assign(size, CAElement(lanes));
-    m_ca_temp.assign(size, CAElement(lanes));
-    m_ca_flow_temp.assign(m_size, CAElement(m_lanes, 0));
+    m_ca.assign(size, CaElementVel(lanes));
+    m_ca_temp.assign(size, CaElementVel(lanes));
+    m_ca_flow_temp.assign(m_size, CaElementFlow(m_lanes, NO_FLOW));
 
     m_connect = nullptr;
     m_connect_pos = -1;
@@ -1090,8 +1101,8 @@ CellularAutomataML::CellularAutomataML(const unsigned size, const unsigned lanes
     m_ca_history.push_back(m_ca);
     m_ca_flow_history.push_back(m_ca_flow_temp);
 }
-CellularAutomataML::CellularAutomataML(const vector<CAElement> &ca, const vector<bool> &rand_values,
-                                       const int vmax)
+CellularAutomataML::CellularAutomataML(const vector<CaElementVel> &ca, const vector<bool> &rand_values,
+                                       const CaVelocity vmax)
 {
     // Inicializa variables.
     m_test = true;
@@ -1100,11 +1111,11 @@ CellularAutomataML::CellularAutomataML(const vector<CAElement> &ca, const vector
     m_size = m_ca.size();
     m_vmax = vmax;
     m_rand_prob = 0;
-    m_ca_temp.assign(m_size, -1);
+    m_ca_temp.assign(m_size, CA_EMPTY);
     m_ca_history.clear();
     m_ca_flow_history.clear();
     m_ca_history.push_back(m_ca);
-    m_connect = NULL;
+    m_connect = nullptr;
     m_connect_pos = -1;
     m_init_vel = 1;
 
@@ -1124,7 +1135,7 @@ void CellularAutomataML::Print() const
     {
         for (unsigned j = 0; j < m_ca.size(); ++j)
         {
-            if (m_ca[j][i] == -1)
+            if (m_ca[j][i] == CA_EMPTY)
                 cout << "-";
             else
                 cout << m_ca[j][i];
@@ -1156,13 +1167,13 @@ int CellularAutomataML::DrawHistory(string path, string out_file_name) const
         BMPPixel* bmpData = new BMPPixel[width];
         BMPPixel color;
 
-        for (int i = height-1; i >= 0; i--)
+        for (int i = height - 1; i >= 0; i--)
         {
             for (unsigned l = 0; l < m_lanes; ++l)
             {
                 for (unsigned j = 0; j < width; ++j)
                 {
-                    if (m_ca_history[i][j][l] == -1)
+                    if (m_ca_history[i][j][l] == CA_EMPTY)
                         color = BMPPixel((char)255, (char)255, (char)255);
                     else
                         color = BMPPixel(0, 0, (char)(255.0*(double)m_ca_history[i][j][l]/(double)m_vmax));
@@ -1215,7 +1226,7 @@ int CellularAutomataML::DrawFlowHistory(string path, string out_file_name) const
             {
                 for (unsigned j = 0; j < width; ++j)
                 {
-                    if (m_ca_flow_history[i][j][l] == 0)
+                    if (m_ca_flow_history[i][j][l] == NO_FLOW)
                         color = BMPPixel((char)255, (char)255, (char)255);
                     else
                         color = BMPPixel(0, 0, (char)(255.0*(double)m_ca_flow_history[i][j][l]/(double)m_vmax));
@@ -1278,25 +1289,26 @@ void CellularAutomataML::ChangeLanes()
             for (unsigned j = 0; j < m_lanes; ++j)
             {
                 // Si no puede acelerar
-                if (!((At(i, j) < m_vmax) && (NextCarDist(i, j) > (At(i, j) + 1))))
+                if (!((m_ca[i][j] < m_vmax) && (NextCarDist(i, j) > (CaSize)(m_ca[i][j] + 1))))
                 {
                     // Intenta cambiar de carril.
                     bool left = false, right = false;
                     for (int k = (int)j - 1; k <= (int)j + 1 && k < (int)m_lanes; ++k)
                     {
                         // Evita carril inexistente, el mismo y carril ocupado.
-                        if (k < 0 || (unsigned)k == j || At(i, k) != -1) continue;
+                        if (k < 0 || (unsigned)k == j || m_ca[i][k] != CA_EMPTY)
+                            continue;
 
                         // Busca auto anterior y verifica si puede cambiarse sin chocar.
                         int v, s = 0;
                         for (int l = i - 1; s <= m_vmax; ++s, l--)
                         {
                             // Verifica posibilidad de choque.
-                            v = At(l, k);
-                            if ((v != -1) && (v - s <= 0))
+                            v = GetAt(l, k);
+                            if ((v != CA_EMPTY) && (v - s <= 0))
                             {
                                 // Ahora busca si en este nuevo carril puede acelerar.
-                                if (NextCarDist(i, k) > (At(i, j) + 1))
+                                if (NextCarDist(i, k) > (CaSize)(m_ca[i][j] + 1))
                                 {
                                     // Marca carril como disponible.
                                     if ((unsigned)k == j - 1)
@@ -1310,7 +1322,7 @@ void CellularAutomataML::ChangeLanes()
                         }
                         if (s == m_vmax)
                         {
-                            if (NextCarDist(i, k) > (At(i, j) + 1))
+                            if (NextCarDist(i, k) > (CaSize)(m_ca[i][j] + 1))
                             {
                                 // Marca carril como disponible.
                                 if ((unsigned)k == j - 1)
@@ -1336,8 +1348,8 @@ void CellularAutomataML::ChangeLanes()
                         else
                             new_lane = j + 1;
 
-                        At(i, new_lane) = At(i, j);
-                        At(i, j) = -1;
+                        m_ca[i][new_lane] = m_ca[i][j];
+                        m_ca[i][j] = CA_EMPTY;
                     }
                 }
             }
@@ -1355,10 +1367,10 @@ void CellularAutomataML::Step()
         for (unsigned j = 0; j < m_lanes; ++j)
         {
             // Encuentra vehículo.
-            if (m_ca[i][j] != -1)
+            if (m_ca[i][j] != CA_EMPTY)
             {
                 // Aceleracion.
-                if ((m_ca[i][j] < m_vmax) && (NextCarDist(i, j) > m_ca[i][j] + 1))
+                if ((m_ca[i][j] < m_vmax) && (NextCarDist(i, j) > (CaSize)(m_ca[i][j] + 1)))
                     m_ca[i][j]++;
                 else
                 {
@@ -1388,15 +1400,15 @@ void CellularAutomataML::Evolve(const unsigned iter)
     for (unsigned i = 0; i < iter; ++i)
         Step();
 }
-unsigned CellularAutomataML::GetSize() const
+CaSize CellularAutomataML::GetSize() const
 {
     return m_size;
 }
-unsigned CellularAutomataML::GetHistorySize() const
+CaSize CellularAutomataML::GetHistorySize() const
 {
     return m_ca_history.size();
 }
-unsigned CellularAutomataML::GetLanes() const
+CaLane CellularAutomataML::GetLanes() const
 {
     return m_lanes;
 }
@@ -1407,15 +1419,11 @@ unsigned CellularAutomataML::CountCars() const
     {
         for (unsigned j = 0; j < m_lanes; ++j)
         {
-            if (m_ca[i][j] != -1)
+            if (m_ca[i][j] != CA_EMPTY)
                 count++;
         }
     }
     return count;
-}
-inline int CellularAutomataML::GetAt(const CaPosition i, const CaLane lane) const
-{
-    return m_ca[i][lane];
 }
 void CellularAutomataML::Connect(CellularAutomataML* connect, CaPosition connect_pos)
 {
@@ -1427,10 +1435,10 @@ void CellularAutomataML::Connect(CellularAutomataML* connect, CaPosition connect
         cout << "Valor incorrecto de posicion de conexion. Cambiando a " << m_connect_pos << endl;
     }
 }
-int CellularAutomataML::NextCarDist(const CaPosition pos, const CaLane lane) const
+inline CaSize CellularAutomataML::NextCarDist(const CaPosition pos, const CaLane lane) const
 {
-    int dist = 1;
-    while ((GetAt(pos + dist, lane) == -1) && (dist < 2*(int)m_size))
+    CaSize dist = 1;
+    while ((GetAt(pos + dist, lane) == CA_EMPTY) && (dist < 2 * m_size))
         dist++;
     return dist;
 }
@@ -1440,14 +1448,14 @@ void CellularAutomataML::Move()
     {
         for (unsigned j = 0; j < m_lanes; ++j)
         {
-            if (m_ca[i][j] != -1)
+            if (m_ca[i][j] != CA_EMPTY)
             {
                 // Cambia las posiciones de los autos en AC.
-                AtTemp(i+m_ca[i][j], j) = m_ca[i][j];
+                AtTemp(i + m_ca[i][j], j) = m_ca[i][j];
 
                 // Marca las casillas donde hay flujo de autos.
                 for (unsigned k = i; k < i+m_ca[i][j]; ++k)
-                    AtFlowTemp(k, j) = 1;
+                    AtFlowTemp(k, j) = IS_FLOW;
             }
         }
     }
@@ -1461,8 +1469,8 @@ inline void CellularAutomataML::AssignChanges()
     {
         for (unsigned j = 0; j < m_lanes; ++j)
         {
-            m_ca_temp[i][j] = -1;
-            m_ca_flow_temp[i][j] = 0;
+            m_ca_temp[i][j] = CA_EMPTY;
+            m_ca_flow_temp[i][j] = NO_FLOW;
         }
     }
 }
@@ -1474,16 +1482,16 @@ void CellularAutomataML::PrintHistory() const
         {
             for (unsigned j = 0; j < m_size; ++j)
             {
-                if (j != m_size -1)
+                if (j != m_size - 1)
                 {
-                    if (m_ca_history[i][k][j] == -1)
+                    if (m_ca_history[i][k][j] == CA_EMPTY)
                         cout << " , ";
                     else
                         cout << m_ca_history[i][k][j] << ", ";
                 }
                 else
                 {
-                    if (m_ca_history[i][k][j] == -1)
+                    if (m_ca_history[i][k][j] == CA_EMPTY)
                         cout << " ";
                     else
                         cout << m_ca_history[i][k][j];
@@ -1504,7 +1512,7 @@ bool CellularAutomataML::IsFluxHalted() const
             {
                 for (unsigned j = 0; j < m_size; ++j)
                 {
-                    if (m_ca_flow_history[i][k][j] != 0)
+                    if (m_ca_flow_history[i][k][j] != NO_FLOW)
                     {
                         halted = false;
                         break;
@@ -1531,7 +1539,7 @@ vector<double> CellularAutomataML::CalculateOcupancy() const
         {
             for (unsigned k = 0; k < m_lanes; ++k)
             {
-                if (m_ca_flow_history[j][i][k] != -1)
+                if (m_ca_flow_history[j][i][k] != CA_EMPTY)
                     sum++;
             }
         }
@@ -1553,7 +1561,7 @@ vector<double> CellularAutomataML::CalculateFlow() const
         {
             for (unsigned k = 0; k < m_lanes; ++k)
             {
-                if ((m_ca_flow_history[j][i][k] != 0) && (m_ca_flow_history[j][i + 1][k] != 0))
+                if ((m_ca_flow_history[j][i][k] != NO_FLOW) && (m_ca_flow_history[j][i + 1][k] != NO_FLOW))
                     sum++;
             }
         }
@@ -1573,25 +1581,32 @@ double CellularAutomataML::CalculateMeanFlow() const
 *                           *
 ****************************/
 
-CircularCAML::CircularCAML(const unsigned size, const unsigned lanes, const double density,
-                           const int vmax, const double rand_prob, const int init_vel)
+CircularCAML::CircularCAML(const CaSize size, const CaLane lanes, const double density,
+                           const CaVelocity vmax, const double rand_prob, const CaVelocity init_vel)
                          : CellularAutomataML(size, lanes, density, vmax, rand_prob, init_vel) {}
-CircularCAML::CircularCAML(const vector<CAElement> &ca, const vector<bool> &rand_values, const int vmax)
+CircularCAML::CircularCAML(const vector<CaElementVel> &ca, const vector<bool> &rand_values, const CaVelocity vmax)
                          : CellularAutomataML(ca, rand_values, vmax) {}
-inline int &CircularCAML::At(const CaPosition i, const CaLane lane)
+inline CaVelocity &CircularCAML::At(const CaPosition i, const CaLane lane)
 {
     if (i < 0)
         return m_ca[m_ca.size() - (abs(i) % m_ca.size())][lane];
     else
         return m_ca[i % m_ca.size()][lane];
 }
-inline int &CircularCAML::AtTemp(const CaPosition i, const CaLane lane)
+inline CaVelocity &CircularCAML::AtTemp(const CaPosition i, const CaLane lane)
 {
     return m_ca_temp[i % m_ca.size()][lane];
 }
-inline int &CircularCAML::AtFlowTemp(const CaPosition i, const CaLane lane)
+inline CaVelocity &CircularCAML::AtFlowTemp(const CaPosition i, const CaLane lane)
 {
     return m_ca_flow_temp[i % m_ca.size()][lane];
+}
+inline CaVelocity CircularCAML::GetAt(const CaPosition i, const CaLane lane) const
+{
+    if (i < 0)
+        return m_ca[m_ca.size() - (abs(i) % m_ca.size())][lane];
+    else
+        return m_ca[i % m_ca.size()][lane];
 }
 void CircularCAML::Evolve(const unsigned iter)
 {
@@ -1610,14 +1625,14 @@ void CircularCAML::Evolve(const unsigned iter)
 *                           *
 ****************************/
 
-OpenCAML::OpenCAML(const unsigned size, const unsigned int lanes, const double density, const int vmax,
-                   const double rand_prob, const int init_vel, const double new_car_prob, const int new_car_speed)
+OpenCAML::OpenCAML(const CaSize size, const CaLane lanes, const double density, const CaVelocity vmax,
+                   const double rand_prob, const CaVelocity init_vel, const double new_car_prob, const CaVelocity new_car_speed)
                  : CellularAutomataML(size, lanes, density, vmax, rand_prob, init_vel)
 {
     m_new_car_prob = new_car_prob;
     m_new_car_speed = new_car_speed;
-    m_ca_empty = -1;
-    m_ca_flow_empty = 0;
+    m_ca_empty = CA_EMPTY;
+    m_ca_flow_empty = NO_FLOW;
 
     // Verifica argumento.
     if (m_new_car_prob < 0 || m_new_car_prob > 1)
@@ -1626,35 +1641,42 @@ OpenCAML::OpenCAML(const unsigned size, const unsigned int lanes, const double d
         cout << "Aviso: Probabilidad de nuevo auto invalida. Cambiando a new_car_prob=" << m_new_car_prob << "." << endl;
     }
 }
-OpenCAML::OpenCAML(const vector<CAElement> &ca, const vector<bool> &rand_values, const int vmax,
-                   const int new_car_speed)
+OpenCAML::OpenCAML(const vector<CaElementVel> &ca, const vector<bool> &rand_values, const CaVelocity vmax,
+                   const CaVelocity new_car_speed)
                  : CellularAutomataML(ca, rand_values, vmax)
 {
     m_new_car_prob = -1.0;
     m_new_car_speed = new_car_speed;
-    m_ca_empty = -1;
-    m_ca_flow_empty = 0;
+    m_ca_empty = CA_EMPTY;
+    m_ca_flow_empty = NO_FLOW;
 }
-inline int &OpenCAML::At(const CaPosition i, const CaLane lane)
+inline CaVelocity &OpenCAML::At(const CaPosition i, const CaLane lane)
 {
     if (i < 0 || (unsigned)i >= m_ca.size())
         return m_ca_empty;
     else
         return m_ca[i][lane];
 }
-inline int &OpenCAML::AtTemp(const CaPosition i, const CaLane lane)
+inline CaVelocity &OpenCAML::AtTemp(const CaPosition i, const CaLane lane)
 {
     if ((unsigned)i >= m_ca.size())
         return m_ca_empty;
     else
         return m_ca_temp[i][lane];
 }
-inline int &OpenCAML::AtFlowTemp(const CaPosition i, const CaLane lane)
+inline CaVelocity &OpenCAML::AtFlowTemp(const CaPosition i, const CaLane lane)
 {
     if ((unsigned)i >= m_ca.size())
         return m_ca_flow_empty;
     else
         return m_ca_flow_temp[i][lane];
+}
+inline CaVelocity OpenCAML::GetAt(const CaPosition i, const CaLane lane) const
+{
+    if (i < 0 || (unsigned)i >= m_ca.size())
+        return CA_EMPTY;
+    else
+        return m_ca[i][lane];
 }
 void OpenCAML::Step()
 {
@@ -1667,26 +1689,26 @@ void OpenCAML::Step()
         for (unsigned j = 0; j < m_lanes; ++j)
         {
             // Encuentra vehículo.
-            if (At(i, j) != -1)
+            if (m_ca[i][j] != -1)
             {
                 // Aceleracion.
-                if ((At(i, j) < m_vmax) && (NextCarDist(i, j) > (At(i, j) + 1)))
-                    At(i, j)++;
+                if ((m_ca[i][j] < m_vmax) && (NextCarDist(i, j) > (CaSize)(m_ca[i][j] + 1)))
+                    m_ca[i][j]++;
                 else
                 {
                     // Frenado.
-                    if (At(i, j) > 0)
+                    if (m_ca[i][j] > 0)
                     {
                         int nd = NextCarDist(i, j);
-                        if (nd <= At(i, j))
-                            At(i, j) = nd - 1;
+                        if (nd <= m_ca[i][j])
+                            m_ca[i][j] = nd - 1;
                     }
                 }
 
                 // Aleatoriedad.
                 bool rnd = Randomization();
-                if ((At(i, j) > 0) && rnd)
-                    At(i, j)--;
+                if ((m_ca[i][j] > 0) && rnd)
+                    m_ca[i][j]--;
             }
         }
     }
@@ -1723,8 +1745,8 @@ CaHandler::CaHandler()
     circularcaml = nullptr;
     opencaml = nullptr;
 }
-CaHandler::CaHandler(CA_TYPE ca, const unsigned size, const double density, const int vmax,
-    const double rand_prob, const int init_vel, Args args, const int custom_random_seed)
+CaHandler::CaHandler(CA_TYPE ca, const CaSize size, const double density, const CaVelocity vmax,
+    const double rand_prob, const CaVelocity init_vel, Args args, const int custom_random_seed)
 {
     cellularautomata = nullptr;
     circularca = nullptr;
@@ -1738,8 +1760,8 @@ CaHandler::CaHandler(CA_TYPE ca, const unsigned size, const double density, cons
     opencaml = nullptr;
     CreateCa(ca, size, density, vmax, rand_prob, init_vel, args, custom_random_seed);
 }
-CaHandler::CaHandler(CA_TYPE ca, const unsigned size, const unsigned lanes, const double density, const int vmax,
-    const double rand_prob, const int init_vel, Args args, const int custom_random_seed)
+CaHandler::CaHandler(CA_TYPE ca, const CaSize size, const CaLane lanes, const double density, const CaVelocity vmax,
+    const double rand_prob, const CaVelocity init_vel, Args args, const int custom_random_seed)
 {
     cellularautomata = nullptr;
     circularca = nullptr;
@@ -1757,8 +1779,8 @@ CaHandler::~CaHandler()
 {
     DeleteCa();
 }
-void CaHandler::CreateCa(CA_TYPE ca, const unsigned size, const double density, const int vmax,
-    const double rand_prob, const int init_vel, Args args, const int custom_random_seed)
+void CaHandler::CreateCa(CA_TYPE ca, const CaSize size, const double density, const CaVelocity vmax,
+    const double rand_prob, const CaVelocity init_vel, Args args, const int custom_random_seed)
 {
     multilane = false;
     DeleteCa();
@@ -1803,8 +1825,8 @@ void CaHandler::CreateCa(CA_TYPE ca, const unsigned size, const double density, 
         cellularautomata = nullptr;
     }
 }
-void CaHandler::CreateCa(CA_TYPE ca, const unsigned size, const unsigned lanes, const double density, const int vmax,
-    const double rand_prob, const int init_vel, Args args, const int custom_random_seed)
+void CaHandler::CreateCa(CA_TYPE ca, const CaSize size, const CaLane lanes, const double density, const CaVelocity vmax,
+    const double rand_prob, const CaVelocity init_vel, Args args, const int custom_random_seed)
 {
     multilane = false;
     DeleteCa();
@@ -1901,7 +1923,7 @@ void CaHandler::Evolve(const unsigned iter)
     else
         return cellularautomata->Evolve(iter);
 }
-int CaHandler::NextCarDist(const CaPosition pos, const CaLane lane) const
+CaSize CaHandler::NextCarDist(const CaPosition pos, const CaLane lane) const
 {
     if (multilane)
         return cellularautomataml->NextCarDist(pos, lane);
@@ -1915,14 +1937,14 @@ bool CaHandler::Randomization(const double prob)
     else
         return cellularautomata->Randomization(prob);
 }
-int &CaHandler::At(const CaPosition i, const CaLane lane)
+CaVelocity &CaHandler::At(const CaPosition i, const CaLane lane)
 {
     if (multilane)
         return cellularautomataml->At(i, lane);
     else
         return cellularautomata->At(i);
 }
-int CaHandler::GetAt(const CaPosition i, const CaLane lane) const
+CaVelocity CaHandler::GetAt(const CaPosition i, const CaLane lane) const
 {
     if (multilane)
         return cellularautomataml->GetAt(i, lane);
@@ -1958,21 +1980,21 @@ void CaHandler::Print() const
     else
         return cellularautomata->Print();
 }
-unsigned CaHandler::GetSize() const
+CaSize CaHandler::GetSize() const
 {
     if (multilane)
         return cellularautomataml->GetSize();
     else
         return cellularautomata->GetSize();
 }
-unsigned CaHandler::GetHistorySize() const
+CaSize CaHandler::GetHistorySize() const
 {
     if (multilane)
         return cellularautomataml->GetHistorySize();
     else
         return cellularautomata->GetHistorySize();
 }
-unsigned CaHandler::GetLanes() const
+CaLane CaHandler::GetLanes() const
 {
     if (multilane)
         return cellularautomataml->GetLanes();
