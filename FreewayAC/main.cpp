@@ -121,7 +121,7 @@ const option::Descriptor usage[] =
     {RANDOM_SEMAPHORES,  0,"", "random_semaphores", Arg::Required,
      "  \t--random_semaphores  \tTrue o False. Coloca los semaforos en posiciones aleatorias en vez de uniformes." },
     {TARGET_LANE, 0, "", "target_lane", Arg::Required,
-     "  \t--target_lane  \tCarril objetivo en AC de uniones." },
+     "  \t--target_lane  \tCarril objetivo para obtener informacion en AC de uniones." },
     {LANES, 0, "", "lanes", Arg::Required,
      "  \t--lanes  \tNumero de carriles en AC multicarril." },
     {RANDOM_SEED, 0, "", "random_seed", Arg::Required,

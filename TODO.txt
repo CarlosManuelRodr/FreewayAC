@@ -1,2 +1,1 @@
-- Flujo y ocupación no se miden correctament en unión.
 - Flow debe ser bool?

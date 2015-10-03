@@ -150,9 +150,9 @@ public:
     ///@return 0 si se pudo crear archivo, 1 en caso de error.
     virtual int DrawFlowHistory(std::string path = "", std::string out_file_name = "") const;
     
-    std::vector<double> CalculateOcupancy() const;
-    std::vector<double> CalculateFlow() const;
-    double CalculateMeanFlow() const;
+    virtual std::vector<double> CalculateOcupancy() const;
+    virtual std::vector<double> CalculateFlow() const;
+    virtual double CalculateMeanFlow() const;
 
     void Print() const;                   ///< Escribe línea de autómata celular en la terminal.
     CaSize GetSize() const;             ///< Devuelve tamaño del AC.
@@ -393,6 +393,10 @@ public:
                      const int init_vel, const double new_car_prob, const int new_car_speed, const int target_lane = 0);
 
     ~SimpleJunctionCA();
+
+    std::vector<double> CalculateOcupancy() const;
+    std::vector<double> CalculateFlow() const;
+    double CalculateMeanFlow() const;
 };
 
 

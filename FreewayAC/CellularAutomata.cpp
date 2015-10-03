@@ -978,6 +978,61 @@ SimpleJunctionCA::~SimpleJunctionCA()
 {
     delete m_target;
 }
+vector<double> SimpleJunctionCA::CalculateOcupancy() const
+{
+    if (m_target_lane == 0)
+    {
+        vector<double> ocupancy;
+        ocupancy.assign(this->GetSize(), 0.0);
+        unsigned height = this->GetHistorySize();
+        unsigned width = this->GetSize();
+
+        for (unsigned i = 0; i < width; ++i)
+        {
+            int sum = 0;
+            for (unsigned j = 1; j < height; ++j)
+            {
+                if (m_ca_history[j][i] != CA_EMPTY)
+                    sum++;
+            }
+            ocupancy[i] = (double)sum / (double)height;
+        }
+        return ocupancy;
+    }
+    else
+        return m_target->CalculateOcupancy();
+}
+vector<double> SimpleJunctionCA::CalculateFlow() const
+{
+    if (m_target_lane == 0)
+    {
+        vector<double> flow;
+        flow.assign(this->GetSize(), 0.0);
+        unsigned height = this->GetHistorySize();
+        unsigned width = this->GetSize();
+
+        for (unsigned i = 0; i < width - 1; ++i)
+        {
+            int sum = 0;
+            for (unsigned j = 1; j < height; ++j)
+            {
+                if ((m_ca_flow_history[j][i] != NO_FLOW) && (m_ca_flow_history[j][i + 1] != NO_FLOW))
+                    sum++;
+            }
+            flow[i] = (double)sum / (double)height;
+        }
+        return flow;
+    }
+    else
+        return m_target->CalculateFlow();
+}
+double SimpleJunctionCA::CalculateMeanFlow() const
+{
+    if (m_target_lane == 0)
+        return aux_mean(this->CalculateFlow());
+    else
+        return m_target->CalculateMeanFlow();
+}
 
 ////////////////////////////////////
 //                                //
