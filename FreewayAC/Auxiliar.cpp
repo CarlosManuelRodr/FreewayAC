@@ -414,7 +414,7 @@ Args::Args(initializer_list<string> d_args_labels, initializer_list<double> d_ar
     m_bool_args = b_args;
     m_string_args = s_args;
 }
-double Args::GetDouble(const unsigned &i)
+double Args::GetDouble(const unsigned i) const
 {
     if (i < m_double_args.size())
         return m_double_args[i];
@@ -425,9 +425,9 @@ double Args::GetDouble(const unsigned &i)
         return 0.0;
     }
 }
-double Args::GetDouble(string label)
+double Args::GetDouble(string label) const
 {
-    int index = aux_find_pos(m_double_labels, label);
+    int index = aux_find_pos_const(m_double_labels, label);
     if (index != -1)
         return m_double_args[index];
     else
@@ -436,7 +436,7 @@ double Args::GetDouble(string label)
         return 0.0;
     }
 }
-int Args::GetInt(const unsigned &i)
+int Args::GetInt(const unsigned i) const
 {
     if (i < m_int_args.size())
         return m_int_args[i];
@@ -446,9 +446,9 @@ int Args::GetInt(const unsigned &i)
         return 0;
     }
 }
-int Args::GetInt(string label)
+int Args::GetInt(string label) const
 {
-    int index = aux_find_pos(m_int_labels, label);
+    int index = aux_find_pos_const(m_int_labels, label);
     if (index != -1)
         return m_int_args[index];
     else
@@ -457,7 +457,7 @@ int Args::GetInt(string label)
         return 0;
     }
 }
-bool Args::GetBool(const unsigned &i)
+bool Args::GetBool(const unsigned i) const
 {
     if (i < m_bool_args.size())
         return m_bool_args[i];
@@ -467,9 +467,9 @@ bool Args::GetBool(const unsigned &i)
         return false;
     }
 }
-bool Args::GetBool(string label)
+bool Args::GetBool(string label) const
 {
-    int index = aux_find_pos(m_bool_labels, label);
+    int index = aux_find_pos_const(m_bool_labels, label);
     if (index != -1)
         return m_bool_args[index];
     else
@@ -478,7 +478,7 @@ bool Args::GetBool(string label)
         return false;
     }
 }
-string Args::GetString(const unsigned &i)
+string Args::GetString(const unsigned i) const
 {
     if (i < m_string_args.size())
         return m_string_args[i];
@@ -488,9 +488,9 @@ string Args::GetString(const unsigned &i)
         return string();
     }
 }
-string Args::GetString(string label)
+string Args::GetString(string label) const
 {
-    int index = aux_find_pos(m_string_labels, label);
+    int index = aux_find_pos_const(m_string_labels, label);
     if (index != -1)
         return m_string_args[index];
     else
@@ -499,7 +499,7 @@ string Args::GetString(string label)
         return string();
     }
 }
-void Args::SetDouble(const unsigned &i, double val)
+void Args::SetDouble(const unsigned i, double val)
 {
     if (i < m_double_args.size())
     {
@@ -519,7 +519,7 @@ void Args::SetDouble(string label, double val)
     else
         cout << "La etiqueta " << label << " ya existe dentro de la lista de argumentos." << endl;
 }
-void Args::SetInt(const unsigned &i, int val)
+void Args::SetInt(const unsigned i, int val)
 {
     if (i < m_int_args.size())
     {
@@ -539,7 +539,7 @@ void Args::SetInt(string label, int val)
     else
         cout << "La etiqueta " << label << " ya existe dentro de la lista de argumentos." << endl;
 }
-void Args::SetBool(const unsigned &i, bool val)
+void Args::SetBool(const unsigned i, bool val)
 {
     if (i < m_bool_args.size())
     {
@@ -555,6 +555,26 @@ void Args::SetBool(string label, bool val)
     {
         m_bool_labels.push_back(label);
         m_bool_args.push_back(val);
+    }
+    else
+        cout << "La etiqueta " << label << " ya existe dentro de la lista de argumentos." << endl;
+}
+void Args::SetString(const unsigned i, std::string val)
+{
+    if (i < m_string_args.size())
+    {
+        m_string_labels[i] = string();
+        m_string_args[i] = val;
+    }
+    else
+        cout << "Error: Asignacion string invalida. Indice: " << i << ", valor: " << val << "." << endl;
+}
+void Args::SetString(std::string label, std::string val)
+{
+    if (!aux_is_in(m_string_labels, label))
+    {
+        m_string_labels.push_back(label);
+        m_string_args.push_back(val);
     }
     else
         cout << "La etiqueta " << label << " ya existe dentro de la lista de argumentos." << endl;

@@ -86,7 +86,7 @@ CellularAutomata::CellularAutomata(const vector<int> &ca, const vector<bool> &ra
     m_init_vel = 1;
 }
 CellularAutomata::~CellularAutomata() {}
-void CellularAutomata::Print()
+void CellularAutomata::Print() const
 {
     // Imprime valores del automata celular en la terminal.
     for (auto ca : m_ca)
@@ -98,7 +98,7 @@ void CellularAutomata::Print()
     }
     cout << endl;
 }
-void CellularAutomata::PrintHistory()
+void CellularAutomata::PrintHistory() const
 {
     for (unsigned i = 0; i < m_ca_history.size(); ++i)
     {
@@ -122,7 +122,7 @@ void CellularAutomata::PrintHistory()
         cout << endl;
     }
 }
-int CellularAutomata::DrawHistory(string path, string out_file_name)
+int CellularAutomata::DrawHistory(string path, string out_file_name) const
 {
     if (out_file_name == "")
         out_file_name = path + "ca.bmp";
@@ -155,7 +155,7 @@ int CellularAutomata::DrawHistory(string path, string out_file_name)
     else
         return 1;
 }
-int CellularAutomata::DrawFlowHistory(string path, string out_file_name)
+int CellularAutomata::DrawFlowHistory(string path, string out_file_name) const
 {
     if (out_file_name == "")
         out_file_name = path + "ca_flow.bmp";
@@ -246,10 +246,10 @@ inline void CellularAutomata::AssignChanges()
     m_ca_flow_temp.assign(m_size, 0);
     m_ca_temp.assign(m_size, -1);
 }
-inline int CellularAutomata::NextCarDist(const CaPosition pos)
+inline int CellularAutomata::NextCarDist(const CaPosition pos) const
 {
 	int dist = 1;
-	while ((At(pos + dist) == -1) && (dist < 2 * (int)m_size))
+	while ((GetAt(pos + dist) == -1) && (dist < 2 * (int)m_size))
 		dist++;
 	return dist;
 }
@@ -262,15 +262,15 @@ void CellularAutomata::Evolve(const unsigned iter)
     for (unsigned i = 0; i < iter; ++i)
         Step();
 }
-unsigned CellularAutomata::GetSize()
+unsigned CellularAutomata::GetSize() const
 {
     return m_size;
 }
-unsigned CellularAutomata::GetHistorySize()
+unsigned CellularAutomata::GetHistorySize() const
 {
     return m_ca_history.size();
 }
-unsigned CellularAutomata::CountCars()
+unsigned CellularAutomata::CountCars() const
 {
     unsigned count = 0;
     for (unsigned i = 0; i < m_ca.size(); ++i)
@@ -280,7 +280,7 @@ unsigned CellularAutomata::CountCars()
     }
     return count;
 }
-bool CellularAutomata::IsFluxHalted()
+bool CellularAutomata::IsFluxHalted() const
 {
     bool halted = true;
     if (m_ca_flow_history.size() > 1)
@@ -329,15 +329,15 @@ bool CellularAutomata::Randomization(const double prob)
             return false;
     }
 }
-int CellularAutomata::GetAt(const CaPosition i)
+inline int CellularAutomata::GetAt(const CaPosition i) const
 {
-	return m_ca[i];
+    return m_ca[i];
 }
 void CellularAutomata::Connect(CellularAutomata* connect, CaPosition from, CaPosition to)
 {
     
 }
-vector<double> CellularAutomata::CalculateOcupancy()
+vector<double> CellularAutomata::CalculateOcupancy() const
 {
     vector<double> ocupancy;
     ocupancy.assign(this->GetSize(), 0.0);
@@ -356,7 +356,7 @@ vector<double> CellularAutomata::CalculateOcupancy()
     }
     return ocupancy;
 }
-vector<double> CellularAutomata::CalculateFlow()
+vector<double> CellularAutomata::CalculateFlow() const
 {
     vector<double> flow;
     flow.assign(this->GetSize(), 0.0);
@@ -375,7 +375,7 @@ vector<double> CellularAutomata::CalculateFlow()
     }
     return flow;
 }
-double CellularAutomata::CalculateMeanFlow()
+double CellularAutomata::CalculateMeanFlow() const
 {
     return aux_mean(this->CalculateFlow());
 }
@@ -709,7 +709,7 @@ void StreetStopCA::Step()
     Move();
     m_ca_history.push_back(m_ca);
 }
-int StreetStopCA::NextStopDist(const CaPosition pos)
+int StreetStopCA::NextStopDist(const CaPosition pos) const
 {
     if (!m_stop_pos.empty())
     {
@@ -727,7 +727,7 @@ int StreetStopCA::NextStopDist(const CaPosition pos)
     else
         return numeric_limits<int>::max();
 }
-int StreetStopCA::DrawHistory(string path, string out_file_name)
+int StreetStopCA::DrawHistory(string path, string out_file_name) const
 {
     if (out_file_name == "")
         out_file_name = path + "ca.bmp";
@@ -745,7 +745,7 @@ int StreetStopCA::DrawHistory(string path, string out_file_name)
             for (unsigned j = 0; j < width; ++j)
             {
                 BMPPixel color;
-                if (aux_is_in(m_stop_pos, j))
+                if (aux_is_in_const(m_stop_pos, j))
                 {
                     if (m_ca_history[i][j] == -1)
                         color = BMPPixel((char)0, (char)255, (char)0);
@@ -861,7 +861,7 @@ void SemaphoreCA::Step()
     Move();
     m_ca_history.push_back(m_ca);
 }
-int SemaphoreCA::NextSemaphoreDist(const CaPosition pos)
+int SemaphoreCA::NextSemaphoreDist(const CaPosition pos) const
 {
     if (!m_semaphore_pos.empty())
     {
@@ -885,7 +885,7 @@ int SemaphoreCA::NextSemaphoreDist(const CaPosition pos)
     else
         return numeric_limits<int>::max();
 }
-int SemaphoreCA::DrawHistory(string path, string out_file_name)
+int SemaphoreCA::DrawHistory(string path, string out_file_name) const
 {
     if (out_file_name == "")
         out_file_name = path + "ca.bmp";
@@ -903,7 +903,7 @@ int SemaphoreCA::DrawHistory(string path, string out_file_name)
             for (int j = 0; j < (int)width; ++j)
             {
                 BMPPixel color;
-                int s_pos = aux_find_pos(m_semaphore_pos, j);
+                int s_pos = aux_find_pos_const(m_semaphore_pos, j);
                 if (s_pos != -1)
                 {
                     if (m_semaphore_val_hist[i][s_pos] < m_semaphore_open)
@@ -973,7 +973,7 @@ void SimpleJunctionCA::Evolve(const unsigned iter)
         this->Step();
     }
 }
-int SimpleJunctionCA::DrawHistory(string path, string out_file_name)
+int SimpleJunctionCA::DrawHistory(string path, string out_file_name) const
 {
     if (out_file_name == "")
         out_file_name = path + "ca_junction.bmp";
@@ -1117,7 +1117,7 @@ CellularAutomataML::CellularAutomataML(const vector<CAElement> &ca, const vector
         m_lanes = m_ca[0].size();
 }
 CellularAutomataML::~CellularAutomataML() {}
-void CellularAutomataML::Print()
+void CellularAutomataML::Print() const
 {
     // Imprime valores del automata celular en la terminal.
     for (unsigned i = 0; i < m_lanes; ++i)
@@ -1135,7 +1135,7 @@ void CellularAutomataML::Print()
         cout << ".";
     cout << endl;
 }
-int CellularAutomataML::DrawHistory(string path, string out_file_name)
+int CellularAutomataML::DrawHistory(string path, string out_file_name) const
 {
     if (out_file_name == "")
         out_file_name = path + "ca.bmp";
@@ -1188,7 +1188,7 @@ int CellularAutomataML::DrawHistory(string path, string out_file_name)
     else
         return 1;
 }
-int CellularAutomataML::DrawFlowHistory(string path, string out_file_name)
+int CellularAutomataML::DrawFlowHistory(string path, string out_file_name) const
 {
     if (out_file_name == "")
         out_file_name = path + "ca_flow.bmp";
@@ -1388,19 +1388,19 @@ void CellularAutomataML::Evolve(const unsigned iter)
     for (unsigned i = 0; i < iter; ++i)
         Step();
 }
-unsigned CellularAutomataML::GetSize()
+unsigned CellularAutomataML::GetSize() const
 {
     return m_size;
 }
-unsigned CellularAutomataML::GetHistorySize()
+unsigned CellularAutomataML::GetHistorySize() const
 {
     return m_ca_history.size();
 }
-unsigned CellularAutomataML::GetLanes()
+unsigned CellularAutomataML::GetLanes() const
 {
     return m_lanes;
 }
-unsigned CellularAutomataML::CountCars()
+unsigned CellularAutomataML::CountCars() const
 {
     unsigned count = 0;
     for (unsigned i = 0; i < m_ca.size(); ++i)
@@ -1413,7 +1413,7 @@ unsigned CellularAutomataML::CountCars()
     }
     return count;
 }
-int CellularAutomataML::GetAt(const CaPosition i, const CaLane lane)
+inline int CellularAutomataML::GetAt(const CaPosition i, const CaLane lane) const
 {
     return m_ca[i][lane];
 }
@@ -1427,10 +1427,10 @@ void CellularAutomataML::Connect(CellularAutomataML* connect, CaPosition connect
         cout << "Valor incorrecto de posicion de conexion. Cambiando a " << m_connect_pos << endl;
     }
 }
-int CellularAutomataML::NextCarDist(const CaPosition pos, const CaLane lane)
+int CellularAutomataML::NextCarDist(const CaPosition pos, const CaLane lane) const
 {
     int dist = 1;
-    while ((At(pos+dist, lane) == -1) && (dist < 2*(int)m_size))
+    while ((GetAt(pos + dist, lane) == -1) && (dist < 2*(int)m_size))
         dist++;
     return dist;
 }
@@ -1466,7 +1466,7 @@ inline void CellularAutomataML::AssignChanges()
         }
     }
 }
-void CellularAutomataML::PrintHistory()
+void CellularAutomataML::PrintHistory() const
 {
     for (unsigned i = 0; i < m_ca_history.size(); ++i)
     {
@@ -1493,7 +1493,7 @@ void CellularAutomataML::PrintHistory()
         cout << endl;
     }
 }
-bool CellularAutomataML::IsFluxHalted()
+bool CellularAutomataML::IsFluxHalted() const
 {
     bool halted = true;
     if (m_ca_flow_history.size() > 1)
@@ -1517,7 +1517,7 @@ bool CellularAutomataML::IsFluxHalted()
     else
         return false;
 }
-vector<double> CellularAutomataML::CalculateOcupancy()
+vector<double> CellularAutomataML::CalculateOcupancy() const
 {
     vector<double> ocupancy;
     ocupancy.assign(this->GetSize(), 0.0);
@@ -1539,7 +1539,7 @@ vector<double> CellularAutomataML::CalculateOcupancy()
     }
     return ocupancy;
 }
-vector<double> CellularAutomataML::CalculateFlow()
+vector<double> CellularAutomataML::CalculateFlow() const
 {
     vector<double> flow;
     flow.assign(this->GetSize(), 0.0);
@@ -1561,7 +1561,7 @@ vector<double> CellularAutomataML::CalculateFlow()
     }
     return flow;
 }
-double CellularAutomataML::CalculateMeanFlow()
+double CellularAutomataML::CalculateMeanFlow() const
 {
     return aux_mean(this->CalculateFlow());
 }
@@ -1887,7 +1887,7 @@ void CaHandler::DeleteCa()
     circularcaml = nullptr;
     opencaml = nullptr;
 }
-int CaHandler::Status()
+int CaHandler::Status() const
 {
     if (cellularautomata != nullptr || cellularautomataml != nullptr)
         return 0;
@@ -1901,7 +1901,7 @@ void CaHandler::Evolve(const unsigned iter)
     else
         return cellularautomata->Evolve(iter);
 }
-int CaHandler::NextCarDist(const CaPosition pos, const CaLane lane)
+int CaHandler::NextCarDist(const CaPosition pos, const CaLane lane) const
 {
     if (multilane)
         return cellularautomataml->NextCarDist(pos, lane);
@@ -1922,7 +1922,7 @@ int &CaHandler::At(const CaPosition i, const CaLane lane)
     else
         return cellularautomata->At(i);
 }
-int CaHandler::GetAt(const CaPosition i, const CaLane lane)
+int CaHandler::GetAt(const CaPosition i, const CaLane lane) const
 {
     if (multilane)
         return cellularautomataml->GetAt(i, lane);
@@ -1937,63 +1937,63 @@ void CaHandler::Connect(CellularAutomataML* connect, CaPosition connect_pos)
 {
     return cellularautomataml->Connect(connect, connect_pos);
 }
-int CaHandler::DrawHistory(std::string path, std::string out_file_name)
+int CaHandler::DrawHistory(std::string path, std::string out_file_name) const
 {
     if (multilane)
         return cellularautomataml->DrawHistory(path, out_file_name);
     else
         return cellularautomata->DrawHistory(path, out_file_name);
 }
-int CaHandler::DrawFlowHistory(std::string path, std::string out_file_name)
+int CaHandler::DrawFlowHistory(std::string path, std::string out_file_name) const
 {
     if (multilane)
         return cellularautomataml->DrawFlowHistory(path, out_file_name);
     else
         return cellularautomata->DrawFlowHistory(path, out_file_name);
 }
-void CaHandler::Print()
+void CaHandler::Print() const
 {
     if (multilane)
         return cellularautomataml->Print();
     else
         return cellularautomata->Print();
 }
-unsigned CaHandler::GetSize()
+unsigned CaHandler::GetSize() const
 {
     if (multilane)
         return cellularautomataml->GetSize();
     else
         return cellularautomata->GetSize();
 }
-unsigned CaHandler::GetHistorySize()
+unsigned CaHandler::GetHistorySize() const
 {
     if (multilane)
         return cellularautomataml->GetHistorySize();
     else
         return cellularautomata->GetHistorySize();
 }
-unsigned CaHandler::GetLanes()
+unsigned CaHandler::GetLanes() const
 {
     if (multilane)
         return cellularautomataml->GetLanes();
     else
         return 1;
 }
-unsigned CaHandler::CountCars()
+unsigned CaHandler::CountCars() const
 {
     if (multilane)
         return cellularautomataml->CountCars();
     else
         return cellularautomata->CountCars();
 }
-bool CaHandler::IsFluxHalted()
+bool CaHandler::IsFluxHalted() const
 {
     if (multilane)
         return cellularautomataml->IsFluxHalted();
     else
         return cellularautomata->IsFluxHalted();
 }
-void CaHandler::PrintHistory()
+void CaHandler::PrintHistory() const
 {
     if (multilane)
         return cellularautomataml->PrintHistory();
@@ -2014,21 +2014,21 @@ void CaHandler::Move()
     else
         return cellularautomata->Move();
 }
-vector<double> CaHandler::CalculateOcupancy()
+vector<double> CaHandler::CalculateOcupancy() const
 {
     if (multilane)
         return cellularautomataml->CalculateOcupancy();
     else
         return cellularautomata->CalculateOcupancy();
 }
-vector<double> CaHandler::CalculateFlow()
+vector<double> CaHandler::CalculateFlow() const
 {
     if (multilane)
         return cellularautomataml->CalculateFlow();
     else
         return cellularautomata->CalculateFlow();
 }
-double CaHandler::CalculateMeanFlow()
+double CaHandler::CalculateMeanFlow() const
 {
     if (multilane)
         return cellularautomataml->CalculateMeanFlow();

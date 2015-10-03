@@ -102,7 +102,7 @@ public:
 
     ///@brief Devuelve la distancia al auto más próximo desde la posición pos.
     ///@param pos Posición desde dónde iniciar la búsqueda.
-    int NextCarDist(const CaPosition pos);
+    int NextCarDist(const CaPosition pos) const;
 
     ///@brief Devuelve valores verdaderos con probabilidad prob. Si se usa en prueba usa valores de lista.
     ///@param prob Probabilidad de obtener valor verdadero. Por defecto se utiliza m_rand_prob.
@@ -116,7 +116,7 @@ public:
 
     ///@brief Devuelve elemento del AC.
     ///@param i Posición dentro del AC.
-    int GetAt(const CaPosition i);
+    int GetAt(const CaPosition i) const;
 
     ///@brief Devuelve referencia a elemento del AC en conexión.
     ///@param i Posición dentro del AC.
@@ -131,24 +131,24 @@ public:
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
     ///@return 0 si se pudo crear archivo, 1 en caso de error.
-    virtual int DrawHistory(std::string path = "", std::string out_file_name = "");
+    virtual int DrawHistory(std::string path = "", std::string out_file_name = "") const;
 
     ///@brief Dibuja mapa histórico del flujo de AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
     ///@return 0 si se pudo crear archivo, 1 en caso de error.
-    virtual int DrawFlowHistory(std::string path = "", std::string out_file_name = "");
+    virtual int DrawFlowHistory(std::string path = "", std::string out_file_name = "") const;
     
-    std::vector<double> CalculateOcupancy();
-    std::vector<double> CalculateFlow();
-    double CalculateMeanFlow();
+    std::vector<double> CalculateOcupancy() const;
+    std::vector<double> CalculateFlow() const;
+    double CalculateMeanFlow() const;
 
-    void Print();                   ///< Escribe línea de autómata celular en la terminal.
-    unsigned GetSize();             ///< Devuelve tamaño del AC.
-    unsigned GetHistorySize();      ///< Devuelve tamaño de la lista histórica de evolución del AC.
-    unsigned CountCars();           ///< Cuenta la cantidad de autos en AC.
-    bool IsFluxHalted();            ///< Informa si el flujo está estancado.
-    void PrintHistory();            ///< Escribe los valores históricos del AC en la terminal.
+    void Print() const;                   ///< Escribe línea de autómata celular en la terminal.
+    unsigned GetSize() const;             ///< Devuelve tamaño del AC.
+    unsigned GetHistorySize() const;      ///< Devuelve tamaño de la lista histórica de evolución del AC.
+    unsigned CountCars() const;           ///< Cuenta la cantidad de autos en AC.
+    bool IsFluxHalted() const;            ///< Informa si el flujo está estancado.
+    void PrintHistory() const;            ///< Escribe los valores históricos del AC en la terminal.
     virtual void Step();            ///< Aplica reglas de evolución temporal del AC.
     virtual void Move();            ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
     void AssignChanges();           ///< Asigna cambios de los arrays teporales al array m_ca e historico.
@@ -303,13 +303,13 @@ public:
 
     ///@brief Devuelve la distancia al tope más próximo desde la posición pos.
     ///@param pos Posición desde dónde iniciar la búsqueda.
-    int NextStopDist(const CaPosition pos);
+    int NextStopDist(const CaPosition pos) const;
 
     ///@brief Dibuja mapa histórico del AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
     ///@return 0 si se pudo crear archivo, 1 en caso de error.
-    int DrawHistory(std::string path = "", std::string out_file_name = "");
+    int DrawHistory(std::string path = "", std::string out_file_name = "") const;
 
     void Step();        ///< Aplica reglas de evolución temporal del AC con tope.
 };
@@ -344,13 +344,13 @@ public:
 
     ///@brief Devuelve la distancia al semáforo más próximo desde la posición pos.
     ///@param pos Posición desde dónde iniciar la búsqueda.
-    int NextSemaphoreDist(const CaPosition pos);
+    int NextSemaphoreDist(const CaPosition pos) const;
 
     ///@brief Dibuja mapa histórico del AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
     ///@return 0 si se pudo crear archivo, 1 en caso de error.
-    int DrawHistory(std::string path = "", std::string out_file_name = "");
+    int DrawHistory(std::string path = "", std::string out_file_name = "") const;
 
     void Step();        ///< Aplica reglas de evolución temporal del AC con tope.
 };
@@ -390,7 +390,7 @@ public:
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
     ///@return 0 si se pudo crear archivo, 1 en caso de error.
-    int DrawHistory(std::string path = "", std::string out_file_name = "");
+    int DrawHistory(std::string path = "", std::string out_file_name = "") const;
 };
 
 
@@ -473,7 +473,7 @@ public:
     ///@brief Similar a AC pero sólo devuelve el valor y en AC de uniones puede apuntar a un carril en específico.
     ///@param i Posición dentro del AC.
     ///@param ca Tipo de AC.
-    int GetAt(const CaPosition i, const CaLane lane);
+    int GetAt(const CaPosition i, const CaLane lane) const;
 
     ///@brief Conecta AC con otro. El flujo de autos ocurre desde el que realiza la conexión al objetivo.
     ///@param connect Puntero a AC objetivo.
@@ -482,35 +482,35 @@ public:
 
     ///@brief Devuelve la distancia al auto más próximo desde la posición pos.
     ///@param pos Posición desde dónde iniciar la búsqueda.
-    virtual int NextCarDist(const CaPosition pos, const CaLane lane);
+    virtual int NextCarDist(const CaPosition pos, const CaLane lane) const;
 
     ///@brief Dibuja mapa histórico del AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
     ///@return 0 si se pudo crear archivo, 1 en caso de error.
-    int DrawHistory(std::string path = "", std::string out_file_name = "");
+    int DrawHistory(std::string path = "", std::string out_file_name = "") const;
 
     ///@brief Dibuja mapa histórico del flujo de AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
     ///@return 0 si se pudo crear archivo, 1 en caso de error.
-    int DrawFlowHistory(std::string path = "", std::string out_file_name = "");
+    int DrawFlowHistory(std::string path = "", std::string out_file_name = "") const;
 
     ///@brief Devuelve valores verdaderos con probabilidad prob. Si se usa en prueba usa valores de lista.
     ///@param prob Probabilidad de obtener valor verdadero. Por defecto se utiliza m_rand_prob.
     bool Randomization(const double prob = -1.0);
 
-    std::vector<double> CalculateOcupancy();
-    std::vector<double> CalculateFlow();
-    double CalculateMeanFlow();
+    std::vector<double> CalculateOcupancy() const;
+    std::vector<double> CalculateFlow() const;
+    double CalculateMeanFlow() const;
 
-    void Print();               ///< Escribe línea de autómata celular en la terminal.
-    unsigned GetSize();         ///< Devuelve tamaño del AC.
-    unsigned GetHistorySize();  ///< Devuelve tamaño de la lista histórica de evolución del AC.
-    unsigned GetLanes();        ///< Devuelve el número de carriles.
-    unsigned CountCars();       ///< Cuenta la cantidad de autos en AC.
-    bool IsFluxHalted();        ///< Informa si el flujo está estancado.
-    void PrintHistory();        ///< Escribe los valores históricos del AC en la terminal.
+    void Print() const;               ///< Escribe línea de autómata celular en la terminal.
+    unsigned GetSize() const;         ///< Devuelve tamaño del AC.
+    unsigned GetHistorySize() const;  ///< Devuelve tamaño de la lista histórica de evolución del AC.
+    unsigned GetLanes() const;        ///< Devuelve el número de carriles.
+    unsigned CountCars() const;       ///< Cuenta la cantidad de autos en AC.
+    bool IsFluxHalted() const;        ///< Informa si el flujo está estancado.
+    void PrintHistory() const;        ///< Escribe los valores históricos del AC en la terminal.
     virtual void Step();        ///< Aplica reglas de evolución temporal del AC.
     virtual void ChangeLanes(); ///< Aplica las reglas de cambio carril.
     virtual void Move();        ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
@@ -647,29 +647,29 @@ public:
     void CreateCa(CA_TYPE ca, const unsigned size, const unsigned lanes, const double density, const int vmax,
         const double rand_prob, const int init_vel, Args args, const int custom_random_seed = -1);
     void DeleteCa();
-    int Status();
+    int Status() const;
 
     void Evolve(const unsigned iter);
-    int NextCarDist(const CaPosition pos, const CaLane lane);
+    int NextCarDist(const CaPosition pos, const CaLane lane) const;
     bool Randomization(const double prob = -1.0);
     int &At(const CaPosition i, const CaLane lane);
-    int GetAt(const CaPosition i, const CaLane lane);
+    int GetAt(const CaPosition i, const CaLane lane) const;
     void Connect(CellularAutomata* connect, CaPosition connect_pos);
     void Connect(CellularAutomataML* connect, CaPosition connect_pos);
-    int DrawHistory(std::string path = "", std::string out_file_name = "");
-    int DrawFlowHistory(std::string path = "", std::string out_file_name = "");
-    void Print();
-    unsigned GetSize();
-    unsigned GetHistorySize();
-    unsigned GetLanes();
-    unsigned CountCars();
-    bool IsFluxHalted();
-    void PrintHistory();
+    int DrawHistory(std::string path = "", std::string out_file_name = "") const;
+    int DrawFlowHistory(std::string path = "", std::string out_file_name = "") const;
+    void Print() const;
+    unsigned GetSize() const;
+    unsigned GetHistorySize() const;
+    unsigned GetLanes() const;
+    unsigned CountCars() const;
+    bool IsFluxHalted() const;
+    void PrintHistory() const;
     void Step();
     void Move();
-    std::vector<double> CalculateOcupancy();
-    std::vector<double> CalculateFlow();
-    double CalculateMeanFlow();
+    std::vector<double> CalculateOcupancy() const;
+    std::vector<double> CalculateFlow() const;
+    double CalculateMeanFlow() const;
 };
 
 #endif

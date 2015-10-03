@@ -47,8 +47,8 @@ public:
 
     ExportFormat export_format;
 
-    void Report();
-    std::string GetFilePath(std::string filename);
+    void Report() const;
+    std::string GetFilePath(std::string filename) const;
 };
 
 

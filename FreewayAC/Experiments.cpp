@@ -12,7 +12,7 @@ using namespace std;
 *                            *
 *****************************/
 
-void ExParam::Report()
+void ExParam::Report() const
 {
     string out;
     out = "Parametros:\n";
@@ -52,7 +52,7 @@ void ExParam::Report()
     file << out;
     file.close();
 }
-string ExParam::GetFilePath(string filename)
+string ExParam::GetFilePath(string filename) const
 {
     string out_file_path;
     if (out_file_name.empty())

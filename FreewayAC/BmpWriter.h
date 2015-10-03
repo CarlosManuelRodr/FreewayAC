@@ -90,7 +90,7 @@ public:
     void WriteLine(std::vector<BMPPixel> data);
 
     ///@brief Return file status.
-    bool IsOpen();
+    bool IsOpen() const;
 
     ///@brief Close file.
     void CloseBMP();

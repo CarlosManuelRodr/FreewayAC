@@ -85,7 +85,16 @@ template <class N> std::string aux_report(const std::string &report_type, N repo
 * @param v Vector dónde buscar.
 * @param find_val Valor a buscar.
 */
-template <class N> bool aux_is_in(std::vector<N> &v, const N &find_val)
+template <class N> bool aux_is_in(std::vector<N> &v, const N find_val)
+{
+    typename std::vector<N>::iterator it = find(v.begin(), v.end(), find_val);
+    if (it != v.end())
+        return true;
+    else
+        return false;
+}
+
+template <class N> bool aux_is_in_const(std::vector<N> v, const N find_val)
 {
     typename std::vector<N>::iterator it = find(v.begin(), v.end(), find_val);
     if (it != v.end())
@@ -99,7 +108,7 @@ template <class N> bool aux_is_in(std::vector<N> &v, const N &find_val)
 * @param list Lista dónde buscar.
 * @param find_val Valor a buscar.
 */
-template <class N> bool aux_is_in(std::initializer_list<N> list, const N &find_val)
+template <class N> bool aux_is_in(std::initializer_list<N> list, const N find_val)
 {
     std::vector<N> v = list;
     typename std::vector<N>::iterator it = find(v.begin(), v.end(), find_val);
@@ -115,7 +124,16 @@ template <class N> bool aux_is_in(std::initializer_list<N> list, const N &find_v
 * @param find_val Valor a buscar.
 * @return La posición ó -1 en caso de que no se encuentre.
 */
-template <class N> int aux_find_pos(std::vector<N> &v, const N &find_val)
+template <class N> int aux_find_pos(std::vector<N> &v, const N find_val)
+{
+    typename std::vector<N>::iterator it = find(v.begin(), v.end(), find_val);
+    if (it != v.end())
+        return distance(v.begin(), it);
+    else
+        return -1;
+}
+
+template <class N> int aux_find_pos_const(std::vector<N> v, const N find_val)
 {
     typename std::vector<N>::iterator it = find(v.begin(), v.end(), find_val);
     if (it != v.end())
@@ -294,39 +312,39 @@ public:
 
     ///@brief Devuelve elemento double.
     ///@param i Indice del elemento a devolver.
-    double GetDouble(const unsigned &i = 0);
+    double GetDouble(const unsigned i = 0) const;
 
     ///@brief Devuelve elemento double.
     ///@param label Etiqueta del elemento a devolver.
-    double GetDouble(std::string label);
+    double GetDouble(std::string label) const;
 
     ///@brief Devuelve elemento int.
     ///@param i Indice del elemento a devolver.
-    int GetInt(const unsigned &i = 0);
+    int GetInt(const unsigned i = 0) const;
 
     ///@brief Devuelve elemento double.
     ///@param label Etiqueta del elemento a devolver.
-    int GetInt(std::string label);
+    int GetInt(std::string label) const;
 
     ///@brief Devuelve elemento bool.
     ///@param i Indice del elemento a devolver.
-    bool GetBool(const unsigned &i = 0);
+    bool GetBool(const unsigned i = 0) const;
 
     ///@brief Devuelve elemento bool.
     ///@param label Etiqueta del elemento a devolver.
-    bool GetBool(std::string label);
+    bool GetBool(std::string label) const;
 
     ///@brief Devuelve elemento string.
     ///@param i Indice del elemento a devolver.
-    std::string GetString(const unsigned &i = 0);
+    std::string GetString(const unsigned i = 0) const;
 
     ///@brief Devuelve elemento string.
     ///@param label Etiqueta del elemento a devolver.
-    std::string GetString(std::string label);
+    std::string GetString(std::string label) const;
 
     ///@brief Asigna elemento double.
     ///@param i Indice del elemento a devolver.
-    void SetDouble(const unsigned &i, double val);
+    void SetDouble(const unsigned i, double val);
 
     ///@brief Asigna elemento double.
     ///@param label Etiqueta del elemento a devolver.
@@ -334,7 +352,7 @@ public:
 
     ///@brief Asigna elemento int.
     ///@param i Indice del elemento a devolver.
-    void SetInt(const unsigned &i, int val);
+    void SetInt(const unsigned i, int val);
 
     ///@brief Asigna elemento int.
     ///@param label Etiqueta del elemento a devolver.
@@ -342,7 +360,7 @@ public:
 
     ///@brief Asigna elemento bool.
     ///@param i Indice del elemento a devolver.
-    void SetBool(const unsigned &i, bool val);
+    void SetBool(const unsigned i, bool val);
 
     ///@brief Asigna elemento bool.
     ///@param label Etiqueta del elemento a devolver.
@@ -350,7 +368,7 @@ public:
 
     ///@brief Asigna elemento string.
     ///@param i Indice del elemento a devolver.
-    void SetString(const unsigned &i, std::string val);
+    void SetString(const unsigned i, std::string val);
 
     ///@brief Asigna elemento string.
     ///@param label Etiqueta del elemento a devolver.
@@ -414,16 +432,16 @@ public:
 
 
     // ## Obtención de valores. ##
-    T** GetMatrix();                            ///< Devuelve puntero a matriz.
-    std::vector<T> GetRow(unsigned int row);    ///< Devuelve vector de fila especificada.
-    unsigned int GetColumns();                  ///< Devuelve número de columnas.
-    unsigned int GetRows();                     ///< Devuelve número de fila.as
-    T Maximum();                                ///< Devuelve valor máximo dentro de matriz.
-    bool IsOk();                                ///< Devuelve status.
+    T** GetMatrix() const;                            ///< Devuelve puntero a matriz.
+    std::vector<T> GetRow(unsigned int row) const;    ///< Devuelve vector de fila especificada.
+    unsigned int GetColumns() const;                  ///< Devuelve número de columnas.
+    unsigned int GetRows() const;                     ///< Devuelve número de fila.as
+    T Maximum() const;                                ///< Devuelve valor máximo dentro de matriz.
+    bool IsOk() const;                                ///< Devuelve status.
 
     ///@brief Acceso seguro a elementos.
-    T At(unsigned int i, unsigned int j);
-    T*& operator[](const unsigned int pos);
+    T At(unsigned int i, unsigned int j) const;
+    T*& operator[](const unsigned int pos) const;
 };
 
 template <class T> Matrix<T>::Matrix()
@@ -531,7 +549,7 @@ template <class T> void Matrix<T>::Assign(T val)
             m_matrix[i][j] = val;
     }
 }
-template <class T> T** Matrix<T>::GetMatrix()
+template <class T> T** Matrix<T>::GetMatrix() const
 {
     return m_matrix;
 }
@@ -540,43 +558,43 @@ template <class T> void Matrix<T>::SetElement(unsigned int i, unsigned int j, T 
     if ((i < m_nrows && i >= 0) && (j < m_ncols && j >= 0))
         m_matrix[i][j] = val;
 }
-template <class T> T Matrix<T>::At(unsigned int i, unsigned int j)
+template <class T> T Matrix<T>::At(unsigned int i, unsigned int j) const
 {
     if ((i < m_nrows && i >= 0) && (j < m_ncols && j >= 0))
         return m_matrix[i][j];
     else
         return 0;
 }
-template <class T> std::vector<T> Matrix<T>::GetRow(unsigned int fil)
+template <class T> std::vector<T> Matrix<T>::GetRow(unsigned int fil) const
 {
     std::vector<T> out;
     for (int j = 0; j < m_ncols; j++)
         out.push_back(m_matrix[fil][j]);
     return out;
 }
-template <class T> unsigned int Matrix<T>::GetColumns()
+template <class T> unsigned int Matrix<T>::GetColumns() const
 {
     return m_ncols;
 }
-template <class T> unsigned int Matrix<T>::GetRows()
+template <class T> unsigned int Matrix<T>::GetRows() const
 {
     return m_nrows;
 }
-template <class T> T Matrix<T>::Maximum()
+template <class T> T Matrix<T>::Maximum() const
 {
     std::vector<T> tmp;
     for (unsigned i = 0; i < m_nrows; i++)
         tmp.push_back(max_element(m_matrix[i], m_matrix[i] + m_ncols));
     return max_element(tmp.begin(), tmp.end());
 }
-template <class T> bool Matrix<T>::IsOk()
+template <class T> bool Matrix<T>::IsOk() const
 {
     if (m_status == 0)
         return true;
     else
         return false;
 }
-template <class T> T*& Matrix<T>::operator[](const unsigned int pos)
+template <class T> T*& Matrix<T>::operator[](const unsigned int pos) const
 {
     return m_matrix[pos];
 }

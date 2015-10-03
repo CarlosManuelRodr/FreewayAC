@@ -144,7 +144,7 @@ void BMPWriter::WriteLine(std::vector<BMPPixel> data)
     if (data.size() == m_width)
         WriteLine(&data[0]);
 }
-bool BMPWriter::IsOpen()
+bool BMPWriter::IsOpen() const
 {
     return m_file.is_open();
 }
