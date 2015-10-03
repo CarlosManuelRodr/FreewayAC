@@ -650,7 +650,7 @@ public:
     int Status();
 
     void Evolve(const unsigned iter);
-    int NextCarDist(const int pos, const unsigned lane);
+    int NextCarDist(const CaPosition pos, const CaLane lane);
     bool Randomization(const double prob = -1.0);
     int &At(const CaPosition i, const CaLane lane);
     int GetAt(const CaPosition i, const CaLane lane);
