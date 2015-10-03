@@ -414,7 +414,7 @@ inline CaVelocity &CircularCA::AtTemp(const CaPosition i)
 {
     return m_ca_temp[i % m_ca.size()];
 }
-inline CaVelocity &CircularCA::AtFlowTemp(const CaPosition i)
+inline CaFlow &CircularCA::AtFlowTemp(const CaPosition i)
 {
     return m_ca_flow_temp[i % m_ca.size()];
 }
@@ -439,8 +439,8 @@ void CircularCA::Evolve(const unsigned iter)
 *                           *
 ****************************/
 
-OpenCA::OpenCA(const CaSize size, const double density, const int vmax, const double rand_prob, const int init_vel,
-               const double new_car_prob, const int new_car_speed)
+OpenCA::OpenCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob, const CaVelocity init_vel,
+               const double new_car_prob, const CaVelocity new_car_speed)
     : CellularAutomata(size, density, vmax, rand_prob, init_vel)
 {
     m_new_car_prob = new_car_prob;
@@ -455,8 +455,8 @@ OpenCA::OpenCA(const CaSize size, const double density, const int vmax, const do
         cout << "Aviso: Probabilidad de nuevo auto invalida. Cambiando a new_car_prob=" << m_new_car_prob << "." << endl;
     }
 }
-OpenCA::OpenCA(const vector<int> &ca, const vector<bool> &rand_values, const int vmax, 
-               const int new_car_speed)
+OpenCA::OpenCA(const vector<int> &ca, const vector<bool> &rand_values, const CaVelocity vmax,
+               const CaVelocity new_car_speed)
     : CellularAutomata(ca, rand_values, vmax)
 {
     m_new_car_prob = -1.0;
@@ -472,7 +472,7 @@ inline CaVelocity &OpenCA::AtTemp(const CaPosition i)
 {
     return ((unsigned)i >= m_ca.size()) ? m_ca_empty : m_ca_temp[i];
 }
-inline CaVelocity &OpenCA::AtFlowTemp(const CaPosition i)
+inline CaFlow &OpenCA::AtFlowTemp(const CaPosition i)
 {
     return ((unsigned)i >= m_ca.size()) ? m_ca_flow_empty : m_ca_flow_temp[i];
 }
@@ -1629,7 +1629,7 @@ inline CaVelocity &CircularCAML::AtTemp(const CaPosition i, const CaLane lane)
 {
     return m_ca_temp[i % m_ca.size()][lane];
 }
-inline CaVelocity &CircularCAML::AtFlowTemp(const CaPosition i, const CaLane lane)
+inline CaFlow &CircularCAML::AtFlowTemp(const CaPosition i, const CaLane lane)
 {
     return m_ca_flow_temp[i % m_ca.size()][lane];
 }
@@ -1690,9 +1690,9 @@ inline CaVelocity &OpenCAML::AtTemp(const CaPosition i, const CaLane lane)
 {
     return (i < 0 || (unsigned)i >= m_ca.size()) ? m_ca_empty : m_ca_temp[i][lane];
 }
-inline CaVelocity &OpenCAML::AtFlowTemp(const CaPosition i, const CaLane lane)
+inline CaFlow &OpenCAML::AtFlowTemp(const CaPosition i, const CaLane lane)
 {
-    return (i < 0 || (unsigned)i >= m_ca.size()) ? m_ca_flow_empty : m_ca_flow_temp[i][lane];
+    return (i < 0 || i >= (CaPosition)m_ca.size()) ? m_ca_flow_empty : m_ca_flow_temp[i][lane];
 }
 inline CaVelocity OpenCAML::GetAt(const CaPosition i, const CaLane lane) const
 {

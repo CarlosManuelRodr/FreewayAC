@@ -56,7 +56,7 @@ using CaSize = unsigned;
 using CaLane = unsigned;
 using CaPosition = int;
 using CaVelocity = int;
-using CaFlow = int;
+using CaFlow = char;
 
 const CaVelocity CA_EMPTY = -1;
 const CaPosition CA_NULL_POS = -1;
@@ -123,7 +123,7 @@ public:
     ///@param i Posición dentro del AC.
     virtual CaVelocity &At(const CaPosition i) = 0;
     virtual CaVelocity &AtTemp(const CaPosition i) = 0;
-    virtual CaVelocity &AtFlowTemp(const CaPosition i) = 0;
+    virtual CaFlow &AtFlowTemp(const CaPosition i) = 0;
     virtual CaVelocity GetAt(const CaPosition i) const = 0;
 
     ///@brief Devuelve referencia a elemento del AC en conexión.
@@ -196,7 +196,7 @@ public:
     ///@param i Posición dentro del AC.
     CaVelocity &At(const CaPosition i);
     CaVelocity &AtTemp(const CaPosition i);
-    CaVelocity &AtFlowTemp(const CaPosition i);
+    CaFlow &AtFlowTemp(const CaPosition i);
     CaVelocity GetAt(const CaPosition i) const;
 
     ///@brief Evoluciona (itera) el AC. Verifica si se conserva la cantidad de autos.
@@ -218,10 +218,10 @@ public:
 class OpenCA : public CellularAutomata
 {
 protected:
-    int m_ca_empty;            ///< Se usa para devolver referencia de lugar vacío.
-    int m_ca_flow_empty;
+    CaVelocity m_ca_empty;            ///< Se usa para devolver referencia de lugar vacío.
+    CaFlow m_ca_flow_empty;
     double m_new_car_prob;  ///< Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
-    int m_new_car_speed;    ///< Velocidad de nuevo auto cuando ingresa a la pista.
+    CaVelocity m_new_car_speed;    ///< Velocidad de nuevo auto cuando ingresa a la pista.
 public:
     ///@brief Constructor.
     ///@param size Tamaño del AC.
@@ -230,8 +230,8 @@ public:
     ///@param rand_prob Probabilidad de descenso de velocidad.
     ///@param new_car_prob Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
     ///@param new_car_speed Velocidad de nuevo auto cuando ingresa a la pista.
-    OpenCA(const CaSize size, const double density, const int vmax, const double rand_prob, const int init_vel,
-           const double new_car_prob, const int new_car_speed);
+    OpenCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob, const CaVelocity init_vel,
+           const double new_car_prob, const CaVelocity new_car_speed);
 
     ///@brief Constructor.
     ///@param ca Lista con valores de AC.
@@ -239,13 +239,13 @@ public:
     ///@param density Densidad de autos.
     ///@param vmax Velocidad máxima de los autos.
     ///@param new_car_speed Velocidad de nuevo auto cuando ingresa a la pista.
-    OpenCA(const std::vector<int> &ca, const std::vector<bool> &rand_values, const int vmax, const int new_car_speed);
+    OpenCA(const std::vector<int> &ca, const std::vector<bool> &rand_values, const CaVelocity vmax, const CaVelocity new_car_speed);
 
     ///@brief Devuelve elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
     CaVelocity &At(const CaPosition i);
     CaVelocity &AtTemp(const CaPosition i);
-    CaVelocity &AtFlowTemp(const CaPosition i);
+    CaFlow &AtFlowTemp(const CaPosition i);
     CaVelocity GetAt(const CaPosition i) const;
 
     void Step();    ///< Aplica reglas de evolución temporal del AC.
@@ -484,7 +484,7 @@ public:
     ///@param lane Carril objetivo.
     virtual CaVelocity &At(const CaPosition i, const CaLane lane) = 0;
     virtual CaVelocity &AtTemp(const CaPosition i, const CaLane lane) = 0;
-    virtual CaVelocity &AtFlowTemp(const CaPosition i, const CaLane lane) = 0;
+    virtual CaFlow &AtFlowTemp(const CaPosition i, const CaLane lane) = 0;
 
     ///@brief Similar a AC pero sólo devuelve el valor y en AC de uniones puede apuntar a un carril en específico.
     ///@param i Posición dentro del AC.
@@ -574,7 +574,7 @@ public:
     ///@param lane Carril objetivo.
     CaVelocity &At(const CaPosition i, const CaLane lane);
     CaVelocity &AtTemp(const CaPosition i, const CaLane lane);
-    CaVelocity &AtFlowTemp(const CaPosition i, const CaLane lane);
+    CaFlow &AtFlowTemp(const CaPosition i, const CaLane lane);
     CaVelocity GetAt(const CaPosition i, const CaLane lane) const;
 
     ///@brief Evoluciona (itera) el AC. Verifica si se conserva la cantidad de autos.
@@ -625,7 +625,7 @@ public:
     ///@param lane Carril objetivo.
     CaVelocity &At(const CaPosition i, const CaLane lane);
     CaVelocity &AtTemp(const CaPosition i, const CaLane lane);
-    CaVelocity &AtFlowTemp(const CaPosition i, const CaLane lane);
+    CaFlow &AtFlowTemp(const CaPosition i, const CaLane lane);
     CaVelocity GetAt(const CaPosition i, const CaLane lane) const;
 
     void Step();    ///< Aplica reglas de evolución temporal del AC.
