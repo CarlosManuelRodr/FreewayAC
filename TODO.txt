@@ -1,4 +1,2 @@
-﻿- Implementar decisión de carril en unión.
 - Flujo y ocupación no se miden correctament en unión.
-- Fix: CellularAutomataML::CellularAutomataML(const vector<CAElement> &ca, const vector<bool> &rand_values,
-                                       const int &vmax)
+- Flow debe ser bool?

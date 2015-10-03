@@ -59,6 +59,7 @@ using CaVelocity = int;
 using CaFlow = int;
 
 const CaVelocity CA_EMPTY = -1;
+const CaPosition CA_NULL_POS = -1;
 const CaFlow NO_FLOW = 0;
 const CaFlow IS_FLOW = 1;
 
@@ -66,7 +67,7 @@ const CaFlow IS_FLOW = 1;
  * @class CellularAutomata
  * @brief Clase base para autómata celular.
  * Esta clase implementa los métodos básicos que todos los autómatas celulares de tráfico poseen.
- * Las condiciones de frontera del autómata se reflejan en los métodos At y Move que se necesitan
+ * Las condiciones de frontera del autómata se reflejan en los métodos At que se necesitan
  * definir en las clases hijas.
  */
 class CellularAutomata
@@ -74,9 +75,9 @@ class CellularAutomata
 protected:
     bool m_test;                 ///< Modo de prueba.
     double m_rand_prob;          ///< Valor de la probabilidad de descenso de velocidad.
-    CaVelocity m_vmax;                  ///< Valor máximo de la velocidad.
-    CaVelocity m_init_vel;              ///< Velocidad inicial de los autos.
-    CaSize m_size;             ///< Tamaño del autómata celular
+    CaVelocity m_vmax;           ///< Valor máximo de la velocidad.
+    CaVelocity m_init_vel;       ///< Velocidad inicial de los autos.
+    CaSize m_size;               ///< Tamaño del autómata celular
     std::vector<CaVelocity> m_ca;       ///< Automata celular. -1 para casillas sin auto, y valores >= 0 indican velocidad del auto en esa casilla.
     std::vector<CaVelocity> m_ca_temp;
     std::vector<CaFlow> m_ca_flow_temp;                         ///< Variable temporal para operaciones con AC.
@@ -85,8 +86,10 @@ protected:
     std::vector<bool> m_rand_values;                            ///< Lista con valores aleatorios para usar en modo de prueba.
 
     // Conexión de carriles.
-    CellularAutomata* m_connect;  ///< Puntero al AC al cual se va a conectar.
-    CaPosition m_connect_pos;     ///< Posición del AC objetivo donde se realiza la conexión.
+    std::vector<CellularAutomata*> m_parents;
+    std::vector<CellularAutomata*> m_connect;  ///< Puntero al AC al cual se va a conectar.
+    std::vector<CaPosition> m_connect_from, m_connect_to;     ///< Posición del AC donde se realiza la conexión.
+    std::vector<double> m_weights;
 
 public:
     ///@brief Constructor.
@@ -99,7 +102,6 @@ public:
     ///@brief Constructor.
     ///@param ca Lista con valores de AC.
     ///@param rand_values Valores aleatorios en cada paso.
-    ///@param density Densidad de autos.
     ///@param vmax Velocidad máxima de los autos.
     CellularAutomata(const std::vector<int> &ca, const std::vector<bool> &rand_values, const CaVelocity vmax);
 
@@ -122,19 +124,19 @@ public:
     virtual CaVelocity &At(const CaPosition i) = 0;
     virtual CaVelocity &AtTemp(const CaPosition i) = 0;
     virtual CaVelocity &AtFlowTemp(const CaPosition i) = 0;
-
-    ///@brief Devuelve elemento del AC.
-    ///@param i Posición dentro del AC.
     virtual CaVelocity GetAt(const CaPosition i) const = 0;
 
     ///@brief Devuelve referencia a elemento del AC en conexión.
     ///@param i Posición dentro del AC.
-    CaVelocity &AtConnected(const CaPosition i);
+    CaVelocity &AtConnected(const CaPosition i, const unsigned connect_target);
 
     ///@brief Conecta AC con otro. El flujo de autos ocurre desde el que realiza la conexión al objetivo.
     ///@param connect Puntero a AC objetivo.
-    ///@param connect_pos Posición del AC objetivo donde se realiza la conexión.
-    void Connect(CellularAutomata* connect, const CaPosition from, const CaPosition to);
+    ///@param from Posición del AC padre de donde se realiza la conexión.
+    ///@param to Posición del AC objetivo donde se realiza la conexión.
+    ///@param weight Probabilidad de que el vehiculo entre a la conexion.
+    void Connect(CellularAutomata* connect, const CaPosition from, const CaPosition to, const double weight);
+    void SetParent(CellularAutomata* parent);
 
     ///@brief Dibuja mapa histórico del AC en formato BMP.
     ///@param path Ruta del archivo.
@@ -153,8 +155,8 @@ public:
     double CalculateMeanFlow() const;
 
     void Print() const;                   ///< Escribe línea de autómata celular en la terminal.
-    unsigned GetSize() const;             ///< Devuelve tamaño del AC.
-    unsigned GetHistorySize() const;      ///< Devuelve tamaño de la lista histórica de evolución del AC.
+    CaSize GetSize() const;             ///< Devuelve tamaño del AC.
+    CaSize GetHistorySize() const;      ///< Devuelve tamaño de la lista histórica de evolución del AC.
     unsigned CountCars() const;           ///< Cuenta la cantidad de autos en AC.
     void PrintHistory() const;            ///< Escribe los valores históricos del AC en la terminal.
     virtual void Step();            ///< Aplica reglas de evolución temporal del AC.
@@ -378,7 +380,7 @@ public:
 class SimpleJunctionCA : public OpenCA
 {
 protected:
-    OpenCA *m_source;
+    OpenCA *m_target;
     int m_target_lane;
 public:
     ///@brief Constructor.
@@ -391,16 +393,6 @@ public:
                      const int init_vel, const double new_car_prob, const int new_car_speed, const int target_lane = 0);
 
     ~SimpleJunctionCA();
-
-    ///@brief Evoluciona (itera) el AC. Verifica si se conserva la cantidad de autos.
-    ///@param iter Número de iteraciones.
-    void Evolve(const unsigned iter);
-
-    ///@brief Dibuja mapa histórico del AC en formato BMP.
-    ///@param path Ruta del archivo.
-    ///@param out_file_name Nombre del archivo de salida.
-    ///@return 0 si se pudo crear archivo, 1 en caso de error.
-    int DrawHistory(std::string path = "", std::string out_file_name = "") const;
 };
 
 
@@ -454,8 +446,10 @@ protected:
     std::vector<bool> m_rand_values;                                    ///< Lista con valores aleatorios para usar en modo de prueba.
 
     // Conexión de carriles.
-    CellularAutomataML* m_connect; ///< Puntero al AC al cual se va a conectar.
-    CaPosition m_connect_pos;        ///< Posición del AC objetivo donde se realiza la conexión.
+    std::vector<CellularAutomataML*> m_parents;
+    std::vector<CellularAutomataML*> m_connect;  ///< Puntero al AC al cual se va a conectar.
+    std::vector<CaPosition> m_connect_from, m_connect_to;     ///< Posición del AC donde se realiza la conexión.
+    std::vector<double> m_weights;
 
 public:
     ///@brief Constructor.
@@ -493,10 +487,17 @@ public:
     ///@param ca Tipo de AC.
     virtual CaVelocity GetAt(const CaPosition i, const CaLane lane) const = 0;
 
+    ///@brief Devuelve referencia a elemento del AC en conexión.
+    ///@param i Posición dentro del AC.
+    CaVelocity &AtConnected(const CaPosition i, const CaLane lane, const unsigned connect_target);
+
     ///@brief Conecta AC con otro. El flujo de autos ocurre desde el que realiza la conexión al objetivo.
     ///@param connect Puntero a AC objetivo.
-    ///@param connect_pos Posición del AC objetivo donde se realiza la conexión.
-    void Connect(CellularAutomataML* connect, CaPosition connect_pos);
+    ///@param from Posición del AC padre de donde se realiza la conexión.
+    ///@param to Posición del AC objetivo donde se realiza la conexión.
+    ///@param weight Probabilidad de que el vehiculo entre a la conexion.
+    void Connect(CellularAutomataML* connect, const CaPosition from, const CaPosition to, const double weight);
+    void SetParent(CellularAutomataML* parent);
 
     ///@brief Devuelve la distancia al auto más próximo desde la posición pos.
     ///@param pos Posición desde dónde iniciar la búsqueda.
@@ -562,7 +563,7 @@ public:
     ///@param rand_values Valores aleatorios en cada paso.
     ///@param density Densidad de autos.
     ///@param vmax Velocidad máxima de los autos.
-    CircularCAML(const std::vector<CaElementVel> &ca, const std::vector<bool> &rand_values, const int vmax);
+    CircularCAML(const std::vector<CaElementVel> &ca, const std::vector<bool> &rand_values, const CaVelocity vmax);
 
     ///@brief Devuelve referencia a  elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
@@ -673,8 +674,6 @@ public:
     bool Randomization(const double prob = -1.0);
     CaVelocity &At(const CaPosition i, const CaLane lane);
     CaVelocity GetAt(const CaPosition i, const CaLane lane) const;
-    void Connect(CellularAutomata* connect, CaPosition connect_pos);
-    void Connect(CellularAutomataML* connect, CaPosition connect_pos);
     int DrawHistory(std::string path = "", std::string out_file_name = "") const;
     int DrawFlowHistory(std::string path = "", std::string out_file_name = "") const;
     void Print() const;

@@ -33,9 +33,6 @@ CellularAutomata::CellularAutomata(const CaSize size, const double density, cons
     m_ca_flow_temp.assign(size, NO_FLOW);
     m_ca_history.clear();
     m_ca_flow_history.clear();
-    m_connect = nullptr;
-    m_connect_pos = -1;
-
 
     // Verifica argumentos.
     double l_density = density;
@@ -81,8 +78,6 @@ CellularAutomata::CellularAutomata(const vector<int> &ca, const vector<bool> &ra
     m_ca_history.clear();
     m_ca_flow_temp.assign(m_size, NO_FLOW);
     m_ca_history.push_back(m_ca);
-    m_connect = nullptr;
-    m_connect_pos = -1;
     m_init_vel = 1;
 }
 CellularAutomata::~CellularAutomata() {}
@@ -224,11 +219,29 @@ inline void CellularAutomata::Move()
 {
     for (unsigned i = 0; i < m_ca.size(); ++i)
     {
+        // Cambia las posiciones de los autos en AC.
         if (m_ca[i] != CA_EMPTY)
         {
-            // Cambia las posiciones de los autos en AC.
-            if ((i + m_ca[i] >= m_size) && m_connect != nullptr)
-                AtConnected(i + m_ca[i]) = m_ca[i];
+            // Si el AC posee conexiones.
+            if (!m_connect.empty())
+            {
+                // Busca si el vehiculo va a pasar por una de las conexiones.
+                vector<CaPosition> mov(m_ca[i]);
+                std::iota(mov.begin(), mov.end(), i);
+                bool found_connection = false;
+                for (unsigned j = 0; j < m_connect.size(); ++j)
+                {
+                    if (aux_is_in(mov, m_connect_from[j]) && this->Randomization(m_weights[j]))
+                    {
+                        found_connection = true;
+                        AtConnected(i + m_ca[i] - m_connect_from[j], j) = m_ca[i];
+                        m_ca[i] = CA_EMPTY;
+                    }
+                }
+
+                if (!found_connection)
+                    AtTemp(i + m_ca[i]) = m_ca[i];
+            }
             else
                 AtTemp(i + m_ca[i]) = m_ca[i];
 
@@ -237,6 +250,14 @@ inline void CellularAutomata::Move()
                 AtFlowTemp(j) = IS_FLOW;
         }
     }
+
+    // Si una cadena de conexiones vuelve al CA padre, se detiene la propagacion de pasos.
+    for (auto children : m_connect)
+    {
+        if (!aux_is_in(m_parents, children))
+            children->Step();
+    }
+
     AssignChanges();
 }
 inline void CellularAutomata::AssignChanges()
@@ -253,20 +274,20 @@ inline CaSize CellularAutomata::NextCarDist(const CaPosition pos) const
         dist++;
     return dist;
 }
-inline int &CellularAutomata::AtConnected(const CaPosition i)
+inline int &CellularAutomata::AtConnected(const CaPosition i, const unsigned connect_target)
 {
-    return m_connect->At(i - m_size + m_connect_pos);
+    return m_connect[connect_target]->At(i + m_connect_to[connect_target]);
 }
 void CellularAutomata::Evolve(const unsigned iter)
 {
     for (unsigned i = 0; i < iter; ++i)
         Step();
 }
-unsigned CellularAutomata::GetSize() const
+CaSize CellularAutomata::GetSize() const
 {
     return m_size;
 }
-unsigned CellularAutomata::GetHistorySize() const
+CaSize CellularAutomata::GetHistorySize() const
 {
     return m_ca_history.size();
 }
@@ -302,9 +323,34 @@ bool CellularAutomata::Randomization(const double prob)
             return false;
     }
 }
-void CellularAutomata::Connect(CellularAutomata* connect, CaPosition from, CaPosition to)
+void CellularAutomata::Connect(CellularAutomata* connect, CaPosition from, CaPosition to, const double weight)
 {
+    if (connect != nullptr)
+    {
+        connect->SetParent(this);
+        m_connect.push_back(connect);
+        m_weights.push_back(weight);
 
+        if (from <= (CaPosition)m_size)
+            m_connect_from.push_back(from);
+        else
+        {
+            m_connect_from.push_back(m_size / 2);
+            cout << "Valor incorrecto de posicion de conexion de salida. Cambiando a " << m_size / 2 << endl;
+        }
+
+        if (to <= (CaPosition)connect->GetSize())
+            m_connect_to.push_back(to);
+        else
+        {
+            m_connect_to.push_back(connect->GetSize() / 2);
+            cout << "Valor incorrecto de posicion de conexion de entrada. Cambiando a " << connect->GetSize() / 2 << endl;
+        }
+    }
+}
+void CellularAutomata::SetParent(CellularAutomata* parent)
+{
+    m_parents.push_back(parent);
 }
 vector<double> CellularAutomata::CalculateOcupancy() const
 {
@@ -918,8 +964,8 @@ SimpleJunctionCA::SimpleJunctionCA(const CaSize size, const double density, cons
                                    const int new_car_speed, const int target_lane)
                                  : OpenCA(size, density, vmax, rand_prob, init_vel, new_car_prob, new_car_speed)
 {
-    m_source = new OpenCA(size, density, vmax, rand_prob, init_vel, new_car_prob, new_car_speed);
-    m_source->Connect(this, size, size / 2);
+    m_target = new OpenCA(size, density, vmax, rand_prob, init_vel, new_car_prob, new_car_speed);
+    this->Connect(m_target, size, size / 2, 1.0);
     m_target_lane = target_lane;
 
     if (m_target_lane < 0 || m_target_lane > 1)
@@ -930,61 +976,8 @@ SimpleJunctionCA::SimpleJunctionCA(const CaSize size, const double density, cons
 }
 SimpleJunctionCA::~SimpleJunctionCA()
 {
-    delete m_source;
+    delete m_target;
 }
-void SimpleJunctionCA::Evolve(const unsigned iter)
-{
-    for (unsigned i = 0; i < iter; ++i)
-    {
-        m_source->Step();
-        this->Step();
-    }
-}
-int SimpleJunctionCA::DrawHistory(string path, string out_file_name) const
-{
-    if (out_file_name == "")
-        out_file_name = path + "ca_junction.bmp";
-    else
-        out_file_name = path + out_file_name;
-
-    m_source->DrawHistory(path);
-    unsigned height = m_ca_history.size();
-    unsigned width = m_size;
-    BMPWriter writer(out_file_name.c_str(), width, height);
-    if (writer.IsOpen())
-    {
-        BMPPixel* bmpData = new BMPPixel[width];
-        for (int i = height - 1; i >= 0; i--)
-        {
-            for (unsigned j = 0; j<width; ++j)
-            {
-                BMPPixel color;
-                if (j == m_size/2)
-                {
-                    if (m_ca_history[i][j] == CA_EMPTY)
-                        color = BMPPixel((char)0, (char)255, (char)0);
-                    else
-                        color = BMPPixel((char)0, (char)255, (char)(255.0*(double)m_ca_history[i][j] / (double)m_vmax));
-                }
-                else
-                {
-                    if (m_ca_history[i][j] == CA_EMPTY)
-                        color = BMPPixel((char)255, (char)255, (char)255);
-                    else
-                        color = BMPPixel((char)0, (char)0, (char)(255.0*(double)m_ca_history[i][j] / (double)m_vmax));
-                }
-                bmpData[j] = color;
-            }
-            writer.WriteLine(bmpData);
-        }
-        writer.CloseBMP();
-        delete[] bmpData;
-        return 0;
-    }
-    else
-        return 1;
-}
-
 
 ////////////////////////////////////
 //                                //
@@ -1024,9 +1017,6 @@ CellularAutomataML::CellularAutomataML(const CaSize size, const CaLane lanes, co
     m_ca.assign(size, CaElementVel(lanes));
     m_ca_temp.assign(size, CaElementVel(lanes));
     m_ca_flow_temp.assign(m_size, CaElementFlow(m_lanes, NO_FLOW));
-
-    m_connect = nullptr;
-    m_connect_pos = -1;
 
     // Verifica argumentos.
     double l_density = density;
@@ -1076,8 +1066,6 @@ CellularAutomataML::CellularAutomataML(const vector<CaElementVel> &ca, const vec
     m_ca_history.clear();
     m_ca_flow_history.clear();
     m_ca_history.push_back(m_ca);
-    m_connect = nullptr;
-    m_connect_pos = -1;
     m_init_vel = 1;
 
     if (m_ca.size() == 0)
@@ -1386,15 +1374,34 @@ unsigned CellularAutomataML::CountCars() const
     }
     return count;
 }
-void CellularAutomataML::Connect(CellularAutomataML* connect, CaPosition connect_pos)
+void CellularAutomataML::Connect(CellularAutomataML* connect, CaPosition from, CaPosition to, const double weight)
 {
-    m_connect = connect;
-    m_connect_pos = connect_pos;
-    if (m_connect_pos > (int)m_size)
+    if (connect != nullptr)
     {
-        m_connect_pos = m_size / 2;
-        cout << "Valor incorrecto de posicion de conexion. Cambiando a " << m_connect_pos << endl;
+        connect->SetParent(this);
+        m_connect.push_back(connect);
+        m_weights.push_back(weight);
+
+        if (from <= (CaPosition)m_size)
+            m_connect_from.push_back(from);
+        else
+        {
+            m_connect_from.push_back(m_size / 2);
+            cout << "Valor incorrecto de posicion de conexion de salida. Cambiando a " << m_size / 2 << endl;
+        }
+
+        if (to <= (CaPosition)connect->GetSize())
+            m_connect_to.push_back(to);
+        else
+        {
+            m_connect_to.push_back(connect->GetSize() / 2);
+            cout << "Valor incorrecto de posicion de conexion de entrada. Cambiando a " << connect->GetSize() / 2 << endl;
+        }
     }
+}
+void CellularAutomataML::SetParent(CellularAutomataML* parent)
+{
+    m_parents.push_back(parent);
 }
 inline CaSize CellularAutomataML::NextCarDist(const CaPosition pos, const CaLane lane) const
 {
@@ -1403,16 +1410,41 @@ inline CaSize CellularAutomataML::NextCarDist(const CaPosition pos, const CaLane
         dist++;
     return dist;
 }
-void CellularAutomataML::Move()
+inline int &CellularAutomataML::AtConnected(const CaPosition i, const CaLane lane, const unsigned connect_target)
+{
+    return m_connect[connect_target]->At(i + m_connect_to[connect_target], lane);
+}
+inline void CellularAutomataML::Move()
 {
     for (unsigned i = 0; i < m_ca.size(); ++i)
     {
         for (unsigned j = 0; j < m_lanes; ++j)
         {
+            // Cambia las posiciones de los autos en AC.
             if (m_ca[i][j] != CA_EMPTY)
             {
-                // Cambia las posiciones de los autos en AC.
-                AtTemp(i + m_ca[i][j], j) = m_ca[i][j];
+                // Si el AC posee conexiones.
+                if (!m_connect.empty())
+                {
+                    vector<CaPosition> mov(m_ca[i][j]);
+                    std::iota(mov.begin(), mov.end(), i);
+                    bool found_connection = false;
+
+                    for (unsigned k = 0; k < m_connect.size(); ++k)
+                    {
+                        if (aux_is_in(mov, m_connect_from[k]) && this->Randomization(m_weights[k]))
+                        {
+                            found_connection = true;
+                            AtConnected(i + m_ca[i][j] - m_connect_from[k], j, k) = m_ca[i][j];
+                            m_ca[i][j] = CA_EMPTY;
+                        }
+                    }
+
+                    if (!found_connection)
+                        AtTemp(i + m_ca[i][j], j) = m_ca[i][j];
+                }
+                else
+                    AtTemp(i + m_ca[i][j], j) = m_ca[i][j];
 
                 // Marca las casillas donde hay flujo de autos.
                 for (unsigned k = i; k < i+m_ca[i][j]; ++k)
@@ -1420,6 +1452,14 @@ void CellularAutomataML::Move()
             }
         }
     }
+
+    // Si una cadena de conexiones vuelve al CA padre, se detiene la propagacion de pasos.
+    for (auto children : m_connect)
+    {
+        if (!aux_is_in(m_parents, children))
+            children->Step();
+    }
+
     AssignChanges();
 }
 inline void CellularAutomataML::AssignChanges()
@@ -1875,14 +1915,6 @@ CaVelocity CaHandler::GetAt(const CaPosition i, const CaLane lane) const
         return cellularautomataml->GetAt(i, lane);
     else
         return cellularautomata->GetAt(i);
-}
-void CaHandler::Connect(CellularAutomata* connect, CaPosition connect_pos)
-{
-    //return cellularautomata->Connect(connect, connect_pos);
-}
-void CaHandler::Connect(CellularAutomataML* connect, CaPosition connect_pos)
-{
-    return cellularautomataml->Connect(connect, connect_pos);
 }
 int CaHandler::DrawHistory(std::string path, std::string out_file_name) const
 {
