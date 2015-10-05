@@ -525,8 +525,8 @@ void OpenCA::Step()
 *                           *
 ****************************/
 
-AutonomousCA::AutonomousCA(const CaSize size, const double density, const int vmax, const double rand_prob,
-                           const int init_vel, const double aut_density)
+AutonomousCA::AutonomousCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob,
+                           const CaVelocity init_vel, const double aut_density)
     : CircularCA(size, density, vmax, rand_prob, init_vel)
 {
     // Verifica argumento.
@@ -551,7 +551,7 @@ AutonomousCA::AutonomousCA(const CaSize size, const double density, const int vm
         m_aut_cars.push_back(aut_car_positions[i]);
 }
 AutonomousCA::AutonomousCA(const vector<int> &ca, vector<int> &aut_cars, const vector<bool> &rand_values,
-                           const int vmax)
+                           const CaVelocity vmax)
                  : CircularCA(ca, rand_values, vmax)
 {
     m_aut_cars = aut_cars;
@@ -563,14 +563,14 @@ void AutonomousCA::Move()
         if (m_ca[i] != CA_EMPTY)
         {
             int pos = aux_find_pos<int>(m_aut_cars, i);
-            if (pos != CA_EMPTY)
+            if (pos != -1)
                 m_aut_cars[pos] = (i + m_ca[i]) % m_size;
 
             // Cambia las posiciones de los autos en AC.
             AtTemp(i + m_ca[i]) = m_ca[i];
 
             // Marca las casillas donde hay flujo de autos.
-            for (unsigned j = i; j < i+m_ca[i]; ++j)
+            for (unsigned j = i; j < i + m_ca[i]; ++j)
                 AtFlowTemp(j) = IS_FLOW;
         }
     }
@@ -653,6 +653,136 @@ void AutonomousCA::Step()
                 if ((m_ca[i] > 0) && rnd)
                     m_ca[i]--;
             }
+        }
+    }
+
+    // Aplicar cambios.
+    Move();
+    m_ca_history.push_back(m_ca);
+}
+
+AutonomousNoRandCA::AutonomousNoRandCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob, 
+                                       const CaVelocity init_vel, const double aut_density)
+    : AutonomousCA(size, density, vmax, rand_prob, init_vel, aut_density) {}
+AutonomousNoRandCA::AutonomousNoRandCA(const std::vector<int>& ca, std::vector<int>& aut_cars, const std::vector<bool>& rand_values,
+                                       const CaVelocity vmax)
+    : AutonomousCA(ca, aut_cars, rand_values, vmax) {}
+void AutonomousNoRandCA::Step()
+{
+    // Iterar sobre AC hasta encotrar vehiculo.
+    for (unsigned i = 0; i < m_ca.size(); ++i)
+    {
+        if (m_ca[i] != CA_EMPTY)
+        {
+            // Aceleracion.
+            if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (CaSize)(m_ca[i] + 1)))
+                m_ca[i]++;
+            else
+            {
+                // Frenado.
+                if (m_ca[i] > 0)
+                {
+                    int nd = NextCarDist(i);
+                    if (nd <= m_ca[i])
+                        m_ca[i] = nd - 1;
+                }
+            }
+
+            // Aleatoriedad.
+            if (!aux_is_in<int>(m_aut_cars, i))
+            {
+                bool rnd = Randomization();
+                if ((m_ca[i] > 0) && rnd)
+                    m_ca[i]--;
+            }
+        }
+    }
+
+    // Aplicar cambios.
+    Move();
+    m_ca_history.push_back(m_ca);
+}
+
+AutonomousInstanteneousOnlyCA::AutonomousInstanteneousOnlyCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob,
+    const CaVelocity init_vel, const double aut_density)
+    : AutonomousCA(size, density, vmax, rand_prob, init_vel, aut_density) {}
+AutonomousInstanteneousOnlyCA::AutonomousInstanteneousOnlyCA(const std::vector<int>& ca, std::vector<int>& aut_cars, const std::vector<bool>& rand_values,
+    const CaVelocity vmax)
+    : AutonomousCA(ca, aut_cars, rand_values, vmax) {}
+void AutonomousInstanteneousOnlyCA::Step()
+{
+    // Iterar sobre AC hasta encotrar vehiculo.
+    for (unsigned i = 0; i < m_ca.size(); ++i)
+    {
+        if (m_ca[i] != CA_EMPTY)
+        {
+            bool smart = aux_is_in<int>(m_aut_cars, i);
+            if (smart)
+            {
+                // Auto inteligente.
+                int nc = i + NextCarDist(i);
+                nc %= m_size;
+                if ((m_ca[nc] < m_vmax) && (NextCarDist(nc) > (CaSize)(m_ca[nc] + 1)) && (NextCarDist(i) <= (CaSize)m_ca[i]))
+                {
+                    if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (CaSize)(m_ca[i] + 1)))
+                        m_ca[i]++;
+                    else
+                    {
+                        // Frenado.
+                        if (m_ca[i] > 0)
+                        {
+                            int nd = NextCarDist(i);
+                            if (m_ca[nc] >= m_ca[i])
+                            {
+                                if (nd <= m_ca[i] - 1)
+                                    m_ca[i] = nd - 1;
+                            }
+                            else
+                            {
+                                if (nd <= m_ca[i])
+                                    m_ca[i] = nd - 1;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // Aceleracion.
+                    if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (CaSize)(m_ca[i] + 1)))
+                        m_ca[i]++;
+                    else
+                    {
+                        // Frenado.
+                        if (m_ca[i] > 0)
+                        {
+                            int nd = NextCarDist(i);
+                            if (nd <= m_ca[i])
+                                m_ca[i] = nd - 1;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Aceleracion.
+                if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (CaSize)(m_ca[i] + 1)))
+                    m_ca[i]++;
+                else
+                {
+                    // Frenado.
+                    if (m_ca[i] > 0)
+                    {
+                        int nd = NextCarDist(i);
+                        if (nd <= m_ca[i])
+                            m_ca[i] = nd - 1;
+                    }
+                }
+            }
+
+            // Aleatoriedad.
+            bool rnd = Randomization();
+            if ((m_ca[i] > 0) && rnd)
+                m_ca[i]--;
         }
     }
 

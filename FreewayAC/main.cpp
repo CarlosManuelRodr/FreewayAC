@@ -44,8 +44,8 @@ enum  OptionIndex { UNKNOWN, FWSIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_
                     FLOW_VS_STOP_DENSITY, FLOW_VS_NEW_CAR, FLOW_PER_NEW_CAR, FLOW_VS_SEMAPHORE_DENSITY, ESCAPE_TIME_VS_DENSITY,
                     DISCHARGE_VS_DENSITY, PENTROPY_VS_DENSITY,
 
-                    CA_CIRCULAR, CA_MULTILANE_CIRCULAR, CA_OPEN, CA_MULTILANE_OPEN, CA_AUTONOMOUS, CA_STOP, CA_SEMAPHORE,
-                    CA_SIMPLE_JUNCTION,
+                    CA_CIRCULAR, CA_MULTILANE_CIRCULAR, CA_OPEN, CA_MULTILANE_OPEN, CA_AUTONOMOUS, CA_AUTONOMOUS_NORAND, CA_AUTONOMOUS_INSTONLY,
+                    CA_STOP, CA_SEMAPHORE, CA_SIMPLE_JUNCTION,
 
                     NEW_CAR_PROB, NEW_CAR_SPEED, AUT_DENSITY, STOP_DENSITY, SEMAPHORE_DENSITY, RANDOM_SEMAPHORES,
                     TARGET_LANE, LANES, RANDOM_SEED, RANDOM_GENERATOR, PARTITIONS, PORDER, PINTERVAL,
@@ -105,6 +105,8 @@ const option::Descriptor usage[] =
     {CA_MULTILANE_OPEN,  0,"","ca_multilane_open", Arg::None,
     "  \t--ca_multilane_open  \tAutomata celular multicarril con frontera abierta." },
     {CA_AUTONOMOUS,  0,"","ca_autonomous", Arg::None, "  \t--ca_autonomous  \tAutomata celular con vehiculos autonomos." },
+    {CA_AUTONOMOUS_NORAND,  0,"","ca_autonomous_norand", Arg::None, "  \t--ca_autonomous_norand  \tAutomata celular con vehiculos autonomos solo sin aleatorizacion." },
+    {CA_AUTONOMOUS_INSTONLY,  0,"","ca_autonomous_instonly", Arg::None, "  \t--ca_autonomous_instonly  \tAutomata celular con vehiculos autonomos solo con reaccion instantanea." },
     {CA_STOP,  0,"","ca_stop", Arg::None,
      "  \t--ca_stop  \tAutomata celular con tope. La posicion del tope se especifica por stop_density." },
     {CA_SEMAPHORE,  0,"","ca_semaphore", Arg::None, 
@@ -412,6 +414,14 @@ int main(int argc, char* argv[])
             ca_type = AUTONOMOUS_CA;
             break;
 
+            case CA_AUTONOMOUS_NORAND:
+            ca_type = AUTONOMOUS_NORAND_CA;
+            break;
+
+            case CA_AUTONOMOUS_INSTONLY:
+            ca_type = AUTONOMOUS_INSTONLY_CA;
+            break;
+
             case CA_STOP:
             ca_type = STOP_CA;
             break;
@@ -627,7 +637,7 @@ int main(int argc, char* argv[])
     Args args;            // Parámetro extra en el constructor de CA.
     if (ca_type == OPEN_CA)
         args = Args({ new_car_prob }, { new_car_speed });
-    if (ca_type == AUTONOMOUS_CA)
+    if (ca_type == AUTONOMOUS_CA || ca_type == AUTONOMOUS_NORAND_CA || ca_type == AUTONOMOUS_INSTONLY_CA)
         args = Args({ aut_density });
     if (ca_type == STOP_CA)
         args = Args({ stop_density });

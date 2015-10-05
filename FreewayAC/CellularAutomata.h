@@ -48,7 +48,7 @@ enum CAS
 */
 enum CA_TYPE
 {
-    CIRCULAR_CA, CIRCULAR_MULTILANE_CA, OPEN_CA, OPEN_MULTILANE_CA, AUTONOMOUS_CA, STOP_CA,
+    CIRCULAR_CA, CIRCULAR_MULTILANE_CA, OPEN_CA, OPEN_MULTILANE_CA, AUTONOMOUS_CA, AUTONOMOUS_NORAND_CA, AUTONOMOUS_INSTONLY_CA , STOP_CA,
     SEMAPHORE_CA, SIMPLE_JUNCTION_CA
 };
 
@@ -218,9 +218,9 @@ public:
 class OpenCA : public CellularAutomata
 {
 protected:
-    CaVelocity m_ca_empty;            ///< Se usa para devolver referencia de lugar vacío.
+    CaVelocity m_ca_empty;         ///< Se usa para devolver referencia de lugar vacío.
     CaFlow m_ca_flow_empty;
-    double m_new_car_prob;  ///< Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
+    double m_new_car_prob;         ///< Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
     CaVelocity m_new_car_speed;    ///< Velocidad de nuevo auto cuando ingresa a la pista.
 public:
     ///@brief Constructor.
@@ -273,8 +273,8 @@ public:
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
     ///@param aut_density Densidad de autos autónomos respecto a número total de autos.
-    AutonomousCA(const CaSize size, const double density, const int vmax, const double rand_prob,
-                 const int init_vel, const double aut_density);
+    AutonomousCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob,
+                 const CaVelocity init_vel, const double aut_density);
 
     ///@brief Constructor.
     ///@param ca Lista con valores de AC.
@@ -283,10 +283,40 @@ public:
     ///@param density Densidad de autos.
     ///@param vmax Velocidad máxima de los autos.
     AutonomousCA(const std::vector<int> &ca, std::vector<int> &aut_cars, const std::vector<bool> &rand_values,
-                 const int vmax);
+                 const CaVelocity vmax);
 
     void Move();    ///< Mueve los autos con condiciones de frontera periódicas.
-    void Step();    ///< Aplica reglas de evolución temporal del AC para autos normales e inteligentes.
+    virtual void Step();    ///< Aplica reglas de evolución temporal del AC para autos normales e inteligentes.
+};
+
+/**
+* @class AutonomousNoRandCA
+* @brief AC con autos autónomos que sólo tienen la propiedad de no aleatorización. Frontera periódica.
+*/
+class AutonomousNoRandCA : public AutonomousCA
+{
+public:
+    AutonomousNoRandCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob,
+        const CaVelocity init_vel, const double aut_density);
+    AutonomousNoRandCA(const std::vector<int> &ca, std::vector<int> &aut_cars, const std::vector<bool> &rand_values,
+        const CaVelocity vmax);
+
+    void Step();
+};
+
+/**
+* @class AutonomousInstanteneousOnlyCA
+* @brief AC con autos autónomos que sólo tienen la propiedad de no aleatorización. Frontera periódica.
+*/
+class AutonomousInstanteneousOnlyCA : public AutonomousCA
+{
+public:
+    AutonomousInstanteneousOnlyCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob,
+        const CaVelocity init_vel, const double aut_density);
+    AutonomousInstanteneousOnlyCA(const std::vector<int> &ca, std::vector<int> &aut_cars, const std::vector<bool> &rand_values,
+        const CaVelocity vmax);
+
+    void Step();
 };
 
 /****************************
