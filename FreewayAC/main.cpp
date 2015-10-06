@@ -618,7 +618,7 @@ int main(int argc, char* argv[])
     else
         RandomGen::SetAlgorithm(MT19937);
 
-    if (!(ocupancy_fixed || flow_fixed || flow_vs_density || flow_per_density || flow_vs_vmax 
+    if (!(ocupancy_fixed || flow_fixed || plot_flow || flow_vs_density || flow_per_density || flow_vs_vmax 
         || flow_vs_rand_prob || flow_vs_aut_cars || flow_vs_new_car || flow_per_new_car
         || flow_vs_stop_density || flow_vs_semaphore_density || escape_time_vs_density
         || discharge_vs_density || pentropy_vs_density || test))
@@ -746,7 +746,7 @@ int main(int argc, char* argv[])
     }
     if (flow_vs_aut_cars)
     {
-        cout << "Midiendo flujo vs densidad de autos inteligentes." << endl;
+        cout << "Midiendo flujo vs densidad de autos autonomos." << endl;
         r = ex_flow_vs_aut_cars(param);
     }
     if (flow_vs_stop_density)

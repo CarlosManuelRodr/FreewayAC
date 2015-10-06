@@ -281,7 +281,7 @@ Coord<double> ex_flow_vs_aut_cars_thread(double s, ExParam &p)
 {
     // Evoluciona el sistema.
     CaHandler ca;
-    ca.CreateCa(AUTONOMOUS_CA, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, Args({ s }), p.random_seed);
+    ca.CreateCa(p.type, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, Args({ s }), p.random_seed);
 
     if (ca.Status() != 0)
         return Coord<double>(0.0, 0.0);
@@ -292,6 +292,12 @@ Coord<double> ex_flow_vs_aut_cars_thread(double s, ExParam &p)
 
 int ex_flow_vs_aut_cars(ExParam p)
 {
+    if (!aux_is_in<CA_TYPE>({ AUTONOMOUS_CA, AUTONOMOUS_INSTONLY_CA, AUTONOMOUS_NORAND_CA }, p.type))
+    {
+        cout << "AC no valido para experimento seleccionado." << endl;
+        return 1;
+    }
+
     vector<Coord<double>> aut_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_aut_cars_thread, p.aut_car_density_min, p.aut_car_density_max, p.dt, p, p.threads);
     return export_data(aut_flow, p.GetFilePath("flow_vs_aut_cars.csv"), p.export_format);
 }

@@ -183,14 +183,14 @@ public:
     ///@param density Densidad de autos.
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
-    CircularCA(const CaSize size, const double density, const int vmax, const double rand_prob, const int init_vel);
+    CircularCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob, const CaVelocity init_vel);
 
     ///@brief Constructor.
     ///@param ca Lista con valores de AC.
     ///@param rand_values Valores aleatorios en cada paso.
     ///@param density Densidad de autos.
     ///@param vmax Velocidad máxima de los autos.
-    CircularCA(const std::vector<int> &ca, const std::vector<bool> &rand_values, const int vmax);
+    CircularCA(const std::vector<int> &ca, const std::vector<bool> &rand_values, const CaVelocity vmax);
 
     ///@brief Devuelve elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
@@ -340,8 +340,8 @@ public:
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
     ///@param stop_density Densidad de topes respecto a tamaño total del AC.
-    StreetStopCA(const CaSize size, const double density, const int vmax, const double rand_prob,
-                 const int init_vel, const double stop_density);
+    StreetStopCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob,
+                 const CaVelocity init_vel, const double stop_density);
 
     ///@brief Devuelve la distancia al tope más próximo desde la posición pos.
     ///@param pos Posición desde dónde iniciar la búsqueda.
@@ -381,8 +381,8 @@ public:
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
     ///@param semaphore_density Densidad de semaforos respecto a tamaño total del AC.
-    SemaphoreCA(const CaSize size, const double density, const int vmax, const double rand_prob,
-                const int init_vel, const double semaphore_density, const bool random_semaphores = false);
+    SemaphoreCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob,
+                const CaVelocity init_vel, const double semaphore_density, const bool random_semaphores = false);
 
     ///@brief Devuelve la distancia al semáforo más próximo desde la posición pos.
     ///@param pos Posición desde dónde iniciar la búsqueda.
@@ -419,8 +419,8 @@ public:
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
     ///@param return_lane Carril al que apunta la función At.
-    SimpleJunctionCA(const CaSize size, const double density, const int vmax, const double rand_prob,
-                     const int init_vel, const double new_car_prob, const int new_car_speed, const int target_lane = 0);
+    SimpleJunctionCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob,
+                     const CaVelocity init_vel, const double new_car_prob, const CaVelocity new_car_speed, const int target_lane = 0);
 
     ~SimpleJunctionCA();
 
@@ -679,6 +679,8 @@ class CaHandler
     CircularCA* circularca;
     OpenCA* openca;
     AutonomousCA* smartca;
+    AutonomousNoRandCA* smartnorandca;
+    AutonomousInstanteneousOnlyCA* smartinstonlyca;
     StreetStopCA* streetstopca;
     SemaphoreCA* semaphoreca;
     SimpleJunctionCA* simplejunctionca;

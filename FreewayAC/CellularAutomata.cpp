@@ -402,9 +402,9 @@ double CellularAutomata::CalculateMeanFlow() const
 *                           *
 ****************************/
 
-CircularCA::CircularCA(const CaSize size, const double density, const int vmax, const double rand_prob, const int init_vel)
+CircularCA::CircularCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob, const CaVelocity init_vel)
     : CellularAutomata(size, density, vmax, rand_prob, init_vel) {}
-CircularCA::CircularCA(const vector<int> &ca, const vector<bool> &rand_values, const int vmax)
+CircularCA::CircularCA(const vector<int> &ca, const vector<bool> &rand_values, const CaVelocity vmax)
     : CellularAutomata(ca, rand_values, vmax) {}
 inline CaVelocity &CircularCA::At(const CaPosition i)
 {
@@ -538,7 +538,7 @@ AutonomousCA::AutonomousCA(const CaSize size, const double density, const CaVelo
     }
 
     // Selecciona autos inteligentes.
-    unsigned aut_car_number = (unsigned)(((double)size)*l_aut_density);
+    unsigned aut_car_number = (unsigned)(((double)size*density)*l_aut_density);
     vector<int> aut_car_positions;
     for (unsigned i = 0; i < m_size; ++i)
     {
@@ -797,8 +797,8 @@ void AutonomousInstanteneousOnlyCA::Step()
 *                           *
 ****************************/
 
-StreetStopCA::StreetStopCA(const CaSize size, const double density, const int vmax,
-                           const double rand_prob, const int init_vel, const double stop_density)
+StreetStopCA::StreetStopCA(const CaSize size, const double density, const CaVelocity vmax,
+                           const double rand_prob, const CaVelocity init_vel, const double stop_density)
                            : CircularCA(size, density, vmax, rand_prob, init_vel)
 {
     unsigned stops = (unsigned)(((double)size)*stop_density);
@@ -920,8 +920,8 @@ int StreetStopCA::DrawHistory(string path, string out_file_name) const
 *                           *
 ****************************/
 
-SemaphoreCA::SemaphoreCA(const CaSize size, const double density, const int vmax,
-                         const double rand_prob, const int init_vel, const double semaphore_density,
+SemaphoreCA::SemaphoreCA(const CaSize size, const double density, const CaVelocity vmax,
+                         const double rand_prob, const CaVelocity init_vel, const double semaphore_density,
                          const bool random_semaphores)
                        : CircularCA(size, density, vmax, rand_prob, init_vel)
 {
@@ -980,7 +980,7 @@ void SemaphoreCA::Step()
                     CaSize ncd = NextCarDist(i);
                     CaSize nsd = NextSemaphoreDist(i);
                     CaSize nd = (ncd < nsd) ? ncd : nsd;
-                    if (nd <= m_ca[i])
+                    if (nd <= (CaSize)m_ca[i])
                         m_ca[i] = nd - 1;
                 }
             }
@@ -1089,9 +1089,9 @@ int SemaphoreCA::DrawHistory(string path, string out_file_name) const
 *                           *
 ****************************/
 
-SimpleJunctionCA::SimpleJunctionCA(const CaSize size, const double density, const int vmax,
-                                   const double rand_prob, const int init_vel, const double new_car_prob,
-                                   const int new_car_speed, const int target_lane)
+SimpleJunctionCA::SimpleJunctionCA(const CaSize size, const double density, const CaVelocity vmax,
+                                   const double rand_prob, const CaVelocity init_vel, const double new_car_prob,
+                                   const CaVelocity new_car_speed, const int target_lane)
                                  : OpenCA(size, density, vmax, rand_prob, init_vel, new_car_prob, new_car_speed)
 {
     m_target = new OpenCA(size, density, vmax, rand_prob, init_vel, new_car_prob, new_car_speed);
@@ -1888,6 +1888,8 @@ CaHandler::CaHandler()
     circularca = nullptr;
     openca = nullptr;
     smartca = nullptr;
+    smartnorandca = nullptr;
+    smartinstonlyca = nullptr;
     streetstopca = nullptr;
     semaphoreca = nullptr;
     simplejunctionca = nullptr;
@@ -1902,6 +1904,8 @@ CaHandler::CaHandler(CA_TYPE ca, const CaSize size, const double density, const 
     circularca = nullptr;
     openca = nullptr;
     smartca = nullptr;
+    smartnorandca = nullptr;
+    smartinstonlyca = nullptr;
     streetstopca = nullptr;
     semaphoreca = nullptr;
     simplejunctionca = nullptr;
@@ -1917,6 +1921,8 @@ CaHandler::CaHandler(CA_TYPE ca, const CaSize size, const CaLane lanes, const do
     circularca = nullptr;
     openca = nullptr;
     smartca = nullptr;
+    smartnorandca = nullptr;
+    smartinstonlyca = nullptr;
     streetstopca = nullptr;
     semaphoreca = nullptr;
     simplejunctionca = nullptr;
@@ -1952,6 +1958,12 @@ void CaHandler::CreateCa(CA_TYPE ca, const CaSize size, const double density, co
             break;
         case AUTONOMOUS_CA:
             cellularautomata = smartca = new AutonomousCA(size, density, vmax, rand_prob, init_vel, args.GetDouble());
+            break;
+        case AUTONOMOUS_NORAND_CA:
+            cellularautomata = smartnorandca = new AutonomousNoRandCA(size, density, vmax, rand_prob, init_vel, args.GetDouble());
+            break;
+        case AUTONOMOUS_INSTONLY_CA:
+            cellularautomata = smartca = new AutonomousInstanteneousOnlyCA(size, density, vmax, rand_prob, init_vel, args.GetDouble());
             break;
         case STOP_CA:
             cellularautomata = streetstopca = new StreetStopCA(size, density, vmax, rand_prob, init_vel, args.GetDouble());
@@ -1999,6 +2011,12 @@ void CaHandler::CreateCa(CA_TYPE ca, const CaSize size, const CaLane lanes, cons
         case AUTONOMOUS_CA:
             cellularautomata = smartca = new AutonomousCA(size, density, vmax, rand_prob, init_vel, args.GetDouble());
             break;
+        case AUTONOMOUS_NORAND_CA:
+            cellularautomata = smartnorandca = new AutonomousNoRandCA(size, density, vmax, rand_prob, init_vel, args.GetDouble());
+            break;
+        case AUTONOMOUS_INSTONLY_CA:
+            cellularautomata = smartca = new AutonomousInstanteneousOnlyCA(size, density, vmax, rand_prob, init_vel, args.GetDouble());
+            break;
         case STOP_CA:
             cellularautomata = streetstopca = new StreetStopCA(size, density, vmax, rand_prob, init_vel, args.GetDouble());
             break;
@@ -2038,6 +2056,10 @@ void CaHandler::DeleteCa()
         delete openca;
     if (smartca)
         delete smartca;
+    if (smartnorandca)
+        delete smartnorandca;
+    if (smartinstonlyca)
+        delete smartinstonlyca;
     if (streetstopca)
         delete streetstopca;
     if (semaphoreca)
@@ -2052,6 +2074,8 @@ void CaHandler::DeleteCa()
     circularca = nullptr;
     openca = nullptr;
     smartca = nullptr;
+    smartnorandca = nullptr;
+    smartinstonlyca = nullptr;
     streetstopca = nullptr;
     cellularautomata = nullptr;
     semaphoreca = nullptr;
