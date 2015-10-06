@@ -299,8 +299,10 @@ int ex_flow_vs_aut_cars(ExParam p)
 Coord<double> ex_flow_vs_new_car_prob_thread(double s, ExParam &p)
 {
     // Evoluciona el sistema.
+    Args temp = p.args;
+    temp.SetDouble(0, s);
     CaHandler ca;
-    ca.CreateCa(p.type, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
+    ca.CreateCa(p.type, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, temp, p.random_seed);
 
     if (ca.Status() != 0)
         return Coord<double>(0.0, 0.0);

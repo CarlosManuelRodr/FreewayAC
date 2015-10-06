@@ -847,9 +847,9 @@ void SemaphoreCA::Step()
                 // Frenado.
                 if (m_ca[i] > 0)
                 {
-                    int ncd = NextCarDist(i);
-                    int nsd = NextSemaphoreDist(i);
-                    int nd = (ncd < nsd) ? ncd : nsd;
+                    CaSize ncd = NextCarDist(i);
+                    CaSize nsd = NextSemaphoreDist(i);
+                    CaSize nd = (ncd < nsd) ? ncd : nsd;
                     if (nd <= m_ca[i])
                         m_ca[i] = nd - 1;
                 }
