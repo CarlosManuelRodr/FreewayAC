@@ -595,7 +595,7 @@ int main(int argc, char* argv[])
 
 #if defined(_WIN32)
     if (low_priority)
-        SetPriorityClass(GetCurrentProcess(), BELOW_NORMAL_PRIORITY_CLASS);
+        SetPriorityClass(GetCurrentProcess(), IDLE_PRIORITY_CLASS);
 #endif
 
     // Verifica opciones.

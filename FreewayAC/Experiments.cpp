@@ -486,7 +486,7 @@ Coord<double> ex_discharge_vs_density_thread(double d, ExParam &p)
         iter++;
     }
     if (iter != 0)
-        return Coord<double>(d, (double)(ca.GetSize())*d / (double)iter);
+        return Coord<double>(d, (double)(ca.GetSize()*ca.GetLanes())*d / (double)iter);
     else
         return Coord<double>(0.0, 0.0);
 }
