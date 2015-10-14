@@ -502,7 +502,9 @@ template <class T> int Matrix<T>::SetMatrix(unsigned int rows, unsigned int cols
             m_matrix[i] = new T[m_ncols];
     }
     catch (std::bad_alloc&)
+    {
         return 1;
+    }
 
     // Assigna valores.
     if (inputMatrix != nullptr)
