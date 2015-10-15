@@ -632,7 +632,7 @@ int main(int argc, char* argv[])
     if (flow_vs_vmax && dt < 1)
         dt = 1.0;
     if (pinterval < 0)
-        pinterval = (int)ceil(0.20*abs(dmax-dmin)/dt);
+        pinterval = (int)ceil(0.20 * abs(dmax - dmin)/dt);
 
     Args args;            // Parámetro extra en el constructor de CA.
     if (ca_type == OPEN_CA)
@@ -697,98 +697,117 @@ int main(int argc, char* argv[])
         param.Report();
 
     // Realiza acciones.
-    if (test)
+    try
     {
-        cout << "Realizando tests." << endl;
-        ex_perform_test();
-    }
+        if (test)
+        {
+            cout << "Realizando tests." << endl;
+            ex_perform_test();
+        }
 
-    int r = 0;
-    if (plot_traffic)
-    {
-        cout << "Creando mapa de trafico." << endl;
-        r = ex_traffic_map(param);
-    }
-    if (plot_flow)
-    {
-        cout << "Creando mapa de flujo." << endl;
-        r = ex_flow_map(param);
-    }
-    if (ocupancy_fixed)
-    {
-        cout << "Midiendo ocupacion." << endl;
-        r = ex_ocupancy_fixed(param);
-    }
-    if (flow_fixed)
-    {
-        cout << "Midiendo flujo." << endl;
-        r = ex_flow_fixed(param);
-    }
-    if (flow_vs_density)
-    {
-        cout << "Midiendo flujo vs densidad." << endl;
-        r = ex_flow_vs_density(param);
-    }
-    if (flow_per_density)
-    {
-        cout << "Midiendo flujo/densidad vs densidad." << endl;
-        r = ex_flow_vs_density(param);
-    }
-    if (flow_vs_vmax)
-    {
-        cout << "Midiendo flujo vs vmax." << endl;
-        r = ex_flow_vs_vmax(param);
-    }
-    if (flow_vs_rand_prob)
-    {
-        cout << "Midiendo flujo vs rand_prob." << endl;
-        r = ex_flow_vs_rand_prob(param);
-    }
-    if (flow_vs_aut_cars)
-    {
-        cout << "Midiendo flujo vs densidad de autos autonomos." << endl;
-        r = ex_flow_vs_aut_cars(param);
-    }
-    if (flow_vs_stop_density)
-    {
-        cout << "Midiendo flujo vs densidad de topes." << endl;
-        r = ex_flow_vs_stop_density(param);
-    }
-    if (flow_vs_new_car)
-    {
-        cout << "Midiendo flujo vs probabilidad de nuevo auto." << endl;
-        r = ex_flow_vs_new_car_prob(param);
-    }
-    if (flow_per_new_car)
-    {
-        cout << "Midiendo flujo/probabilidad vs probabilidad de nuevo auto." << endl;
-        r = ex_flow_vs_new_car_prob(param);
-    }
-    if (flow_vs_semaphore_density)
-    {
-        cout << "Midiendo flujo vs densidad de semaforos." << endl;
-        r = ex_flow_vs_semaphore_density(param);
-    }
-    if (escape_time_vs_density)
-    {
-        cout << "Midiendo tiempo de escape vs densidad de autos." << endl;
-        r = ex_escape_time_vs_density(param);
-    }
-    if (discharge_vs_density)
-    {
-        cout << "Midiendo gasto vs densidad de autos." << endl;
-        r = ex_discharge_vs_density(param);
-    }
-    if (pentropy_vs_density)
-    {
-        cout << "Midiendo gasto respecto a densidad de autos." << endl;
-        r = ex_pentropy_vs_density(param);
-    }
+        if (plot_traffic)
+        {
+            cout << "Creando mapa de trafico." << endl;
+            ex_traffic_map(param);
+        }
+        if (plot_flow)
+        {
+            cout << "Creando mapa de flujo." << endl;
+            ex_flow_map(param);
+        }
+        if (ocupancy_fixed)
+        {
+            cout << "Midiendo ocupacion." << endl;
+            ex_ocupancy_fixed(param);
+        }
+        if (flow_fixed)
+        {
+            cout << "Midiendo flujo." << endl;
+            ex_flow_fixed(param);
+        }
+        if (flow_vs_density)
+        {
+            cout << "Midiendo flujo vs densidad." << endl;
+            ex_flow_vs_density(param);
+        }
+        if (flow_per_density)
+        {
+            cout << "Midiendo flujo/densidad vs densidad." << endl;
+            ex_flow_vs_density(param);
+        }
+        if (flow_vs_vmax)
+        {
+            cout << "Midiendo flujo vs vmax." << endl;
+            ex_flow_vs_vmax(param);
+        }
+        if (flow_vs_rand_prob)
+        {
+            cout << "Midiendo flujo vs rand_prob." << endl;
+            ex_flow_vs_rand_prob(param);
+        }
+        if (flow_vs_aut_cars)
+        {
+            cout << "Midiendo flujo vs densidad de autos autonomos." << endl;
+            ex_flow_vs_aut_cars(param);
+        }
+        if (flow_vs_stop_density)
+        {
+            cout << "Midiendo flujo vs densidad de topes." << endl;
+            ex_flow_vs_stop_density(param);
+        }
+        if (flow_vs_new_car)
+        {
+            cout << "Midiendo flujo vs probabilidad de nuevo auto." << endl;
+            ex_flow_vs_new_car_prob(param);
+        }
+        if (flow_per_new_car)
+        {
+            cout << "Midiendo flujo/probabilidad vs probabilidad de nuevo auto." << endl;
+            ex_flow_vs_new_car_prob(param);
+        }
+        if (flow_vs_semaphore_density)
+        {
+            cout << "Midiendo flujo vs densidad de semaforos." << endl;
+            ex_flow_vs_semaphore_density(param);
+        }
+        if (escape_time_vs_density)
+        {
+            cout << "Midiendo tiempo de escape vs densidad de autos." << endl;
+            ex_escape_time_vs_density(param);
+        }
+        if (discharge_vs_density)
+        {
+            cout << "Midiendo gasto vs densidad de autos." << endl;
+            ex_discharge_vs_density(param);
+        }
+        if (pentropy_vs_density)
+        {
+            cout << "Midiendo gasto respecto a densidad de autos." << endl;
+            ex_pentropy_vs_density(param);
+        }
 
-    if (r == 0)
         cout << "Hecho." << endl;
-    else
-        cout << "Error en la ejecucion." << endl;
+    }
+    catch (std::invalid_argument& e)
+    {
+        cout << "Error: Argumento no valido." << endl;
+        cout << e.what() << endl;
+    }
+    catch (std::runtime_error& e)
+    {
+        cout << "Error de ejecucion." << endl;
+        cout << e.what() << endl;
+    }
+    catch (std::bad_alloc& e)
+    {
+        cout << "Error: Memoria insuficiente." << endl;
+        cout << e.what() << endl;
+    }
+    catch (std::exception& e)
+    {
+        cout << "Error inesperado." << endl;
+        cout << e.what() << endl;
+    }
 
     if (beep)
         aux_beep();

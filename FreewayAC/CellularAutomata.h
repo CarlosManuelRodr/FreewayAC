@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <algorithm>
+#include <exception>
 #include "BmpWriter.h"
 #include "Auxiliar.h"
 
@@ -109,26 +110,26 @@ public:
 
     ///@brief Evoluciona (itera) el AC.
     ///@param iter Número de iteraciones.
-    virtual void Evolve(const unsigned iter);
+    virtual void Evolve(const unsigned iter) noexcept;
 
     ///@brief Devuelve la distancia al auto más próximo desde la posición pos.
     ///@param pos Posición desde dónde iniciar la búsqueda.
-    CaSize NextCarDist(const CaPosition pos) const;
+    CaSize NextCarDist(const CaPosition pos) const noexcept;
 
     ///@brief Devuelve valores verdaderos con probabilidad prob. Si se usa en prueba usa valores de lista.
     ///@param prob Probabilidad de obtener valor verdadero. Por defecto se utiliza m_rand_prob.
-    bool Randomization(const double prob = -1.0);
+    bool Randomization(const double prob = -1.0) noexcept;
 
     ///@brief Devuelve referencia a elemento del AC considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
-    virtual CaVelocity &At(const CaPosition i) = 0;
-    virtual CaVelocity &AtTemp(const CaPosition i) = 0;
-    virtual CaFlow &AtFlowTemp(const CaPosition i) = 0;
-    virtual CaVelocity GetAt(const CaPosition i) const = 0;
+    virtual CaVelocity &At(const CaPosition i) noexcept = 0;
+    virtual CaVelocity &AtTemp(const CaPosition i) noexcept = 0;
+    virtual CaFlow &AtFlowTemp(const CaPosition i) noexcept = 0;
+    virtual CaVelocity GetAt(const CaPosition i) const noexcept = 0;
 
     ///@brief Devuelve referencia a elemento del AC en conexión.
     ///@param i Posición dentro del AC.
-    CaVelocity &AtConnected(const CaPosition i, const unsigned connect_target);
+    CaVelocity &AtConnected(const CaPosition i, const unsigned connect_target) noexcept;
 
     ///@brief Conecta AC con otro. El flujo de autos ocurre desde el que realiza la conexión al objetivo.
     ///@param connect Puntero a AC objetivo.
@@ -141,27 +142,25 @@ public:
     ///@brief Dibuja mapa histórico del AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
-    ///@return 0 si se pudo crear archivo, 1 en caso de error.
-    virtual int DrawHistory(std::string path = "", std::string out_file_name = "") const;
+    virtual void DrawHistory(std::string path = "", std::string out_file_name = "") const;
 
     ///@brief Dibuja mapa histórico del flujo de AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
-    ///@return 0 si se pudo crear archivo, 1 en caso de error.
-    virtual int DrawFlowHistory(std::string path = "", std::string out_file_name = "") const;
+    virtual void DrawFlowHistory(std::string path = "", std::string out_file_name = "") const;
     
-    virtual std::vector<double> CalculateOcupancy() const;
-    virtual std::vector<double> CalculateFlow() const;
-    virtual double CalculateMeanFlow() const;
+    virtual std::vector<double> CalculateOcupancy() const noexcept;
+    virtual std::vector<double> CalculateFlow() const noexcept;
+    virtual double CalculateMeanFlow() const noexcept;
 
-    void Print() const;                   ///< Escribe línea de autómata celular en la terminal.
-    CaSize GetSize() const;             ///< Devuelve tamaño del AC.
-    CaSize GetHistorySize() const;      ///< Devuelve tamaño de la lista histórica de evolución del AC.
-    unsigned CountCars() const;           ///< Cuenta la cantidad de autos en AC.
-    void PrintHistory() const;            ///< Escribe los valores históricos del AC en la terminal.
-    virtual void Step();            ///< Aplica reglas de evolución temporal del AC.
-    virtual void Move();            ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
-    void AssignChanges();           ///< Asigna cambios de los arrays teporales al array m_ca e historico.
+    void Print() const noexcept;                   ///< Escribe línea de autómata celular en la terminal.
+    CaSize GetSize() const noexcept;             ///< Devuelve tamaño del AC.
+    CaSize GetHistorySize() const noexcept;      ///< Devuelve tamaño de la lista histórica de evolución del AC.
+    unsigned CountCars() const noexcept;           ///< Cuenta la cantidad de autos en AC.
+    void PrintHistory() const noexcept;            ///< Escribe los valores históricos del AC en la terminal.
+    virtual void Step() noexcept;            ///< Aplica reglas de evolución temporal del AC.
+    virtual void Move() noexcept;            ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
+    void AssignChanges() noexcept;           ///< Asigna cambios de los arrays teporales al array m_ca e historico.
 };
 
 
@@ -194,14 +193,14 @@ public:
 
     ///@brief Devuelve elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
-    CaVelocity &At(const CaPosition i);
-    CaVelocity &AtTemp(const CaPosition i);
-    CaFlow &AtFlowTemp(const CaPosition i);
-    CaVelocity GetAt(const CaPosition i) const;
+    CaVelocity &At(const CaPosition i) noexcept;
+    CaVelocity &AtTemp(const CaPosition i) noexcept;
+    CaFlow &AtFlowTemp(const CaPosition i) noexcept;
+    CaVelocity GetAt(const CaPosition i) const noexcept;
 
     ///@brief Evoluciona (itera) el AC. Verifica si se conserva la cantidad de autos.
     ///@param iter Número de iteraciones.
-    void Evolve(const unsigned iter);
+    void Evolve(const unsigned iter) noexcept;
 };
 
 
@@ -243,12 +242,12 @@ public:
 
     ///@brief Devuelve elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
-    CaVelocity &At(const CaPosition i);
-    CaVelocity &AtTemp(const CaPosition i);
-    CaFlow &AtFlowTemp(const CaPosition i);
-    CaVelocity GetAt(const CaPosition i) const;
+    CaVelocity &At(const CaPosition i) noexcept;
+    CaVelocity &AtTemp(const CaPosition i) noexcept;
+    CaFlow &AtFlowTemp(const CaPosition i) noexcept;
+    CaVelocity GetAt(const CaPosition i) const noexcept;
 
-    void Step();    ///< Aplica reglas de evolución temporal del AC.
+    void Step() noexcept;    ///< Aplica reglas de evolución temporal del AC.
 };
 
 
@@ -285,8 +284,8 @@ public:
     AutonomousCA(const std::vector<int> &ca, std::vector<int> &aut_cars, const std::vector<bool> &rand_values,
                  const CaVelocity vmax);
 
-    void Move();    ///< Mueve los autos con condiciones de frontera periódicas.
-    virtual void Step();    ///< Aplica reglas de evolución temporal del AC para autos normales e inteligentes.
+    void Move() noexcept;    ///< Mueve los autos con condiciones de frontera periódicas.
+    virtual void Step() noexcept;    ///< Aplica reglas de evolución temporal del AC para autos normales e inteligentes.
 };
 
 /**
@@ -301,7 +300,7 @@ public:
     AutonomousNoRandCA(const std::vector<int> &ca, std::vector<int> &aut_cars, const std::vector<bool> &rand_values,
         const CaVelocity vmax);
 
-    void Step();
+    void Step() noexcept;
 };
 
 /**
@@ -316,7 +315,7 @@ public:
     AutonomousInstanteneousOnlyCA(const std::vector<int> &ca, std::vector<int> &aut_cars, const std::vector<bool> &rand_values,
         const CaVelocity vmax);
 
-    void Step();
+    void Step() noexcept;
 };
 
 /****************************
@@ -345,15 +344,14 @@ public:
 
     ///@brief Devuelve la distancia al tope más próximo desde la posición pos.
     ///@param pos Posición desde dónde iniciar la búsqueda.
-    CaSize NextStopDist(const CaPosition pos) const;
+    CaSize NextStopDist(const CaPosition pos) const noexcept;
 
     ///@brief Dibuja mapa histórico del AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
-    ///@return 0 si se pudo crear archivo, 1 en caso de error.
-    int DrawHistory(std::string path = "", std::string out_file_name = "") const;
+    void DrawHistory(std::string path = "", std::string out_file_name = "") const;
 
-    void Step();        ///< Aplica reglas de evolución temporal del AC con tope.
+    void Step() noexcept;        ///< Aplica reglas de evolución temporal del AC con tope.
 };
 
 /****************************
@@ -386,15 +384,14 @@ public:
 
     ///@brief Devuelve la distancia al semáforo más próximo desde la posición pos.
     ///@param pos Posición desde dónde iniciar la búsqueda.
-    CaSize NextSemaphoreDist(const CaPosition pos) const;
+    CaSize NextSemaphoreDist(const CaPosition pos) const noexcept;
 
     ///@brief Dibuja mapa histórico del AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
-    ///@return 0 si se pudo crear archivo, 1 en caso de error.
-    int DrawHistory(std::string path = "", std::string out_file_name = "") const;
+    void DrawHistory(std::string path = "", std::string out_file_name = "") const;
 
-    void Step();        ///< Aplica reglas de evolución temporal del AC con tope.
+    void Step() noexcept;        ///< Aplica reglas de evolución temporal del AC con tope.
 };
 
 /****************************
@@ -424,9 +421,9 @@ public:
 
     ~SimpleJunctionCA();
 
-    std::vector<double> CalculateOcupancy() const;
-    std::vector<double> CalculateFlow() const;
-    double CalculateMeanFlow() const;
+    std::vector<double> CalculateOcupancy() const noexcept;
+    std::vector<double> CalculateFlow() const noexcept;
+    double CalculateMeanFlow() const noexcept;
 };
 
 
@@ -507,23 +504,23 @@ public:
 
     ///@brief Evoluciona (itera) el AC.
     ///@param iter Número de iteraciones.
-    void Evolve(const unsigned iter);
+    void Evolve(const unsigned iter) noexcept;
 
     ///@brief Devuelve referencia a  elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
     ///@param lane Carril objetivo.
-    virtual CaVelocity &At(const CaPosition i, const CaLane lane) = 0;
-    virtual CaVelocity &AtTemp(const CaPosition i, const CaLane lane) = 0;
-    virtual CaFlow &AtFlowTemp(const CaPosition i, const CaLane lane) = 0;
+    virtual CaVelocity &At(const CaPosition i, const CaLane lane) noexcept = 0;
+    virtual CaVelocity &AtTemp(const CaPosition i, const CaLane lane) noexcept = 0;
+    virtual CaFlow &AtFlowTemp(const CaPosition i, const CaLane lane) noexcept = 0;
 
     ///@brief Similar a AC pero sólo devuelve el valor y en AC de uniones puede apuntar a un carril en específico.
     ///@param i Posición dentro del AC.
     ///@param ca Tipo de AC.
-    virtual CaVelocity GetAt(const CaPosition i, const CaLane lane) const = 0;
+    virtual CaVelocity GetAt(const CaPosition i, const CaLane lane) const noexcept = 0;
 
     ///@brief Devuelve referencia a elemento del AC en conexión.
     ///@param i Posición dentro del AC.
-    CaVelocity &AtConnected(const CaPosition i, const CaLane lane, const unsigned connect_target);
+    CaVelocity &AtConnected(const CaPosition i, const CaLane lane, const unsigned connect_target) noexcept;
 
     ///@brief Conecta AC con otro. El flujo de autos ocurre desde el que realiza la conexión al objetivo.
     ///@param connect Puntero a AC objetivo.
@@ -535,38 +532,36 @@ public:
 
     ///@brief Devuelve la distancia al auto más próximo desde la posición pos.
     ///@param pos Posición desde dónde iniciar la búsqueda.
-    virtual CaSize NextCarDist(const CaPosition pos, const CaLane lane) const;
+    virtual CaSize NextCarDist(const CaPosition pos, const CaLane lane) const noexcept;
 
     ///@brief Dibuja mapa histórico del AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
-    ///@return 0 si se pudo crear archivo, 1 en caso de error.
-    int DrawHistory(std::string path = "", std::string out_file_name = "") const;
+    void DrawHistory(std::string path = "", std::string out_file_name = "") const;
 
     ///@brief Dibuja mapa histórico del flujo de AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
-    ///@return 0 si se pudo crear archivo, 1 en caso de error.
-    int DrawFlowHistory(std::string path = "", std::string out_file_name = "") const;
+    void DrawFlowHistory(std::string path = "", std::string out_file_name = "") const;
 
     ///@brief Devuelve valores verdaderos con probabilidad prob. Si se usa en prueba usa valores de lista.
     ///@param prob Probabilidad de obtener valor verdadero. Por defecto se utiliza m_rand_prob.
-    bool Randomization(const double prob = -1.0);
+    bool Randomization(const double prob = -1.0) noexcept;
 
-    std::vector<double> CalculateOcupancy() const;
-    std::vector<double> CalculateFlow() const;
-    double CalculateMeanFlow() const;
+    std::vector<double> CalculateOcupancy() const noexcept;
+    std::vector<double> CalculateFlow() const noexcept;
+    double CalculateMeanFlow() const noexcept;
 
-    void Print() const;               ///< Escribe línea de autómata celular en la terminal.
-    CaSize GetSize() const;           ///< Devuelve tamaño del AC.
-    CaSize GetHistorySize() const;    ///< Devuelve tamaño de la lista histórica de evolución del AC.
-    CaLane GetLanes() const;        ///< Devuelve el número de carriles.
-    unsigned CountCars() const;       ///< Cuenta la cantidad de autos en AC.
-    void PrintHistory() const;        ///< Escribe los valores históricos del AC en la terminal.
-    virtual void Step();        ///< Aplica reglas de evolución temporal del AC.
-    virtual void ChangeLanes(); ///< Aplica las reglas de cambio carril.
-    virtual void Move();        ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
-    void AssignChanges();           ///< Asigna cambios de los arrays teporales al array m_ca e historico.
+    void Print() const noexcept;               ///< Escribe línea de autómata celular en la terminal.
+    CaSize GetSize() const noexcept;           ///< Devuelve tamaño del AC.
+    CaSize GetHistorySize() const noexcept;    ///< Devuelve tamaño de la lista histórica de evolución del AC.
+    CaLane GetLanes() const noexcept;        ///< Devuelve el número de carriles.
+    unsigned CountCars() const noexcept;       ///< Cuenta la cantidad de autos en AC.
+    void PrintHistory() const noexcept;        ///< Escribe los valores históricos del AC en la terminal.
+    virtual void Step() noexcept;        ///< Aplica reglas de evolución temporal del AC.
+    virtual void ChangeLanes() noexcept; ///< Aplica las reglas de cambio carril.
+    virtual void Move() noexcept;        ///< Mueve los autos según las condiciones de frontera especificadas en clase hija.
+    void AssignChanges() noexcept;           ///< Asigna cambios de los arrays teporales al array m_ca e historico.
 };
 
 /****************************
@@ -602,14 +597,14 @@ public:
     ///@brief Devuelve referencia a  elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
     ///@param lane Carril objetivo.
-    CaVelocity &At(const CaPosition i, const CaLane lane);
-    CaVelocity &AtTemp(const CaPosition i, const CaLane lane);
-    CaFlow &AtFlowTemp(const CaPosition i, const CaLane lane);
-    CaVelocity GetAt(const CaPosition i, const CaLane lane) const;
+    CaVelocity &At(const CaPosition i, const CaLane lane) noexcept;
+    CaVelocity &AtTemp(const CaPosition i, const CaLane lane) noexcept;
+    CaFlow &AtFlowTemp(const CaPosition i, const CaLane lane) noexcept;
+    CaVelocity GetAt(const CaPosition i, const CaLane lane) const noexcept;
 
     ///@brief Evoluciona (itera) el AC. Verifica si se conserva la cantidad de autos.
     ///@param iter Número de iteraciones.
-    void Evolve(const unsigned iter);
+    void Evolve(const unsigned iter) noexcept;
 };
 
 
@@ -626,7 +621,7 @@ public:
 class OpenCAML : public CellularAutomataML
 {
 protected:
-    CaVelocity m_ca_empty;         ///< Se usa para devolver referencia de lugar vacío.
+    CaVelocity m_ca_empty;  ///< Se usa para devolver referencia de lugar vacío.
     CaFlow m_ca_flow_empty;
     double m_new_car_prob;  ///< Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
     int m_new_car_speed;    ///< Velocidad de nuevo auto cuando ingresa a la pista.
@@ -653,12 +648,12 @@ public:
     ///@brief Devuelve referencia a  elemento de valores del autómata celular considerando las condiciones de frontera.
     ///@param i Posición dentro del AC.
     ///@param lane Carril objetivo.
-    CaVelocity &At(const CaPosition i, const CaLane lane);
-    CaVelocity &AtTemp(const CaPosition i, const CaLane lane);
-    CaFlow &AtFlowTemp(const CaPosition i, const CaLane lane);
-    CaVelocity GetAt(const CaPosition i, const CaLane lane) const;
+    CaVelocity &At(const CaPosition i, const CaLane lane) noexcept;
+    CaVelocity &AtTemp(const CaPosition i, const CaLane lane) noexcept;
+    CaFlow &AtFlowTemp(const CaPosition i, const CaLane lane) noexcept;
+    CaVelocity GetAt(const CaPosition i, const CaLane lane) const noexcept;
 
-    void Step();    ///< Aplica reglas de evolución temporal del AC.
+    void Step() noexcept;    ///< Aplica reglas de evolución temporal del AC.
 };
 
 
@@ -703,26 +698,25 @@ public:
     void CreateCa(CA_TYPE ca, const CaSize size, const CaLane lanes, const double density, const CaVelocity vmax,
         const double rand_prob, const CaVelocity init_vel, Args args, const int custom_random_seed = -1);
     void DeleteCa();
-    int Status() const;
 
-    void Evolve(const unsigned iter);
-    CaSize NextCarDist(const CaPosition pos, const CaLane lane) const;
-    bool Randomization(const double prob = -1.0);
-    CaVelocity &At(const CaPosition i, const CaLane lane);
-    CaVelocity GetAt(const CaPosition i, const CaLane lane) const;
-    int DrawHistory(std::string path = "", std::string out_file_name = "") const;
-    int DrawFlowHistory(std::string path = "", std::string out_file_name = "") const;
-    void Print() const;
-    CaSize GetSize() const;
-    CaSize GetHistorySize() const;
-    CaLane GetLanes() const;
-    unsigned CountCars() const;
-    void PrintHistory() const;
-    void Step();
-    void Move();
-    std::vector<double> CalculateOcupancy() const;
-    std::vector<double> CalculateFlow() const;
-    double CalculateMeanFlow() const;
+    void Evolve(const unsigned iter) noexcept;
+    CaSize NextCarDist(const CaPosition pos, const CaLane lane) const noexcept;
+    bool Randomization(const double prob = -1.0) noexcept;
+    CaVelocity &At(const CaPosition i, const CaLane lane) noexcept;
+    CaVelocity GetAt(const CaPosition i, const CaLane lane) const noexcept;
+    void DrawHistory(std::string path = "", std::string out_file_name = "") const;
+    void DrawFlowHistory(std::string path = "", std::string out_file_name = "") const;
+    void Print() const noexcept;
+    CaSize GetSize() const noexcept;
+    CaSize GetHistorySize() const noexcept;
+    CaLane GetLanes() const noexcept;
+    unsigned CountCars() const noexcept;
+    void PrintHistory() const noexcept;
+    void Step() noexcept;
+    void Move() noexcept;
+    std::vector<double> CalculateOcupancy() const noexcept;
+    std::vector<double> CalculateFlow() const noexcept;
+    double CalculateMeanFlow() const noexcept;
 };
 
 #endif

@@ -1,6 +1,6 @@
 /**
 * @file Experiments.h
-* @brief Experimentos sobre autómatas celulares y funciones de medición.
+* @brief Experimentos sobre autómatas celulares.
 * @author Carlos Manuel Rodríguez Martínez
 * @date 8/06/2015
 */
@@ -61,82 +61,82 @@ public:
 /**
 * @brief Crea mapa de tráfico.
 */
-int ex_traffic_map(ExParam p);
+void ex_traffic_map(ExParam p);
 
 /**
 * @brief Crea mapa de flujo.
 */
-int ex_flow_map(ExParam p);
+void ex_flow_map(ExParam p);
 
 /**
 * @brief Mide la ocupación en todas las casillas de AC.
 */
-int ex_ocupancy_fixed(ExParam p);
+void ex_ocupancy_fixed(ExParam p);
 
 /**
 * @brief Mide el flujo en todas las casillas de AC.
 */
-int ex_flow_fixed(ExParam p);
+void ex_flow_fixed(ExParam p);
 
 /**
 * @brief Mide el flujo promedio de todas las casillas respecto a densidad de autos.
 */
-int ex_flow_vs_density(ExParam p);
+void ex_flow_vs_density(ExParam p);
 
 /**
 * @brief Mide el flujo promedio de todas las casillas respecto a velocidad máxima autos.
 */
-int ex_flow_vs_vmax(ExParam p);
+void ex_flow_vs_vmax(ExParam p);
 
 /**
 * @brief Mide el flujo promedio de todas las casillas respecto a velocidad máxima autos.
 */
-int ex_flow_vs_rand_prob(ExParam p);
+void ex_flow_vs_rand_prob(ExParam p);
 
 /**
 * @brief Mide el flujo promedio de todas las casillas respecto a densidad de autos inteligentes.
 */
-int ex_flow_vs_aut_cars(ExParam p);
+void ex_flow_vs_aut_cars(ExParam p);
 
 /**
 * @brief Mide el flujo promedio de todas las casillas respecto a probabilidad de aparición de nuevo auto.
 */
-int ex_flow_vs_new_car_prob(ExParam p);
+void ex_flow_vs_new_car_prob(ExParam p);
 
 /**
 * @brief Mide el flujo promedio de todas las casillas respecto a densidad de topes.
 */
-int ex_flow_vs_stop_density(ExParam p);
+void ex_flow_vs_stop_density(ExParam p);
 
 /**
 * @brief Mide el flujo promedio de todas las casillas respecto a densidad de semáforos.
 */
-int ex_flow_vs_semaphore_density(ExParam p);
+void ex_flow_vs_semaphore_density(ExParam p);
 
 /**
 * @brief Mide el tiempo de escape respecto a densidad de vehículos.
 */
-int ex_escape_time_vs_density(ExParam p);
+void ex_escape_time_vs_density(ExParam p);
 
 /**
 * @brief Mide el tiempo de escape respecto a probabilidad de descenso de velocidad.
 */
-int ex_escape_time_vs_rand_prob(ExParam p);
+void ex_escape_time_vs_rand_prob(ExParam p);
 
 /**
 * @brief Mide el tiempo de escape respecto a velocidad máxima.
 */
-int ex_escape_time_vs_vmax(ExParam p);
+void ex_escape_time_vs_vmax(ExParam p);
 
 /**
 * @brief Mide el gasto respecto a densidad de vehículos.
 */
-int ex_discharge_vs_density(ExParam p);
+void ex_discharge_vs_density(ExParam p);
 
 /**
 * @brief Crea gráfica de entropia de permutacion de gasto respecto a densidad de vehículos.
 */
-int ex_pentropy_vs_density(ExParam p);
+void ex_pentropy_vs_density(ExParam p);
 
 
 /**

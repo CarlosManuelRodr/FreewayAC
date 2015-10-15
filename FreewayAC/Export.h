@@ -38,7 +38,7 @@ enum ExportFormat
 * @param data Lista de datos a exportar.
 * @param filename Archivo a exportar los datos.
 */
-template <class N> int export_csv(std::vector<N> &data, const std::string &filename)
+template <class N> void export_csv(std::vector<N> &data, const std::string &filename)
 {
     std::ofstream file(filename.c_str(), std::ofstream::out);
     if (file.is_open())
@@ -51,13 +51,9 @@ template <class N> int export_csv(std::vector<N> &data, const std::string &filen
                 file << i << ", " << data[i];
         }
         file.close();
-        return 0;
     }
     else
-    {
-        std::cout << "Error: No se pudo crear archivo de salida." << std::endl;
-        return 1;
-    }
+        throw std::runtime_error("export_csv: No se pudo crear archivo de salida.");
 }
 
 /**
@@ -66,7 +62,7 @@ template <class N> int export_csv(std::vector<N> &data, const std::string &filen
 * @param data2 Lista de datos a exportar.
 * @param filename Archivo a exportar los datos.
 */
-template <class N> int export_csv(std::vector<N> data_1, std::vector<N> data_2, const std::string filename)
+template <class N> void export_csv(std::vector<N> data_1, std::vector<N> data_2, const std::string filename)
 {
     if (data_1.size() == data_2.size())
     {
@@ -81,19 +77,12 @@ template <class N> int export_csv(std::vector<N> data_1, std::vector<N> data_2, 
                     file << data_1[i] << ", " << data_2[i];
             }
             file.close();
-            return 0;
         }
         else
-        {
-            std::cout << "Error: No se pudo crear archivo de salida." << std::endl;
-            return 1;
-        }
+            throw std::runtime_error("export_csv: No se pudo crear archivo de salida.");
     }
     else
-    {
-        std::cout << "Error: Vectores de datos no coinciden en tamaño." << std::endl;
-        return 1;
-    }
+        throw std::invalid_argument("export_csv: Vectores de datos no coinciden en tamaño.");
 }
 
 /**
@@ -101,7 +90,7 @@ template <class N> int export_csv(std::vector<N> data_1, std::vector<N> data_2, 
 * @param data Lista de datos a exportar.
 * @param filename Archivo a exportar los datos.
 */
-template <class N> int export_csv(std::vector<Coord<N>> data, std::string filename)
+template <class N> void export_csv(std::vector<Coord<N>> data, std::string filename)
 {
     std::vector<N> data1, data2;
     for (unsigned i = 0; i < data.size(); ++i)
@@ -109,7 +98,7 @@ template <class N> int export_csv(std::vector<Coord<N>> data, std::string filena
         data1.push_back(data[i].GetX());
         data2.push_back(data[i].GetY());
     }
-    return export_csv(data1, data2, filename);
+    export_csv(data1, data2, filename);
 }
 
 /**
@@ -151,10 +140,9 @@ template <class N> int export_plot(const std::vector<N> data, const std::string 
             writer.WriteLine(bmp_data);
         }
         writer.CloseBMP();
-        return 0;
     }
     else
-        return 1;
+        throw std::runtime_error("export_plot: No se pudo crear archivo de salida.");
 }
 
 /**
@@ -163,45 +151,45 @@ template <class N> int export_plot(const std::vector<N> data, const std::string 
 * @param data_2 Lista de datos de eje vertical.
 * @param filename Archivo a exportar los datos.
 */
-template <class N> int export_data(std::vector<N> data_1, std::vector<N> data_2, std::string filename,
+template <class N> void export_data(std::vector<N> data_1, std::vector<N> data_2, std::string filename,
                                    ExportFormat format)
 {
     switch (format)
     {
     case CSV:
-        return export_csv(data_1, data_2, aux_replace_extension(filename, "csv"));
+        export_csv(data_1, data_2, aux_replace_extension(filename, "csv"));
         break;
     case BMP:
-        return export_plot(data_2, aux_replace_extension(filename, "bmp"));
+        export_plot(data_2, aux_replace_extension(filename, "bmp"));
         break;
     default:
-        return 1;
+        return;
     }
 }
 
-template <class N> int export_data(std::vector<N> data, std::string filename, ExportFormat format)
+template <class N> void export_data(std::vector<N> data, std::string filename, ExportFormat format)
 {
     switch (format)
     {
     case CSV:
-        return export_csv(data, aux_replace_extension(filename, "csv"));
+        export_csv(data, aux_replace_extension(filename, "csv"));
         break;
     case BMP:
-        return export_plot(data, aux_replace_extension(filename, "bmp"));
+        export_plot(data, aux_replace_extension(filename, "bmp"));
         break;
     default:
-        return 1;
+        return;
     }
 }
 
-template <class N> int export_data(std::vector<Coord<N>> data, std::string filename,
+template <class N> void export_data(std::vector<Coord<N>> data, std::string filename,
 	ExportFormat format)
 {
-	return export_data(aux_coordvec_to_vec<N>(data, COORD_X), aux_coordvec_to_vec<N>(data, COORD_Y), filename, format);
+	export_data(aux_coordvec_to_vec<N>(data, COORD_X), aux_coordvec_to_vec<N>(data, COORD_Y), filename, format);
 }
 
-int export_map(std::vector<int> data, std::string filename, const unsigned height = 30);
+void export_map(std::vector<int> data, std::string filename, const unsigned height = 30);
 
-int export_map(Matrix<int> data, std::string filename);
+void export_map(Matrix<int> data, std::string filename);
 
 #endif

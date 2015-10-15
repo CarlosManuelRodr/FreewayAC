@@ -179,42 +179,38 @@ vector<Coord<double>> measure_permutation_entropy(vector<Coord<double>> data, in
 *                           *
 ****************************/
 
-int ex_traffic_map(ExParam p)
+void ex_traffic_map(ExParam p)
 {
     CaHandler ca(p.type, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, p.args);
     ca.Evolve(p.iterations);
-    return ca.DrawHistory(p.path, p.out_file_name);
+    ca.DrawHistory(p.path, p.out_file_name);
 }
 
-int ex_flow_map(ExParam p)
+void ex_flow_map(ExParam p)
 {
     CaHandler ca(p.type, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, p.args);
     ca.Evolve(p.iterations);
-    return ca.DrawFlowHistory(p.path, p.out_file_name);
+    ca.DrawFlowHistory(p.path, p.out_file_name);
 }
 
-int ex_ocupancy_fixed(ExParam p)
+void ex_ocupancy_fixed(ExParam p)
 {
     CaHandler ca(p.type, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, p.args);
     ca.Evolve(p.iterations);
-    return export_data(ca.CalculateOcupancy(), p.GetFilePath("ocupancy.csv"), p.export_format);
+    export_data(ca.CalculateOcupancy(), p.GetFilePath("ocupancy.csv"), p.export_format);
 }
 
-int ex_flow_fixed(ExParam p)
+void ex_flow_fixed(ExParam p)
 {
     CaHandler ca(p.type, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, p.args);
     ca.Evolve(p.iterations);
-    return export_data(ca.CalculateFlow(), p.GetFilePath("flow.csv"), p.export_format);
+    export_data(ca.CalculateFlow(), p.GetFilePath("flow.csv"), p.export_format);
 }
 
 Coord<double> ex_flow_vs_density_thread(double d, ExParam &p)
 {
     // Evoluciona el sistema.
-    CaHandler ca;
-    ca.CreateCa(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
-
-    if (ca.Status() != 0)
-        return Coord<double>(0.0, 0.0);
+    CaHandler ca(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
     ca.Evolve(p.iterations);
 
     // Obtiene el promedio de todos los flujos.
@@ -225,7 +221,7 @@ Coord<double> ex_flow_vs_density_thread(double d, ExParam &p)
     return Coord<double>(d, mean);
 }
 
-int ex_flow_vs_density(ExParam p)
+void ex_flow_vs_density(ExParam p)
 {
     vector<Coord<double>> dens_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_density_thread, p.density_min, p.density_max, p.dt, p, p.threads);
 
@@ -236,70 +232,52 @@ int ex_flow_vs_density(ExParam p)
     else
         filename = "flow_vs_density.csv";
 
-    return export_data(dens_flow, p.GetFilePath(filename), p.export_format);
+    export_data(dens_flow, p.GetFilePath(filename), p.export_format);
 }
 
 Coord<double> ex_flow_vs_vmax_thread(int v, ExParam &p)
 {
     // Evoluciona el sistema.
-    CaHandler ca;
-    ca.CreateCa(p.type, p.size, p.lanes, p.density, v, p.rand_prob, p.init_vel, p.args, p.random_seed);
-
-    if (ca.Status() != 0)
-        return Coord<double>(0.0, 0.0);
+    CaHandler ca(p.type, p.size, p.lanes, p.density, v, p.rand_prob, p.init_vel, p.args, p.random_seed);
     ca.Evolve(p.iterations);
-
     return Coord<double>(v, ca.CalculateMeanFlow());
 }
 
-int ex_flow_vs_vmax(ExParam p)
+void ex_flow_vs_vmax(ExParam p)
 {
     vector<Coord<double>> vmax_flow = aux_parallel_function<Coord<double>, int, ExParam&>(ex_flow_vs_vmax_thread, p.vmax_min, p.vmax_max, (int)p.dt, p, p.threads);
-    return export_data(vmax_flow, p.GetFilePath("flow_vs_vmax.csv"), p.export_format);
+    export_data(vmax_flow, p.GetFilePath("flow_vs_vmax.csv"), p.export_format);
 }
 
 Coord<double> ex_flow_vs_rand_prob_thread(double r, ExParam &p)
 {
     // Evoluciona el sistema.
-    CaHandler ca;
-    ca.CreateCa(p.type, p.size, p.lanes, p.density, p.vmax, r, p.init_vel, p.args, p.random_seed);
-
-    if (ca.Status() != 0)
-        return Coord<double>(0.0, 0.0);
+    CaHandler ca(p.type, p.size, p.lanes, p.density, p.vmax, r, p.init_vel, p.args, p.random_seed);
     ca.Evolve(p.iterations);
-
     return Coord<double>(r, ca.CalculateMeanFlow());
 }
 
-int ex_flow_vs_rand_prob(ExParam p)
+void ex_flow_vs_rand_prob(ExParam p)
 {
     vector<Coord<double>> rand_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_rand_prob_thread, p.rand_prob_min, p.rand_prob_max, p.dt, p, p.threads);
-    return export_data(rand_flow, p.GetFilePath("flow_vs_rand_prob.csv"), p.export_format);
+    export_data(rand_flow, p.GetFilePath("flow_vs_rand_prob.csv"), p.export_format);
 }
 
 Coord<double> ex_flow_vs_aut_cars_thread(double s, ExParam &p)
 {
     // Evoluciona el sistema.
-    CaHandler ca;
-    ca.CreateCa(p.type, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, Args({ s }), p.random_seed);
-
-    if (ca.Status() != 0)
-        return Coord<double>(0.0, 0.0);
+    CaHandler ca(p.type, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, Args({ s }), p.random_seed);
     ca.Evolve(p.iterations);
-
     return Coord<double>(s, ca.CalculateMeanFlow());
 }
 
-int ex_flow_vs_aut_cars(ExParam p)
+void ex_flow_vs_aut_cars(ExParam p)
 {
     if (!aux_is_in<CA_TYPE>({ AUTONOMOUS_CA, AUTONOMOUS_INSTONLY_CA, AUTONOMOUS_NORAND_CA }, p.type))
-    {
-        cout << "AC no valido para experimento seleccionado." << endl;
-        return 1;
-    }
+        throw std::invalid_argument("ex_flow_vs_aut_cars: AC no valido para experimento seleccionado.");
 
     vector<Coord<double>> aut_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_aut_cars_thread, p.aut_car_density_min, p.aut_car_density_max, p.dt, p, p.threads);
-    return export_data(aut_flow, p.GetFilePath("flow_vs_aut_cars.csv"), p.export_format);
+    export_data(aut_flow, p.GetFilePath("flow_vs_aut_cars.csv"), p.export_format);
 }
 
 Coord<double> ex_flow_vs_new_car_prob_thread(double s, ExParam &p)
@@ -307,11 +285,7 @@ Coord<double> ex_flow_vs_new_car_prob_thread(double s, ExParam &p)
     // Evoluciona el sistema.
     Args temp = p.args;
     temp.SetDouble(0, s);
-    CaHandler ca;
-    ca.CreateCa(p.type, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, temp, p.random_seed);
-
-    if (ca.Status() != 0)
-        return Coord<double>(0.0, 0.0);
+    CaHandler ca(p.type, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, temp, p.random_seed);
     ca.Evolve(p.iterations);
 
     // Obtiene el promedio de todos los flujos.
@@ -322,13 +296,10 @@ Coord<double> ex_flow_vs_new_car_prob_thread(double s, ExParam &p)
     return Coord<double>(s, mean);
 }
 
-int ex_flow_vs_new_car_prob(ExParam p)
+void ex_flow_vs_new_car_prob(ExParam p)
 {
     if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, p.type))
-    {
-        cout << "AC no valido para experimento seleccionado." << endl;
-        return 1;
-    }
+        throw std::invalid_argument("ex_flow_vs_new_car_prob: AC no valido para experimento seleccionado.");
 
     // Escribe a archivo.
     string filename;
@@ -338,53 +309,43 @@ int ex_flow_vs_new_car_prob(ExParam p)
         filename = "flow_vs_new_car_prob.csv";
 
     vector<Coord<double>> new_car_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_new_car_prob_thread, p.new_car_prob_min, p.new_car_prob_max, p.dt, p, p.threads);
-    return export_data(new_car_flow, p.GetFilePath(filename), p.export_format);
+    export_data(new_car_flow, p.GetFilePath(filename), p.export_format);
 }
 
 Coord<double> ex_flow_vs_stop_density_thread(double d, ExParam &p)
 {
     // Evoluciona el sistema.
-    CaHandler ca;
-    ca.CreateCa(STOP_CA, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, Args({ d }), p.random_seed);
-
-    if (ca.Status() != 0)
-        return Coord<double>(0.0, 0.0);
+    CaHandler ca(STOP_CA, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, Args({ d }), p.random_seed);
     ca.Evolve(p.iterations);
-
     return Coord<double>(d, ca.CalculateMeanFlow());
 }
 
-int ex_flow_vs_stop_density(ExParam p)
+void ex_flow_vs_stop_density(ExParam p)
 {
     vector<Coord<double>> stop_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_stop_density_thread, p.stop_density_min, p.stop_density_max, p.dt, p, p.threads);
-    return export_data(stop_flow, p.GetFilePath("flow_vs_stop_density.csv"), p.export_format);
+    export_data(stop_flow, p.GetFilePath("flow_vs_stop_density.csv"), p.export_format);
 }
 
 Coord<double> ex_flow_vs_semaphore_density_thread(double d, ExParam &p)
 {
     // Evoluciona el sistema.
-    CaHandler ca;
-    ca.CreateCa(SEMAPHORE_CA, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, Args({ d }, {}, { p.random_semaphores }), p.random_seed);
-
-    if (ca.Status() != 0)
-        return Coord<double>(0.0, 0.0);
+    CaHandler ca(SEMAPHORE_CA, p.size, p.density, p.vmax, p.rand_prob, p.init_vel, Args({ d }, {}, { p.random_semaphores }), p.random_seed);
     ca.Evolve(p.iterations);
-
     return Coord<double>(d, ca.CalculateMeanFlow());
 }
 
-int ex_flow_vs_semaphore_density(ExParam p)
+void ex_flow_vs_semaphore_density(ExParam p)
 {
-    vector<Coord<double>> semaphore_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_semaphore_density_thread, p.semaphore_density_min, p.semaphore_density_max, p.dt, p, p.threads);
-    return export_data(semaphore_flow, p.GetFilePath("flow_vs_semaphore_density.csv"), p.export_format);
+    vector<Coord<double>> semaphore_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_semaphore_density_thread,p.semaphore_density_min, 
+            p.semaphore_density_max, p.dt, p, p.threads);
+    export_data(semaphore_flow, p.GetFilePath("flow_vs_semaphore_density.csv"), p.export_format);
 }
 
 Coord<double> ex_escape_time_vs_density_thread(double d, ExParam &p)
 {
     // Evoluciona el sistema.
     p.args.SetDouble(0, 0.0);
-    CaHandler ca;
-    ca.CreateCa(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
+    CaHandler ca(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
 
     int iter = 0;
     while (ca.CountCars() != 0)
@@ -398,24 +359,20 @@ Coord<double> ex_escape_time_vs_density_thread(double d, ExParam &p)
         return Coord<double>(0.0, 0.0);
 }
 
-int ex_escape_time_vs_density(ExParam p)
+void ex_escape_time_vs_density(ExParam p)
 {
     if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, p.type))
-    {
-        cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
-        p.type = OPEN_CA;
-    }
+        throw std::invalid_argument("ex_escape_time_vs_density: AC no valido para experimento seleccionado.");
 
     vector<Coord<double>> dens_escape = aux_parallel_function<Coord<double>, double, ExParam&>(ex_escape_time_vs_density_thread, p.density_min, p.density_max, p.dt, p, p.threads);
-    return export_data(dens_escape, p.GetFilePath("escape_time_vs_density.csv"), p.export_format);
+    export_data(dens_escape, p.GetFilePath("escape_time_vs_density.csv"), p.export_format);
 }
 
 Coord<double> ex_escape_time_vs_rand_prob_thread(double ra, ExParam &p)
 {
     // Evoluciona el sistema.
     p.args.SetDouble(0, 0.0);
-    CaHandler ca;
-    ca.CreateCa(p.type, p.size, p.lanes, p.density, p.vmax, ra, p.init_vel, p.args, p.random_seed);
+    CaHandler ca(p.type, p.size, p.lanes, p.density, p.vmax, ra, p.init_vel, p.args, p.random_seed);
 
     int iter = 0;
     while (ca.CountCars() != 0)
@@ -429,24 +386,20 @@ Coord<double> ex_escape_time_vs_rand_prob_thread(double ra, ExParam &p)
         return Coord<double>(0.0, 0.0);
 }
 
-int ex_escape_time_vs_rand_prob(ExParam p)
+void ex_escape_time_vs_rand_prob(ExParam p)
 {
     if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, p.type))
-    {
-        cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
-        p.type = OPEN_CA;
-    }
+        throw std::invalid_argument("ex_escape_time_vs_rand_prob: AC no valido para experimento seleccionado.");
 
     vector<Coord<double>> rand_escape = aux_parallel_function<Coord<double>, double, ExParam&>(ex_escape_time_vs_rand_prob_thread, p.rand_prob_min, p.rand_prob_max, p.dt, p, p.threads);
-    return export_data(rand_escape, p.GetFilePath("escape_time_vs_rand_prob.csv"), p.export_format);
+    export_data(rand_escape, p.GetFilePath("escape_time_vs_rand_prob.csv"), p.export_format);
 }
 
 Coord<double> ex_escape_time_vs_vmax_thread(int v, ExParam &p)
 {
     // Evoluciona el sistema.
     p.args.SetDouble(0, 0.0);
-    CaHandler ca;
-    ca.CreateCa(p.type, p.size, p.lanes, p.density, v, p.rand_prob, p.init_vel, p.args, p.random_seed);
+    CaHandler ca(p.type, p.size, p.lanes, p.density, v, p.rand_prob, p.init_vel, p.args, p.random_seed);
 
     int iter = 0;
     while (ca.CountCars() != 0)
@@ -460,24 +413,20 @@ Coord<double> ex_escape_time_vs_vmax_thread(int v, ExParam &p)
         return Coord<double>(0.0, 0.0);
 }
 
-int ex_escape_time_vs_vmax(ExParam p)
+void ex_escape_time_vs_vmax(ExParam p)
 {
     if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, p.type))
-    {
-        cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
-        p.type = OPEN_CA;
-    }
+        throw std::invalid_argument("ex_escape_time_vs_vmax: AC no valido para experimento seleccionado.");
 
     vector<Coord<double>> vmax_escape = aux_parallel_function<Coord<double>, int, ExParam&>(ex_escape_time_vs_vmax_thread, p.vmax_min, p.vmax_max, (int)p.dt, p, p.threads);
-    return export_data(vmax_escape, p.GetFilePath("escape_time_vs_vmax.csv"), p.export_format);
+    export_data(vmax_escape, p.GetFilePath("escape_time_vs_vmax.csv"), p.export_format);
 }
 
 Coord<double> ex_discharge_vs_density_thread(double d, ExParam &p)
 {
     // Evoluciona el sistema.
     p.args.SetDouble(0, 0.0);
-    CaHandler ca;
-    ca.CreateCa(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
+    CaHandler ca(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
 
     int iter = 0;
     while (ca.CountCars() != 0)
@@ -491,36 +440,27 @@ Coord<double> ex_discharge_vs_density_thread(double d, ExParam &p)
         return Coord<double>(0.0, 0.0);
 }
 
-int ex_discharge_vs_density(ExParam p)
+void ex_discharge_vs_density(ExParam p)
 {
     if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, p.type))
-    {
-        cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
-        p.type = OPEN_CA;
-    }
+        throw std::invalid_argument("ex_discharge_vs_density: AC no valido para experimento seleccionado.");
 
     vector<Coord<double>> dens_discharge = aux_parallel_function<Coord<double>, double, ExParam&>(ex_discharge_vs_density_thread, p.density_min, p.density_max, p.dt, p, p.threads);
-    return export_data(dens_discharge, "discharge_vs_density.csv", p.export_format);
+    export_data(dens_discharge, "discharge_vs_density.csv", p.export_format);
 }
 
 
-int ex_pentropy_vs_density(ExParam p)
+void ex_pentropy_vs_density(ExParam p)
 {
-    CA_TYPE ca_type = p.type;
-    if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, ca_type))
-    {
-        cout << "AC no valido para experimento seleccionado. Cambiando a ca_open." << endl;
-        ca_type = OPEN_CA;
-    }
+    if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, p.type))
+        throw std::invalid_argument("ex_pentropy_vs_density: AC no valido para experimento seleccionado.");
 
     vector<Coord<double>> dens_discharge = aux_parallel_function<Coord<double>, double, ExParam&>(ex_discharge_vs_density_thread, p.density_min, p.density_max, p.dt, p, p.threads);
-    int r = export_data(dens_discharge, "discharge_vs_density.csv", p.export_format);
-    if (r != 0)
-        return r;
+    export_data(dens_discharge, "discharge_vs_density.csv", p.export_format);
 
     cout << "Midiendo entropia de permutacion." << endl;
     vector<Coord<double>> result = measure_permutation_entropy(dens_discharge, p.porder, p.pinterval);
-    return export_data(result, p.GetFilePath("pentropy_vs_density.csv"), p.export_format);
+    export_data(result, p.GetFilePath("pentropy_vs_density.csv"), p.export_format);
 }
 
 
@@ -541,7 +481,7 @@ void ex_perform_test()
     circ_ca.Evolve(3);
 
     bool match = true;
-    for (unsigned i=0; i<init.size(); i++)
+    for (unsigned i = 0; i < init.size(); ++i)
     {
         if (circ_ca.GetAt(i) != end_circ[i])
             match = false;
@@ -566,7 +506,7 @@ void ex_perform_test()
     open_ca.Evolve(3);
 
     match = true;
-    for (unsigned i=0; i<init.size(); i++)
+    for (unsigned i = 0; i < init.size(); ++i)
     {
         if (open_ca.GetAt(i) != end_open[i])
             match = false;
@@ -592,7 +532,7 @@ void ex_perform_test()
     autonomous_ca.Evolve(3);
 
     match = true;
-    for (unsigned i = 0; i<init.size(); i++)
+    for (unsigned i = 0; i < init.size(); ++i)
     {
         if (autonomous_ca.GetAt(i) != end_aut[i])
             match = false;

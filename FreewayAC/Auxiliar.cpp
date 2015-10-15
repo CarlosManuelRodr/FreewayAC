@@ -121,16 +121,7 @@ string aux_replace_extension(const string &in, const string &ext)
 }
 void aux_beep()
 {
-#if defined(__linux__)
-
-    int r = system("which play > /dev/null 2>&1");
-    if (r == 0)
-        // SOX installed. More audible sound.
-        system("play -n synth 0.1 sine 800 vol 0.4 > /dev/null 2>&1");
-    else
-        cout << '\a';
-
-#elif defined(__APPLE__)
+#if defined(__linux__) || defined(__APPLE__)
     cout << '\a';
 #elif defined(_WIN32)
     Beep(800,200);

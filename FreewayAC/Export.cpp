@@ -10,7 +10,7 @@ using namespace std;
 *                           *
 ****************************/
 
-int export_map(vector<int> data, string filename, const unsigned height)
+void export_map(vector<int> data, string filename, const unsigned height)
 {
     unsigned width = data.size();
     BMPWriter writer(filename.c_str(), width, height);
@@ -31,12 +31,11 @@ int export_map(vector<int> data, string filename, const unsigned height)
             writer.WriteLine(bmp_data);
 
         writer.CloseBMP();
-        return 0;
     }
     else
-        return 1;
+        throw std::runtime_error("export_map: No se pudo crear archivo de salida.");
 }
-int export_map(Matrix<int> data, const string filename)
+void export_map(Matrix<int> data, const string filename)
 {
     unsigned width = data.GetColumns();
     unsigned height = data.GetRows();
@@ -59,8 +58,7 @@ int export_map(Matrix<int> data, const string filename)
             writer.WriteLine(bmp_data);
         }
         writer.CloseBMP();
-        return 0;
     }
     else
-        return 1;
+        throw std::runtime_error("export_map: No se pudo crear archivo de salida.");
 }
