@@ -274,7 +274,7 @@ Coord<double> ex_flow_vs_aut_cars_thread(double s, ExParam &p)
 void ex_flow_vs_aut_cars(ExParam p)
 {
     if (!aux_is_in<CA_TYPE>({ AUTONOMOUS_CA, AUTONOMOUS_INSTONLY_CA, AUTONOMOUS_NORAND_CA }, p.type))
-        throw std::invalid_argument("ex_flow_vs_aut_cars: AC no valido para experimento seleccionado.");
+        throw CaArgumentError("ex_flow_vs_aut_cars: AC no valido para experimento seleccionado.");
 
     vector<Coord<double>> aut_flow = aux_parallel_function<Coord<double>, double, ExParam&>(ex_flow_vs_aut_cars_thread, p.aut_car_density_min, p.aut_car_density_max, p.dt, p, p.threads);
     export_data(aut_flow, p.GetFilePath("flow_vs_aut_cars.csv"), p.export_format);
@@ -299,7 +299,7 @@ Coord<double> ex_flow_vs_new_car_prob_thread(double s, ExParam &p)
 void ex_flow_vs_new_car_prob(ExParam p)
 {
     if (!aux_is_in<CA_TYPE>({ OPEN_CA, SIMPLE_JUNCTION_CA }, p.type))
-        throw std::invalid_argument("ex_flow_vs_new_car_prob: AC no valido para experimento seleccionado.");
+        throw CaArgumentError("ex_flow_vs_new_car_prob: AC no valido para experimento seleccionado.");
 
     // Escribe a archivo.
     string filename;
@@ -362,7 +362,7 @@ Coord<double> ex_escape_time_vs_density_thread(double d, ExParam &p)
 void ex_escape_time_vs_density(ExParam p)
 {
     if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, p.type))
-        throw std::invalid_argument("ex_escape_time_vs_density: AC no valido para experimento seleccionado.");
+        throw CaArgumentError("ex_escape_time_vs_density: AC no valido para experimento seleccionado.");
 
     vector<Coord<double>> dens_escape = aux_parallel_function<Coord<double>, double, ExParam&>(ex_escape_time_vs_density_thread, p.density_min, p.density_max, p.dt, p, p.threads);
     export_data(dens_escape, p.GetFilePath("escape_time_vs_density.csv"), p.export_format);
@@ -389,7 +389,7 @@ Coord<double> ex_escape_time_vs_rand_prob_thread(double ra, ExParam &p)
 void ex_escape_time_vs_rand_prob(ExParam p)
 {
     if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, p.type))
-        throw std::invalid_argument("ex_escape_time_vs_rand_prob: AC no valido para experimento seleccionado.");
+        throw CaArgumentError("ex_escape_time_vs_rand_prob: AC no valido para experimento seleccionado.");
 
     vector<Coord<double>> rand_escape = aux_parallel_function<Coord<double>, double, ExParam&>(ex_escape_time_vs_rand_prob_thread, p.rand_prob_min, p.rand_prob_max, p.dt, p, p.threads);
     export_data(rand_escape, p.GetFilePath("escape_time_vs_rand_prob.csv"), p.export_format);
@@ -416,7 +416,7 @@ Coord<double> ex_escape_time_vs_vmax_thread(int v, ExParam &p)
 void ex_escape_time_vs_vmax(ExParam p)
 {
     if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, p.type))
-        throw std::invalid_argument("ex_escape_time_vs_vmax: AC no valido para experimento seleccionado.");
+        throw CaArgumentError("ex_escape_time_vs_vmax: AC no valido para experimento seleccionado.");
 
     vector<Coord<double>> vmax_escape = aux_parallel_function<Coord<double>, int, ExParam&>(ex_escape_time_vs_vmax_thread, p.vmax_min, p.vmax_max, (int)p.dt, p, p.threads);
     export_data(vmax_escape, p.GetFilePath("escape_time_vs_vmax.csv"), p.export_format);
@@ -443,7 +443,7 @@ Coord<double> ex_discharge_vs_density_thread(double d, ExParam &p)
 void ex_discharge_vs_density(ExParam p)
 {
     if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, p.type))
-        throw std::invalid_argument("ex_discharge_vs_density: AC no valido para experimento seleccionado.");
+        throw CaArgumentError("ex_discharge_vs_density: AC no valido para experimento seleccionado.");
 
     vector<Coord<double>> dens_discharge = aux_parallel_function<Coord<double>, double, ExParam&>(ex_discharge_vs_density_thread, p.density_min, p.density_max, p.dt, p, p.threads);
     export_data(dens_discharge, "discharge_vs_density.csv", p.export_format);
@@ -453,7 +453,7 @@ void ex_discharge_vs_density(ExParam p)
 void ex_pentropy_vs_density(ExParam p)
 {
     if (!aux_is_in<CA_TYPE>({ OPEN_CA, OPEN_MULTILANE_CA, SIMPLE_JUNCTION_CA }, p.type))
-        throw std::invalid_argument("ex_pentropy_vs_density: AC no valido para experimento seleccionado.");
+        throw CaArgumentError("ex_pentropy_vs_density: AC no valido para experimento seleccionado.");
 
     vector<Coord<double>> dens_discharge = aux_parallel_function<Coord<double>, double, ExParam&>(ex_discharge_vs_density_thread, p.density_min, p.density_max, p.dt, p, p.threads);
     export_data(dens_discharge, "discharge_vs_density.csv", p.export_format);
