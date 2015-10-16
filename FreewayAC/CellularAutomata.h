@@ -13,7 +13,6 @@
 #include <cstdlib>
 #include <fstream>
 #include <algorithm>
-#include <exception>
 #include "BmpWriter.h"
 #include "Auxiliar.h"
 

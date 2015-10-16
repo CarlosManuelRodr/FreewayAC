@@ -15,7 +15,30 @@
 #include <functional>
 #include <thread>
 #include <sstream>
+#include <exception>
 #include "ThreadPool.h"
+
+/****************************
+*                           *
+*   Manejo de excepciones   *
+*                           *
+****************************/
+
+class CaRuntimeError: public std::runtime_error
+{
+public:
+    CaRuntimeError(std::string const& message)
+        : std::runtime_error(message)
+    {}
+};
+
+class CaArgumentError: public std::invalid_argument
+{
+public:
+    CaArgumentError(std::string const& message)
+        : std::invalid_argument(message)
+    {}
+};
 
 /****************************
 *                           *

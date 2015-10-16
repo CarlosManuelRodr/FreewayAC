@@ -788,12 +788,12 @@ int main(int argc, char* argv[])
 
         cout << "Hecho." << endl;
     }
-    catch (std::invalid_argument& e)
+    catch (CaArgumentError& e)
     {
         cout << "Error: Argumento no valido." << endl;
         cout << e.what() << endl;
     }
-    catch (std::runtime_error& e)
+    catch (CaRuntimeError& e)
     {
         cout << "Error de ejecucion." << endl;
         cout << e.what() << endl;

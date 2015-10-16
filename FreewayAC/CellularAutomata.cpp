@@ -37,11 +37,11 @@ CellularAutomata::CellularAutomata(const CaSize size, const double density, cons
     // Verifica argumentos.
     double l_density = density;
     if (l_density < 0.0 || l_density > 1.0)
-        throw std::invalid_argument(string("CellularAutomata: Densidad ") + to_string(l_density) + " invalida.");
+        throw CaArgumentError(string("CellularAutomata: Densidad ") + to_string(l_density) + " invalida.");
     if (m_vmax < 1)
-        throw std::invalid_argument(string("CellularAutomata: Velocidad limite ") + to_string(m_vmax) + " invalida.");
+        throw CaArgumentError(string("CellularAutomata: Velocidad limite ") + to_string(m_vmax) + " invalida.");
     if (m_rand_prob < 0.0 || m_rand_prob > 1.0)
-        throw std::invalid_argument(string("CellularAutomata: Probabilidad de frenado ") + to_string(m_rand_prob) + " invalida.");
+        throw CaArgumentError(string("CellularAutomata: Probabilidad de frenado ") + to_string(m_rand_prob) + " invalida.");
     
     unsigned vehicles = (unsigned)(((double)size)*l_density);
 
@@ -73,7 +73,7 @@ CellularAutomata::CellularAutomata(const vector<int> &ca, const vector<bool> &ra
     m_init_vel = 1;
     
     if (m_ca.empty())
-        throw std::invalid_argument("CellularAutomataML: ac no contiene elementos.");
+        throw CaArgumentError("CellularAutomataML: ac no contiene elementos.");
 }
 CellularAutomata::~CellularAutomata() {}
 void CellularAutomata::Print() const noexcept
@@ -142,7 +142,7 @@ void CellularAutomata::DrawHistory(string path, string out_file_name) const
         delete[] bmpData;
     }
     else
-        throw std::runtime_error("CellularAutomata::DrawHistory: No se pudo crear archivo de salida.");
+        throw CaRuntimeError("CellularAutomata::DrawHistory: No se pudo crear archivo de salida.");
 }
 void CellularAutomata::DrawFlowHistory(string path, string out_file_name) const
 {
@@ -174,7 +174,7 @@ void CellularAutomata::DrawFlowHistory(string path, string out_file_name) const
         delete[] bmpData;
     }
     else
-        throw std::runtime_error("CellularAutomata::DrawFlowHistory: No se pudo crear archivo de salida.");
+        throw CaRuntimeError("CellularAutomata::DrawFlowHistory: No se pudo crear archivo de salida.");
 }
 inline void CellularAutomata::Step() noexcept
 {
@@ -327,22 +327,22 @@ void CellularAutomata::Connect(CellularAutomata* connect, CaPosition from, CaPos
         if (from <= (CaPosition)m_size)
             m_connect_from.push_back(from);
         else
-            throw std::invalid_argument("CellularAutomata::Connect: posicion de conexion incorrecta.");
+            throw CaArgumentError("CellularAutomata::Connect: posicion de conexion incorrecta.");
 
         if (to <= (CaPosition)connect->GetSize())
             m_connect_to.push_back(to);
         else
-            throw std::invalid_argument("CellularAutomata::Connect: posicion de conexion incorrecta.");
+            throw CaArgumentError("CellularAutomata::Connect: posicion de conexion incorrecta.");
     }
     else
-        throw std::invalid_argument("CellularAutomata::Connect: puntero nulo a ac objetivo.");
+        throw CaArgumentError("CellularAutomata::Connect: puntero nulo a ac objetivo.");
 }
 void CellularAutomata::SetParent(CellularAutomata* parent)
 {
     if (parent != nullptr)
         m_parents.push_back(parent);
     else
-        throw std::invalid_argument("CellularAutomata::SetParent: puntero nulo a ac padre.");
+        throw CaArgumentError("CellularAutomata::SetParent: puntero nulo a ac padre.");
 }
 vector<double> CellularAutomata::CalculateOcupancy() const noexcept
 {
@@ -442,7 +442,7 @@ OpenCA::OpenCA(const CaSize size, const double density, const CaVelocity vmax, c
 
     // Verifica argumento.
     if (m_new_car_prob < 0 || m_new_car_prob > 1)
-        throw std::invalid_argument(string("OpenCA: Probabilidad de nuevo auto ") + to_string(m_new_car_prob) + " invalida.");
+        throw CaArgumentError(string("OpenCA: Probabilidad de nuevo auto ") + to_string(m_new_car_prob) + " invalida.");
 }
 OpenCA::OpenCA(const vector<int> &ca, const vector<bool> &rand_values, const CaVelocity vmax,
                const CaVelocity new_car_speed)
@@ -521,7 +521,7 @@ AutonomousCA::AutonomousCA(const CaSize size, const double density, const CaVelo
     // Verifica argumento.
     double l_aut_density = aut_density;
     if (l_aut_density < 0 || l_aut_density > 1)
-        throw std::invalid_argument(string("AutonomousCA: Densidad de vehiculos autonomos ") + to_string(l_aut_density) + " invalida.");
+        throw CaArgumentError(string("AutonomousCA: Densidad de vehiculos autonomos ") + to_string(l_aut_density) + " invalida.");
 
     // Selecciona autos inteligentes.
     unsigned aut_car_number = (unsigned)(((double)size*density)*l_aut_density);
@@ -789,7 +789,7 @@ StreetStopCA::StreetStopCA(const CaSize size, const double density, const CaVelo
 {
     unsigned stops = (unsigned)(((double)size)*stop_density);
     if (stop_density < 0 || stop_density > 1)
-        throw std::invalid_argument(string("StreetStopCA: Densidad de topes ") + to_string(stop_density) + " invalida.");
+        throw CaArgumentError(string("StreetStopCA: Densidad de topes ") + to_string(stop_density) + " invalida.");
 
     // Coloca topes.
     vector<unsigned> stop_positions;
@@ -893,7 +893,7 @@ void StreetStopCA::DrawHistory(string path, string out_file_name) const
         delete[] bmpData;
     }
     else
-        throw std::runtime_error("StreetStopCA::DrawHistory: No se pudo crear archivo de salida.");
+        throw CaRuntimeError("StreetStopCA::DrawHistory: No se pudo crear archivo de salida.");
 }
 
 /****************************
@@ -911,7 +911,7 @@ SemaphoreCA::SemaphoreCA(const CaSize size, const double density, const CaVeloci
     m_semaphore_open = 50;
     unsigned semaphores = (unsigned)(((double)size)*semaphore_density);
     if (semaphore_density < 0 || semaphore_density > 1)
-        throw std::invalid_argument(string("SemaphoreCA: Densidad de semaforos ") + to_string(semaphore_density) + " invalida.");
+        throw CaArgumentError(string("SemaphoreCA: Densidad de semaforos ") + to_string(semaphore_density) + " invalida.");
 
     // Coloca semáforo.
     if (random_semaphores)
@@ -1058,7 +1058,7 @@ void SemaphoreCA::DrawHistory(string path, string out_file_name) const
         delete[] bmpData;
     }
     else
-        throw std::runtime_error("SemaphoreCA::DrawHistory: No se pudo crear archivo de salida.");
+        throw CaRuntimeError("SemaphoreCA::DrawHistory: No se pudo crear archivo de salida.");
 }
 
 /****************************
@@ -1077,7 +1077,7 @@ SimpleJunctionCA::SimpleJunctionCA(const CaSize size, const double density, cons
     m_target_lane = target_lane;
 
     if (m_target_lane < 0 || m_target_lane > 1)
-        throw std::invalid_argument(string("SimpleJunctionCA: Carril objetivo ") + to_string(m_target_lane) + " invalido.");
+        throw CaArgumentError(string("SimpleJunctionCA: Carril objetivo ") + to_string(m_target_lane) + " invalido.");
 }
 SimpleJunctionCA::~SimpleJunctionCA()
 {
@@ -1181,11 +1181,11 @@ CellularAutomataML::CellularAutomataML(const CaSize size, const CaLane lanes, co
     // Verifica argumentos.
     double l_density = density;
     if (l_density < 0.0 || l_density > 1.0)
-        throw std::invalid_argument(string("CellularAutomataML: Densidad ") + to_string(l_density) + " invalida.");
+        throw CaArgumentError(string("CellularAutomataML: Densidad ") + to_string(l_density) + " invalida.");
     if (m_vmax < 1)
-        throw std::invalid_argument(string("CellularAutomataML: Velocidad limite ") + to_string(m_vmax) + " invalida.");
+        throw CaArgumentError(string("CellularAutomataML: Velocidad limite ") + to_string(m_vmax) + " invalida.");
     if (m_rand_prob < 0.0 || m_rand_prob > 1.0)
-        throw std::invalid_argument(string("CellularAutomataML: Probabilidad de frenado ") + to_string(m_rand_prob) + " invalida.");
+        throw CaArgumentError(string("CellularAutomataML: Probabilidad de frenado ") + to_string(m_rand_prob) + " invalida.");
     unsigned vehicles = (unsigned)(((double)size)*density);
 
     // Coloca autos al azar.
@@ -1220,7 +1220,7 @@ CellularAutomataML::CellularAutomataML(const vector<CaElementVel> &ca, const vec
     m_init_vel = 1;
 
     if (m_ca.empty())
-        throw std::invalid_argument("CellularAutomataML: ac no contiene elementos.");
+        throw CaArgumentError("CellularAutomataML: ac no contiene elementos.");
     else
         m_lanes = m_ca[0].size();
 }
@@ -1293,7 +1293,7 @@ void CellularAutomataML::DrawHistory(string path, string out_file_name) const
         delete[] bmpData;
     }
     else
-        throw std::runtime_error("CellularAutomataML::DrawHistory: No se pudo crear archivo de salida.");
+        throw CaRuntimeError("CellularAutomataML::DrawHistory: No se pudo crear archivo de salida.");
 }
 void CellularAutomataML::DrawFlowHistory(string path, string out_file_name) const
 {
@@ -1345,7 +1345,7 @@ void CellularAutomataML::DrawFlowHistory(string path, string out_file_name) cons
         delete[] bmpData;
     }
     else
-        throw std::runtime_error("CellularAutomataML::DrawFlowHistory: No se pudo crear archivo de salida.");
+        throw CaRuntimeError("CellularAutomataML::DrawFlowHistory: No se pudo crear archivo de salida.");
 }
 bool CellularAutomataML::Randomization(const double prob) noexcept
 {
@@ -1531,22 +1531,22 @@ void CellularAutomataML::Connect(CellularAutomataML* connect, CaPosition from, C
         if (from <= (CaPosition)m_size)
             m_connect_from.push_back(from);
         else
-            throw std::invalid_argument("CellularAutomataML::Connect: posicion de conexion incorrecta.");
+            throw CaArgumentError("CellularAutomataML::Connect: posicion de conexion incorrecta.");
 
         if (to <= (CaPosition)connect->GetSize())
             m_connect_to.push_back(to);
         else
-            throw std::invalid_argument("CellularAutomataML::Connect: posicion de conexion incorrecta.");
+            throw CaArgumentError("CellularAutomataML::Connect: posicion de conexion incorrecta.");
     }
     else
-        throw std::invalid_argument("CellularAutomataML::Connect: puntero nulo a ac objetivo.");
+        throw CaArgumentError("CellularAutomataML::Connect: puntero nulo a ac objetivo.");
 }
 void CellularAutomataML::SetParent(CellularAutomataML* parent)
 {
     if (parent != nullptr)
         m_parents.push_back(parent);
     else
-        throw std::invalid_argument("CellularAutomataML::SetParent: puntero nulo a ac padre.");
+        throw CaArgumentError("CellularAutomataML::SetParent: puntero nulo a ac padre.");
 }
 inline CaSize CellularAutomataML::NextCarDist(const CaPosition pos, const CaLane lane) const noexcept
 {
@@ -1752,7 +1752,7 @@ OpenCAML::OpenCAML(const CaSize size, const CaLane lanes, const double density, 
 
     // Verifica argumento.
     if (m_new_car_prob < 0 || m_new_car_prob > 1)
-        throw std::invalid_argument(string("OpenCAML: Probabilidad de nuevo auto ") + to_string(m_new_car_prob) + " invalida.");
+        throw CaArgumentError(string("OpenCAML: Probabilidad de nuevo auto ") + to_string(m_new_car_prob) + " invalida.");
 }
 OpenCAML::OpenCAML(const vector<CaElementVel> &ca, const vector<bool> &rand_values, const CaVelocity vmax,
                    const CaVelocity new_car_speed)

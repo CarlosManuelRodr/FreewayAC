@@ -53,7 +53,7 @@ template <class N> void export_csv(std::vector<N> &data, const std::string &file
         file.close();
     }
     else
-        throw std::runtime_error("export_csv: No se pudo crear archivo de salida.");
+        throw CaRuntimeError("export_csv: No se pudo crear archivo de salida.");
 }
 
 /**
@@ -79,10 +79,10 @@ template <class N> void export_csv(std::vector<N> data_1, std::vector<N> data_2,
             file.close();
         }
         else
-            throw std::runtime_error("export_csv: No se pudo crear archivo de salida.");
+            throw CaRuntimeError("export_csv: No se pudo crear archivo de salida.");
     }
     else
-        throw std::invalid_argument("export_csv: Vectores de datos no coinciden en tamaño.");
+        throw CaArgumentError("export_csv: Vectores de datos no coinciden en tamaño.");
 }
 
 /**
@@ -142,7 +142,7 @@ template <class N> int export_plot(const std::vector<N> data, const std::string 
         writer.CloseBMP();
     }
     else
-        throw std::runtime_error("export_plot: No se pudo crear archivo de salida.");
+        throw CaRuntimeError("export_plot: No se pudo crear archivo de salida.");
 }
 
 /**

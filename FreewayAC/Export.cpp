@@ -33,7 +33,7 @@ void export_map(vector<int> data, string filename, const unsigned height)
         writer.CloseBMP();
     }
     else
-        throw std::runtime_error("export_map: No se pudo crear archivo de salida.");
+        throw CaRuntimeError("export_map: No se pudo crear archivo de salida.");
 }
 void export_map(Matrix<int> data, const string filename)
 {
@@ -60,5 +60,5 @@ void export_map(Matrix<int> data, const string filename)
         writer.CloseBMP();
     }
     else
-        throw std::runtime_error("export_map: No se pudo crear archivo de salida.");
+        throw CaRuntimeError("export_map: No se pudo crear archivo de salida.");
 }
