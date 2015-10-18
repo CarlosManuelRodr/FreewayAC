@@ -792,21 +792,25 @@ int main(int argc, char* argv[])
     {
         cout << "Error: Argumento no valido." << endl;
         cout << e.what() << endl;
+        return 1;
     }
     catch (CaRuntimeError& e)
     {
         cout << "Error de ejecucion." << endl;
         cout << e.what() << endl;
+        return 1;
     }
     catch (std::bad_alloc& e)
     {
         cout << "Error: Memoria insuficiente." << endl;
         cout << e.what() << endl;
+        return 1;
     }
     catch (std::exception& e)
     {
         cout << "Error inesperado." << endl;
         cout << e.what() << endl;
+        return 1;
     }
 
     if (beep)

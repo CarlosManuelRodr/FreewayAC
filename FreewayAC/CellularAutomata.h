@@ -143,6 +143,8 @@ public:
     ///@param out_file_name Nombre del archivo de salida.
     virtual void DrawHistory(std::string path = "", std::string out_file_name = "") const;
 
+    void PrintHistoryToFile(std::string path = "", std::string out_file_name = "") const;
+
     ///@brief Dibuja mapa histórico del flujo de AC en formato BMP.
     ///@param path Ruta del archivo.
     ///@param out_file_name Nombre del archivo de salida.
@@ -705,6 +707,7 @@ public:
     CaVelocity GetAt(const CaPosition i, const CaLane lane) const noexcept;
     void DrawHistory(std::string path = "", std::string out_file_name = "") const;
     void DrawFlowHistory(std::string path = "", std::string out_file_name = "") const;
+    void PrintHistoryToFile(std::string path = "", std::string out_file_name = "") const;
     void Print() const noexcept;
     CaSize GetSize() const noexcept;
     CaSize GetHistorySize() const noexcept;

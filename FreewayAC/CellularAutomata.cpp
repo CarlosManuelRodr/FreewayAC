@@ -3,6 +3,7 @@
 #include <cctype>
 #include <vector>
 #include "CellularAutomata.h"
+#include "Export.h"
 using namespace std;
 
 
@@ -143,6 +144,14 @@ void CellularAutomata::DrawHistory(string path, string out_file_name) const
     }
     else
         throw CaRuntimeError("CellularAutomata::DrawHistory: No se pudo crear archivo de salida.");
+}
+void CellularAutomata::PrintHistoryToFile(std::string path, std::string out_file_name) const
+{
+    if (out_file_name == "")
+        out_file_name = path + "ca.csv";
+    else
+        out_file_name = path + out_file_name;
+    export_csv(m_ca_history, out_file_name);
 }
 void CellularAutomata::DrawFlowHistory(string path, string out_file_name) const
 {
@@ -2059,6 +2068,11 @@ void CaHandler::DrawHistory(std::string path, std::string out_file_name) const
         return cellularautomataml->DrawHistory(path, out_file_name);
     else
         return cellularautomata->DrawHistory(path, out_file_name);
+}
+void CaHandler::PrintHistoryToFile(std::string path, std::string out_file_name) const
+{
+    if (!multilane)
+        return cellularautomata->PrintHistoryToFile(path, out_file_name);
 }
 void CaHandler::DrawFlowHistory(std::string path, std::string out_file_name) const
 {

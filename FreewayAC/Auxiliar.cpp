@@ -197,7 +197,7 @@ string df_get_app_folder()
     HMODULE hModule = GetModuleHandle(NULL);
     if (hModule != NULL)
     {
-        GetModuleFileName(hModule, ownPth, (sizeof(ownPth)));
+        GetModuleFileNameW(hModule, ownPth, MAX_PATH);
         PathRemoveFileSpec(ownPth);
         wcstombs(mbOwnPth, ownPth, MAX_PATH);
         return string(mbOwnPth);

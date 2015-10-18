@@ -87,6 +87,39 @@ template <class N> void export_csv(std::vector<N> data_1, std::vector<N> data_2,
 
 /**
 * @brief Exporta datos a archivo csv.
+* @param data Matriz de datos a exportar.
+* @param filename Archivo a exportar los datos.
+*/
+template <class N> void export_csv(std::vector< std::vector<N> > data, const std::string filename)
+{
+    std::ofstream file(filename.c_str(), std::ofstream::out);
+    unsigned height = data.size();
+    unsigned width;
+    if (height > 1)
+        width = data[0].size();
+    else
+        throw CaArgumentError("export_csv: Datos introducidos en formato incorrecto.");
+
+    if (file.is_open())
+    {
+        for (unsigned i = 0; i < height; ++i)
+        {
+            for (unsigned j = 0; j < width; ++j)
+            {
+                if (j - width + 1 != 0)
+                    file << data[i][j] << ",";
+                else
+                    file << data[i][j];
+            }
+            file << std::endl;
+        }
+    }
+    else
+        throw CaRuntimeError("export_csv: No se pudo crear archivo de salida.");
+}
+
+/**
+* @brief Exporta datos a archivo csv.
 * @param data Lista de datos a exportar.
 * @param filename Archivo a exportar los datos.
 */
@@ -106,7 +139,7 @@ template <class N> void export_csv(std::vector<Coord<N>> data, std::string filen
 * @param data Lista de datos a exportar.
 * @param filename Archivo a exportar los datos.
 */
-template <class N> int export_plot(const std::vector<N> data, const std::string filename)
+template <class N> void export_plot(const std::vector<N> data, const std::string filename)
 {
     unsigned coord_y;
     unsigned int size = data.size();

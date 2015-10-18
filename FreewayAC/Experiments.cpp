@@ -184,6 +184,7 @@ void ex_traffic_map(ExParam p)
     CaHandler ca(p.type, p.size, p.lanes, p.density, p.vmax, p.rand_prob, p.init_vel, p.args);
     ca.Evolve(p.iterations);
     ca.DrawHistory(p.path, p.out_file_name);
+    ca.PrintHistoryToFile(p.path, p.out_file_name);
 }
 
 void ex_flow_map(ExParam p)
