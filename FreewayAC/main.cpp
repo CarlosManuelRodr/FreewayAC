@@ -54,7 +54,7 @@ enum  OptionIndex { UNKNOWN, FWSIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_
                     STOP_DENSITY_MIN, STOP_DENSITY_MAX, NEW_CAR_MIN, NEW_CAR_MAX, RAND_PROB_MAX, SEMAPHORE_DENSITY_MIN,
                     SEMAPHORE_DENSITY_MAX,
 
-                    OUT_FILE_NAME, PATH, EXPORT_FORMAT, SHOW_PROGRESS, TEST, REPORT, BEEP, LOW_PRIORITY, THREADS, BENCHMARK, HELP };
+                    OUT_FILE_NAME, PATH, EXPORT_FORMAT, SHOW_PROGRESS, REPORT, BEEP, LOW_PRIORITY, THREADS, BENCHMARK, HELP };
 
 const option::Descriptor usage[] =
 {
@@ -157,7 +157,6 @@ const option::Descriptor usage[] =
     {PATH,  0,"", "path", Arg::Required, "  \t--path=<arg>  \tRuta donde guardar archivos de salida." },
     {EXPORT_FORMAT, 0, "", "export_format", Arg::Required, "  \t--export_format=<arg>  \tFormato de salida. CSV o BMP." },
     {SHOW_PROGRESS,  0,"", "show_progress", Arg::Required, "  \t--show_progress=<arg>  \tTrue o False. Muestra o no barra de progreso." },
-    {TEST,    0,"", "test", Arg::None,    "  \t--test  \tRealiza pruebas para garantizar la fiabilidad de resultados." },
     {REPORT,    0,"", "report", Arg::None,    "  \t--report  \tReporta lo parametros que se usan en la ejecucion." },
     {BEEP,    0,"", "beep", Arg::None,    "  \t--beep  \tEmite alerta sonora al terminar la ejecucion." },
     {LOW_PRIORITY, 0,"", "low_priority", Arg::None, "  \t--low_priority  \tEstablece la prioridad del proceso debajo de lo normal. Solo en Windows." },
@@ -270,7 +269,7 @@ int main(int argc, char* argv[])
     bool pentropy_vs_density = false;
     bool per_density = false, per_prob = false;
 
-    bool random_semaphores = false, test = false, show_progress = true;
+    bool random_semaphores = false, show_progress = true;
 
     double dt = 0.1, dmin = 0.0, dmax = 1.0, rand_prob_min = 0.0, rand_prob_max = 1.0;
     double aut_min = 0.0, aut_max = 1.0, new_car_min = 0.0, new_car_max = 1.0, stop_density_min = 0.0;
@@ -562,10 +561,6 @@ int main(int argc, char* argv[])
             show_progress = aux_string_to_bool(opt.arg);
             break;
 
-            case TEST:
-            test = true;
-            break;
-
             case REPORT:
             report = true;
             break;
@@ -621,7 +616,7 @@ int main(int argc, char* argv[])
     if (!(ocupancy_fixed || flow_fixed || plot_flow || flow_vs_density || flow_per_density || flow_vs_vmax 
         || flow_vs_rand_prob || flow_vs_aut_cars || flow_vs_new_car || flow_per_new_car
         || flow_vs_stop_density || flow_vs_semaphore_density || escape_time_vs_density
-        || discharge_vs_density || pentropy_vs_density || test))
+        || discharge_vs_density || pentropy_vs_density))
     {
         plot_traffic = true;    // Opcion predeterminada.
     }
@@ -699,12 +694,6 @@ int main(int argc, char* argv[])
     // Realiza acciones.
     try
     {
-        if (test)
-        {
-            cout << "Realizando tests." << endl;
-            ex_perform_test();
-        }
-
         if (plot_traffic)
         {
             cout << "Creando mapa de trafico." << endl;

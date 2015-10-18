@@ -60,6 +60,9 @@ build/
 /FreewayAC/Debug/
 /FreewayAC/Release/
 /FreewayAC/x64/
+/FreewayAC_tests/Debug/
+/FreewayAC_tests/Release/
+/FreewayAC_tests/x64/
 
 #  Application files #
 ######################

@@ -126,6 +126,8 @@ public:
     virtual CaFlow &AtFlowTemp(const CaPosition i) noexcept = 0;
     virtual CaVelocity GetAt(const CaPosition i) const noexcept = 0;
 
+    std::vector<CaVelocity> GetCa();
+
     ///@brief Devuelve referencia a elemento del AC en conexión.
     ///@param i Posición dentro del AC.
     CaVelocity &AtConnected(const CaPosition i, const unsigned connect_target) noexcept;

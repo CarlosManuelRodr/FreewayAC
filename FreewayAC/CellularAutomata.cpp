@@ -280,6 +280,10 @@ inline int &CellularAutomata::AtConnected(const CaPosition i, const unsigned con
 {
     return m_connect[connect_target]->At(i + m_connect_to[connect_target]);
 }
+std::vector<CaVelocity> CellularAutomata::GetCa()
+{
+    return m_ca;
+}
 void CellularAutomata::Evolve(const unsigned iter) noexcept
 {
     for (unsigned i = 0; i < iter; ++i)
