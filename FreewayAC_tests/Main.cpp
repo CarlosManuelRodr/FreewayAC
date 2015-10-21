@@ -26,7 +26,6 @@ BOOST_AUTO_TEST_CASE(AuxiliarTest)
     BOOST_CHECK_EQUAL(aux_string_to_num<double>("42.98"), 42.98);
     BOOST_CHECK_EQUAL(aux_mean(std::vector<int>({ 1, 6, 8, 10, 90 })), 23);
     //BOOST_CHECK_NO_THROW(aux_parallel_function<std::vector<int>, int, int>([](int a, int b) { return std::vector<int>({ a }); }, 0, 0, 0, 0));
-    
 }
 
 BOOST_AUTO_TEST_SUITE_END()

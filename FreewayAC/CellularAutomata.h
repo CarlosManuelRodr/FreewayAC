@@ -468,6 +468,7 @@ class CellularAutomataML
 protected:
     bool m_test;                 ///< Modo de prueba.
     double m_rand_prob;          ///< Valor de la probabilidad de descenso de velocidad.
+    unsigned m_lane_changes;     ///< Número de cambios de carril.
     CaVelocity m_vmax;           ///< Valor máximo de la velocidad.
     CaLane m_lanes;              ///< Número de carriles.
     CaVelocity m_init_vel;       ///< Velocidad inicial de los vehículos.
@@ -558,7 +559,8 @@ public:
     void Print() const noexcept;               ///< Escribe línea de autómata celular en la terminal.
     CaSize GetSize() const noexcept;           ///< Devuelve tamaño del AC.
     CaSize GetHistorySize() const noexcept;    ///< Devuelve tamaño de la lista histórica de evolución del AC.
-    CaLane GetLanes() const noexcept;        ///< Devuelve el número de carriles.
+    CaLane GetLanes() const noexcept;          ///< Devuelve el número de carriles.
+    unsigned GetLaneChanges() const noexcept;  ///< Devuelve el número de cambios de carril.
     unsigned CountCars() const noexcept;       ///< Cuenta la cantidad de autos en AC.
     void PrintHistory() const noexcept;        ///< Escribe los valores históricos del AC en la terminal.
     virtual void Step() noexcept;        ///< Aplica reglas de evolución temporal del AC.
@@ -714,6 +716,7 @@ public:
     CaSize GetSize() const noexcept;
     CaSize GetHistorySize() const noexcept;
     CaLane GetLanes() const noexcept;
+    unsigned GetLaneChanges() const noexcept;
     unsigned CountCars() const noexcept;
     void PrintHistory() const noexcept;
     void Step() noexcept;

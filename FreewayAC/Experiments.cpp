@@ -463,3 +463,20 @@ void ex_pentropy_vs_density(ExParam p)
     vector<Coord<double>> result = measure_permutation_entropy(dens_discharge, p.porder, p.pinterval);
     export_data(result, p.GetFilePath("pentropy_vs_density.csv"), p.export_format);
 }
+
+Coord<double> ex_lane_changes_vs_density_thread(double d, ExParam &p)
+{
+    // Evoluciona el sistema.
+    CaHandler ca(p.type, p.size, p.lanes, d, p.vmax, p.rand_prob, p.init_vel, p.args, p.random_seed);
+    ca.Evolve(p.iterations);
+    return Coord<double>(d, ca.GetLaneChanges());
+}
+
+void ex_lane_changes_vs_density(ExParam p)
+{
+    if (!aux_is_in<CA_TYPE>({ CIRCULAR_MULTILANE_CA, OPEN_MULTILANE_CA }, p.type))
+        throw CaArgumentError("ex_lane_changes_vs_density: AC no valido para experimento seleccionado.");
+
+    vector<Coord<double>> lane_changes = aux_parallel_function<Coord<double>, double, ExParam&>(ex_lane_changes_vs_density_thread, p.density_min, p.density_max, p.dt, p, p.threads);
+    export_data(lane_changes, p.GetFilePath("lane_changes_vs_density.csv"), p.export_format);
+}

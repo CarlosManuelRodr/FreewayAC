@@ -138,6 +138,11 @@ void ex_discharge_vs_density(ExParam p);
 */
 void ex_pentropy_vs_density(ExParam p);
 
+/**
+* @brief Mide el número de cambios de carril respecto a densidad.
+*/
+void ex_lane_changes_vs_density(ExParam p);
+
 
 /**
 * @brief Realiza tests para verificar la corrección de los algoritmos.

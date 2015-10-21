@@ -42,7 +42,7 @@ enum  OptionIndex { UNKNOWN, FWSIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_
                     PLOT_TRAFFIC, PLOT_FLOW, MEASURE_OCUPANCY, MEASURE_FLOW,
                     FLOW_VS_DENSITY, FLOW_PER_DENSITY, FLOW_VS_VMAX, FLOW_VS_RAND_PROB, FLOW_VS_AUT_CARS,
                     FLOW_VS_STOP_DENSITY, FLOW_VS_NEW_CAR, FLOW_PER_NEW_CAR, FLOW_VS_SEMAPHORE_DENSITY, ESCAPE_TIME_VS_DENSITY,
-                    DISCHARGE_VS_DENSITY, PENTROPY_VS_DENSITY,
+                    DISCHARGE_VS_DENSITY, PENTROPY_VS_DENSITY, LANE_CHANGES_VS_DENSITY,
 
                     CA_CIRCULAR, CA_MULTILANE_CIRCULAR, CA_OPEN, CA_MULTILANE_OPEN, CA_AUTONOMOUS, CA_AUTONOMOUS_NORAND, CA_AUTONOMOUS_INSTONLY,
                     CA_STOP, CA_SEMAPHORE, CA_SIMPLE_JUNCTION,
@@ -97,6 +97,8 @@ const option::Descriptor usage[] =
     "  \t--discharge_vs_density  \tMide gasto vs densidad en un rango especificado por dmin, dmax y dt." },
     {PENTROPY_VS_DENSITY,  0,"","pentropy_vs_density", Arg::None,
     "  \t--pentropy_vs_density  \tMide entropia de permutacion vs densidad en un rango especificado por dmin, dmax y dt." },
+    {LANE_CHANGES_VS_DENSITY,  0,"","lane_changes_vs_density", Arg::None,
+    "  \t--lane_changes_vs_density  \tMide el cambio de carriles vs densidad en un rango especificado por dmin, dmax y dt." },
 
     {CA_CIRCULAR,  0,"","ca_circular", Arg::None, "  \t--ca_circular  \tAutomata celular circular." },
     {CA_MULTILANE_CIRCULAR, 0, "", "ca_multilane_circular", Arg::None, 
@@ -266,7 +268,7 @@ int main(int argc, char* argv[])
     bool plot_traffic = false, plot_flow = false, flow_vs_vmax = false, flow_vs_rand_prob = false, flow_vs_aut_cars = false;
     bool flow_vs_stop_density = false, flow_per_density = false, flow_vs_new_car = false, flow_per_new_car = false;
     bool flow_vs_semaphore_density = false, escape_time_vs_density = false, discharge_vs_density = false;
-    bool pentropy_vs_density = false;
+    bool pentropy_vs_density = false, lane_changes_vs_density = false;
     bool per_density = false, per_prob = false;
 
     bool random_semaphores = false, show_progress = true;
@@ -391,6 +393,10 @@ int main(int argc, char* argv[])
 
             case PENTROPY_VS_DENSITY:
             pentropy_vs_density = true;
+            break;
+
+            case LANE_CHANGES_VS_DENSITY:
+            lane_changes_vs_density = true;
             break;
 
             case CA_CIRCULAR:
@@ -616,9 +622,9 @@ int main(int argc, char* argv[])
     if (!(ocupancy_fixed || flow_fixed || plot_flow || flow_vs_density || flow_per_density || flow_vs_vmax 
         || flow_vs_rand_prob || flow_vs_aut_cars || flow_vs_new_car || flow_per_new_car
         || flow_vs_stop_density || flow_vs_semaphore_density || escape_time_vs_density
-        || discharge_vs_density || pentropy_vs_density))
+        || discharge_vs_density || pentropy_vs_density || lane_changes_vs_density))
     {
-        plot_traffic = true;    // Opcion predeterminada.
+        plot_traffic = true;    // Opción predeterminada.
     }
     if (flow_per_density)
         per_density = true;
@@ -773,6 +779,11 @@ int main(int argc, char* argv[])
         {
             cout << "Midiendo gasto respecto a densidad de autos." << endl;
             ex_pentropy_vs_density(param);
+        }
+        if (lane_changes_vs_density)
+        {
+            cout << "Midiendo cambios de carril respecto a densidad de autos." << endl;
+            ex_lane_changes_vs_density(param);
         }
 
         cout << "Hecho." << endl;

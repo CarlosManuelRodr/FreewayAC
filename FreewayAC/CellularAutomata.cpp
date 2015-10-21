@@ -1185,6 +1185,7 @@ CellularAutomataML::CellularAutomataML(const CaSize size, const CaLane lanes, co
     m_vmax = vmax;
     m_rand_prob = rand_prob;
     m_init_vel = init_vel;
+    m_lane_changes = 0;
     m_ca_history.clear();
     m_ca_flow_history.clear();
     m_ca.assign(size, CaElementVel(lanes));
@@ -1226,6 +1227,7 @@ CellularAutomataML::CellularAutomataML(const vector<CaElementVel> &ca, const vec
     m_size = m_ca.size();
     m_vmax = vmax;
     m_rand_prob = 0;
+    m_lane_changes = 0;
     m_ca_temp.assign(m_size, CA_EMPTY);
     m_ca_history.clear();
     m_ca_flow_history.clear();
@@ -1458,6 +1460,7 @@ void CellularAutomataML::ChangeLanes() noexcept
 
                         m_ca[i][new_lane] = m_ca[i][j];
                         m_ca[i][j] = CA_EMPTY;
+                        m_lane_changes++;
                     }
                 }
             }
@@ -1519,6 +1522,10 @@ CaSize CellularAutomataML::GetHistorySize() const noexcept
 CaLane CellularAutomataML::GetLanes() const noexcept
 {
     return m_lanes;
+}
+unsigned CellularAutomataML::GetLaneChanges() const noexcept
+{
+    return m_lane_changes;
 }
 unsigned CellularAutomataML::CountCars() const noexcept
 {
@@ -2112,6 +2119,13 @@ CaLane CaHandler::GetLanes() const noexcept
         return cellularautomataml->GetLanes();
     else
         return 1;
+}
+unsigned CaHandler::GetLaneChanges() const noexcept
+{
+    if (multilane)
+        return cellularautomataml->GetLaneChanges();
+    else
+        return 0;
 }
 unsigned CaHandler::CountCars() const noexcept
 {
