@@ -1,0 +1,807 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 10.1' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     31725,        799]
+NotebookOptionsPosition[     30566,        757]
+NotebookOutlinePosition[     30895,        772]
+CellTagsIndexPosition[     30852,        769]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Aut\[OAcute]mata celular para la descripci\[OAcute]n del \
+tr\[AAcute]fico vehicular", "Title",
+ CellChangeTimes->{{3.6598445654222918`*^9, 3.6598445787259617`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["Introducci\[OAcute]n", "Chapter",
+ CellChangeTimes->{{3.659844593013845*^9, 3.659844595429812*^9}}],
+
+Cell[TextData[{
+ "Los aut\[OAcute]matas celulares (AC) son un modelo interesante que nos \
+permite describir modelos de sistemas din\[AAcute]micos discretizados. Uno de \
+los ejemplos m\[AAcute]s famosos e ilustrativos es el llamado ",
+ StyleBox["juego de la vida",
+  FontSlant->"Italic"],
+ " de John  Conway. Este sistema muestra una din\[AAcute]mica compleja a \
+partir de dos reglas simples que determinan el estado futuro de cada c\
+\[EAcute]lula. Otro ejemplo m\[AAcute]s actual y con aplicaci\[OAcute]n pr\
+\[AAcute]ctica es aut\[OAcute]mata celular elemental que se usa en el ",
+ StyleBox["cifrado Wolfram",
+  FontSlant->"Italic"],
+ ".\n\nEn general un sistema que sea susceptible a ser discretizable, y que \
+su evoluci\[OAcute]n temporal est\[EAcute] definida por reglas globales que \
+se aplican local y simult\[AAcute]neamente son buenos candidatos a ser \
+estudiados mediante un modelo de AC. Un sistema de esta categor\[IAcute]a que \
+es interesante, es el modelado del tr\[AAcute]fico automovil\[IAcute]stico."
+}], "Text",
+ CellChangeTimes->{{3.659844601200688*^9, 3.659844695765316*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Regla 184", "Chapter",
+ CellChangeTimes->{{3.65984471189324*^9, 3.659844718228867*^9}}],
+
+Cell[TextData[{
+ "Para el caso de una simulaci\[OAcute]n simple del tr\[AAcute]fico \
+utilizando un aut\[OAcute]mata celular, se puede usar la regla 184 del aut\
+\[OAcute]mata celular de ",
+ StyleBox["Wolfram",
+  FontSlant->"Italic"],
+ ", la cual consiste en un arreglo unidimensional de celdas, cada una de las \
+cuales tiene dos posibles estados 0 o 1. En cada paso de su \
+evoluci\[OAcute]n, se aplican las siguientes reglas para cada una de las c\
+\[EAcute]lulas en la red, de manera simult\[AAcute]nea para determinar el \
+nuevo estado de la red."
+}], "Text",
+ CellChangeTimes->{{3.659844721434902*^9, 3.6598447968769217`*^9}, {
+  3.659845465072769*^9, 3.6598454747453117`*^9}, {3.659845564328925*^9, 
+  3.659845575408658*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"t", " ", "=", " ", 
+   RowBox[{"Table", "[", 
+    RowBox[{
+     RowBox[{"CellularAutomaton", "[", 
+      RowBox[{"184", ",", "i", ",", "1"}], "]"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"i", ",", 
+       RowBox[{"Tuples", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{"0", ",", "1"}], "}"}], ",", "3"}], "]"}]}], "}"}]}], 
+    "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"Do", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{
+      RowBox[{"t", "[", 
+       RowBox[{"[", "i", "]"}], "]"}], "[", 
+      RowBox[{"[", "2", "]"}], "]"}], "[", 
+     RowBox[{"[", 
+      RowBox[{"{", 
+       RowBox[{"1", ",", "3"}], "}"}], "]"}], "]"}], " ", "=", " ", "0"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{"i", ",", "1", ",", 
+     RowBox[{"Length", "[", "t", "]"}]}], "}"}]}], 
+  "]"}], "\[IndentingNewLine]", 
+ RowBox[{"Table", "[", 
+  RowBox[{
+   RowBox[{"ArrayPlot", "[", 
+    RowBox[{"i", ",", " ", 
+     RowBox[{"ImageSize", "\[Rule]", "Tiny"}]}], "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"i", ",", "t"}], "}"}]}], "]"}]}], "Input",
+ CellChangeTimes->{{3.659844997710246*^9, 3.6598450203200693`*^9}, {
+  3.659845203640224*^9, 3.659845268286869*^9}, {3.659845349209056*^9, 
+  3.6598453614690933`*^9}, {3.659845434879354*^9, 3.659845452127081*^9}}],
+
+Cell["La evoluci\[OAcute]n del sistema es la siguiente.", "Text",
+ CellChangeTimes->{{3.6598455276480913`*^9, 3.659845532415626*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"SetOptions", "[", 
+   RowBox[{"ArrayPlot", ",", 
+    RowBox[{"BaseStyle", "\[Rule]", 
+     RowBox[{"{", 
+      RowBox[{"FontSize", "\[Rule]", "14"}], "}"}]}]}], "]"}], ";"}], "\n", 
+ RowBox[{"ArrayPlot", "[", 
+  RowBox[{
+   RowBox[{"CellularAutomaton", "[", 
+    RowBox[{"184", ",", 
+     RowBox[{"RandomInteger", "[", 
+      RowBox[{"1", ",", "100"}], "]"}], ",", "100"}], "]"}], ",", 
+   RowBox[{"PlotLegends", "\[Rule]", "Automatic"}], ",", 
+   RowBox[{"FrameTicks", "\[Rule]", "Automatic"}], ",", 
+   RowBox[{"FrameLabel", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"\"\<Tiempo\>\"", ",", "\"\<Longitud\>\""}], "}"}]}], ",", 
+   RowBox[{"PixelConstrained", "\[Rule]", "3"}], ",", " ", 
+   RowBox[{"PlotLabel", "\[Rule]", "\"\<Regla 184\>\""}]}], "]"}]}], "Input",
+ CellChangeTimes->{{3.6598454895906076`*^9, 3.659845543430319*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Modelo Kai-Nagel", "Chapter",
+ CellChangeTimes->{{3.659845624767465*^9, 3.659845631863266*^9}}],
+
+Cell[TextData[{
+ "Un modelo m\[AAcute]s realista que nos permite simular las peque\[NTilde]as \
+variaciones de velocidad aleatorias que ocurren en el tr\[AAcute]fico, y que \
+adem\[AAcute]s permite un mayor rango de velocidades permitidas de cada auto \
+que pertenece al aut\[OAcute]mata celular es el propuesto por Kai Nagel y \
+Michael Schreckenberg.\n\nLa descripci\[OAcute]n del modelo es la siguiente. \
+Se elabora un arreglo unidimensional de longitud ",
+ StyleBox["S",
+  FontSlant->"Italic"],
+ ", y con condiciones de frontera peri\[OAcute]dicas, lo que emula un flujo \
+constante de autos por la autopista, uno puede ver esto como un conjunto de \
+autos moviendo en un circuito cerrado.\n\nCada veh\[IAcute]culo tiene una \
+velocidad entera que se encuentra entre [0,",
+ StyleBox["vmax",
+  FontSlant->"Italic"],
+ "]. Para una configuraci\[OAcute]n arbitraria, la evoluci\[OAcute]n de este \
+aut\[OAcute]mata se encuentra siguiendo los siguientes pasos, en paralelo \
+para cada auto:"
+}], "Text",
+ CellChangeTimes->{{3.6598456448950644`*^9, 3.6598457288966007`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "Aceleraci\[OAcute]n: Si la velocidad ",
+ StyleBox["v",
+  FontSlant->"Italic"],
+ " de un veh\[IAcute]culo es menor que ",
+ StyleBox["vmax",
+  FontSlant->"Italic"],
+ " y la distancia con el siguiente auto es mayor que ",
+ StyleBox["v",
+  FontSlant->"Italic"],
+ "+1, la velocidad se aumenta en una unidad v \[RightArrow] v+1."
+}], "ItemNumbered",
+ CellChangeTimes->{{3.659845744566833*^9, 3.6598457573265457`*^9}, {
+  3.6598458084626503`*^9, 3.6598458670748367`*^9}}],
+
+Cell[TextData[{
+ "Frenado: Si un veh\[IAcute]culo en la posici\[OAcute]n ",
+ StyleBox["i",
+  FontSlant->"Italic"],
+ " observa al siguiente veh\[IAcute]culo en la posici\[OAcute]n ",
+ StyleBox["i",
+  FontSlant->"Italic"],
+ "+",
+ StyleBox["j",
+  FontSlant->"Italic"],
+ ", reduce su velocidad a ",
+ StyleBox["v",
+  FontSlant->"Italic"],
+ " \[Rule] ",
+ StyleBox["j",
+  FontSlant->"Italic"],
+ "-1."
+}], "ItemNumbered",
+ CellChangeTimes->{{3.659845744566833*^9, 3.6598457573265457`*^9}, {
+  3.6598458084626503`*^9, 3.659845946928391*^9}}],
+
+Cell[TextData[{
+ "Aleatorizaci\[OAcute]n: Con probabilidad ",
+ StyleBox["p",
+  FontSlant->"Italic"],
+ ", la velocidad de cada veh\[IAcute]culo (si es mayor que cero) disminuye en \
+uno ",
+ StyleBox["v",
+  FontSlant->"Italic"],
+ " \[Rule] ",
+ StyleBox["v",
+  FontSlant->"Italic"],
+ "-1."
+}], "ItemNumbered",
+ CellChangeTimes->{{3.659845744566833*^9, 3.6598457573265457`*^9}, {
+  3.6598458084626503`*^9, 3.6598459839975452`*^9}}],
+
+Cell[TextData[{
+ "Movimiento vehicular: Cada veh\[IAcute]culo avanza ",
+ StyleBox["v",
+  FontSlant->"Italic"],
+ " espacios."
+}], "ItemNumbered",
+ CellChangeTimes->{{3.659845744566833*^9, 3.6598457573265457`*^9}, {
+  3.6598458084626503`*^9, 3.659845962429783*^9}}]
+}, Open  ]],
+
+Cell["A continuaci\[OAcute]n se muestra una implementaci\[OAcute]n del \
+algoritmo.", "Text",
+ CellChangeTimes->{{3.659846043269236*^9, 3.659846058901081*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", " ", 
+   RowBox[{"Valores", " ", "iniciales", " ", "por", " ", "defecto"}], " ", 
+   "*)"}], "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"EMPTY", " ", "=", " ", 
+     RowBox[{"-", "1"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"FLOW", " ", "=", " ", "1"}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"NOFLOW", " ", "=", " ", "0"}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"size", "=", "20"}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"vmax", "=", "5"}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"randprob", " ", "=", " ", "0.2"}], ";"}], "\[IndentingNewLine]", 
+   
+   RowBox[{
+    RowBox[{"density", " ", "=", " ", "0.4"}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"positions", " ", "=", " ", 
+     RowBox[{
+      RowBox[{"RandomSample", "[", 
+       RowBox[{"Range", "[", "size", "]"}], "]"}], "[", 
+      RowBox[{"[", 
+       RowBox[{"1", ";;", 
+        RowBox[{"Round", "[", 
+         RowBox[{"size", "*", "density"}], "]"}]}], "]"}], "]"}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"ca", " ", "=", " ", 
+     RowBox[{"Table", "[", 
+      RowBox[{
+       RowBox[{"-", "1"}], ",", 
+       RowBox[{"{", "size", "}"}]}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"ca", "[", 
+      RowBox[{"[", "positions", "]"}], "]"}], " ", "=", "1"}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"flow", " ", "=", " ", 
+     RowBox[{"Table", "[", 
+      RowBox[{"NOFLOW", ",", 
+       RowBox[{"{", "size", "}"}]}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"camap", " ", "=", " ", 
+     RowBox[{"{", "}"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"flowmap", " ", "=", " ", 
+     RowBox[{"{", "}"}]}], ";"}], "\[IndentingNewLine]", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", " ", 
+    RowBox[{"Funci\[OAcute]n", " ", "para", " ", "reiniciar"}], " ", "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Initialize", "[", 
+     RowBox[{
+     "asize_", ",", " ", "adensity_", ",", "avmax_", ",", "arandprob_"}], 
+     "]"}], " ", ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", "}"}], ",", "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"size", " ", "=", " ", "asize"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"density", "=", "adensity"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"vmax", " ", "=", " ", "avmax"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"randprob", " ", "=", " ", "arandprob"}], ";", 
+       "\[IndentingNewLine]", "\[IndentingNewLine]", 
+       RowBox[{"positions", " ", "=", " ", 
+        RowBox[{
+         RowBox[{"RandomSample", "[", 
+          RowBox[{"Range", "[", "size", "]"}], "]"}], "[", 
+         RowBox[{"[", 
+          RowBox[{"1", ";;", 
+           RowBox[{"Round", "[", 
+            RowBox[{"size", "*", "density"}], "]"}]}], "]"}], "]"}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"ca", " ", "=", " ", 
+        RowBox[{"Table", "[", 
+         RowBox[{
+          RowBox[{"-", "1"}], ",", 
+          RowBox[{"{", "size", "}"}]}], "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{
+        RowBox[{"ca", "[", 
+         RowBox[{"[", "positions", "]"}], "]"}], " ", "=", "1"}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"flow", " ", "=", " ", 
+        RowBox[{"Table", "[", 
+         RowBox[{"NOFLOW", ",", 
+          RowBox[{"{", "size", "}"}]}], "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"camap", " ", "=", " ", 
+        RowBox[{"{", "}"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"flowmap", " ", "=", " ", 
+        RowBox[{"{", "}"}]}], ";"}]}], "\[IndentingNewLine]", "]"}]}], 
+   "\[IndentingNewLine]", "\[IndentingNewLine]", 
+   RowBox[{"(*", " ", 
+    RowBox[{"Devuelve", " ", 
+     RowBox[{"ca", "[", 
+      RowBox[{"[", "i", "]"}], "]"}], " ", "con", " ", "condiciones", " ", 
+     "de", " ", "frontera", " ", "peri\[OAcute]dicas"}], " ", "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"At", "[", "i_", "]"}], " ", ":=", " ", 
+    RowBox[{"If", "[", 
+     RowBox[{
+      RowBox[{"i", " ", "<=", " ", "size"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"Return", "[", 
+       RowBox[{"ca", "[", 
+        RowBox[{"[", "i", "]"}], "]"}], "]"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"Return", "[", 
+       RowBox[{"ca", "[", 
+        RowBox[{"[", 
+         RowBox[{"i", "-", "size"}], "]"}], "]"}], "]"}]}], 
+     "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", " ", 
+    RowBox[{
+    "Devuelve", " ", "distancia", " ", "a", " ", "veh\[IAcute]culo", " ", 
+     "m\[AAcute]s", " ", "cercano", " ", "desde", " ", "i", " ", "hacia", " ",
+      "la", " ", "derecha"}], " ", "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"NextCarDist", "[", "i_", "]"}], " ", ":=", " ", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", "distance", "}"}], ",", "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"distance", " ", "=", " ", "1"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"While", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"At", "[", 
+           RowBox[{"i", "+", "distance"}], "]"}], " ", "\[Equal]", " ", 
+          "EMPTY"}], ",", " ", 
+         RowBox[{"distance", "++"}]}], "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", "distance", "]"}], ";"}]}], 
+     "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", " ", 
+    RowBox[{
+    "Calcula", " ", "cambios", " ", "de", " ", "las", " ", "velocidades"}], 
+    " ", "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Step", "[", "]"}], ":=", 
+    RowBox[{"Do", "[", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"ca", "[", 
+          RowBox[{"[", "i", "]"}], "]"}], " ", "\[NotEqual]", " ", "EMPTY"}], 
+        ",", "\[IndentingNewLine]", 
+        RowBox[{"(*", " ", "Aceleraci\[OAcute]n", " ", "*)"}], 
+        "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"If", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{"ca", "[", 
+               RowBox[{"[", "i", "]"}], "]"}], " ", "<", " ", "vmax"}], ")"}],
+             " ", "&&", " ", 
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{"NextCarDist", "[", "i", "]"}], " ", ">", " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{"ca", "[", 
+                 RowBox[{"[", "i", "]"}], "]"}], "+", "1"}], ")"}]}], ")"}]}],
+            ",", "\[IndentingNewLine]", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"ca", "[", 
+              RowBox[{"[", "i", "]"}], "]"}], "++"}], ";"}]}], 
+          "\[IndentingNewLine]", "]"}], "\[IndentingNewLine]", 
+         RowBox[{"(*", " ", "Frenado", " ", "*)"}], "\[IndentingNewLine]", 
+         RowBox[{"If", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"ca", "[", 
+             RowBox[{"[", "i", "]"}], "]"}], " ", ">", " ", "0"}], ",", 
+           "\[IndentingNewLine]", 
+           RowBox[{
+            RowBox[{"nd", " ", "=", " ", 
+             RowBox[{"NextCarDist", "[", "i", "]"}]}], ";", 
+            "\[IndentingNewLine]", 
+            RowBox[{"If", "[", 
+             RowBox[{
+              RowBox[{"nd", " ", "\[LessEqual]", " ", 
+               RowBox[{"ca", "[", 
+                RowBox[{"[", "i", "]"}], "]"}]}], ",", "\[IndentingNewLine]", 
+              
+              RowBox[{
+               RowBox[{
+                RowBox[{"ca", "[", 
+                 RowBox[{"[", "i", "]"}], "]"}], " ", "=", " ", 
+                RowBox[{"nd", " ", "-", "1"}]}], ";"}]}], 
+             "\[IndentingNewLine]", "]"}]}]}], "\[IndentingNewLine]", "]"}], 
+         "\[IndentingNewLine]", 
+         RowBox[{"(*", " ", "Aleatoriedad", " ", "*)"}], 
+         "\[IndentingNewLine]", 
+         RowBox[{"If", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{"ca", "[", 
+               RowBox[{"[", "i", "]"}], "]"}], " ", ">", " ", "0"}], ")"}], 
+            " ", "&&", " ", 
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{"RandomReal", "[", "]"}], " ", "\[LessEqual]", " ", 
+              "randprob"}], ")"}]}], ",", "\[IndentingNewLine]", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"ca", "[", 
+              RowBox[{"[", "i", "]"}], "]"}], "--"}], ";"}]}], 
+          "\[IndentingNewLine]", "]"}]}]}], "\[IndentingNewLine]", "]"}], 
+      "\[IndentingNewLine]", ",", 
+      RowBox[{"{", 
+       RowBox[{"i", ",", "1", ",", 
+        RowBox[{"Length", "[", "ca", "]"}]}], "}"}]}], "\[IndentingNewLine]", 
+     "]"}]}], "\[IndentingNewLine]", "\[IndentingNewLine]", 
+   RowBox[{"(*", " ", 
+    RowBox[{
+    "Realiza", " ", "el", " ", "movimiento", " ", "de", " ", "los", " ", 
+     "veh\[IAcute]culos"}], " ", "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Move", "[", "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"tmpca", ",", "i"}], "}"}], ",", "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"tmpca", " ", "=", " ", 
+        RowBox[{"Table", "[", 
+         RowBox[{
+          RowBox[{"-", "1"}], ",", 
+          RowBox[{"{", "size", "}"}]}], "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"flow", " ", "=", " ", 
+        RowBox[{"Table", "[", 
+         RowBox[{"NOFLOW", ",", 
+          RowBox[{"{", "size", "}"}]}], "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Do", "[", "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"If", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"ca", "[", 
+             RowBox[{"[", "i", "]"}], "]"}], " ", "\[NotEqual]", " ", 
+            "EMPTY"}], ",", "\[IndentingNewLine]", 
+           RowBox[{"(*", " ", 
+            RowBox[{"Actualiza", " ", "posici\[OAcute]n"}], " ", "*)"}], 
+           "\[IndentingNewLine]", 
+           RowBox[{
+            RowBox[{"pos", " ", "=", " ", 
+             RowBox[{"i", "+", 
+              RowBox[{"ca", "[", 
+               RowBox[{"[", "i", "]"}], "]"}]}]}], ";", "\[IndentingNewLine]",
+             " ", 
+            RowBox[{
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{"pos", " ", "<=", " ", "size"}], ",", 
+               "\[IndentingNewLine]", 
+               RowBox[{
+                RowBox[{"tmpca", "[", 
+                 RowBox[{"[", "pos", "]"}], "]"}], "=", " ", 
+                RowBox[{"ca", "[", 
+                 RowBox[{"[", "i", "]"}], "]"}]}], ",", "\[IndentingNewLine]", 
+               RowBox[{
+                RowBox[{"tmpca", "[", 
+                 RowBox[{"[", 
+                  RowBox[{"pos", "-", "size"}], "]"}], "]"}], " ", "=", " ", 
+                RowBox[{"ca", "[", 
+                 RowBox[{"[", "i", "]"}], "]"}]}]}], "\[IndentingNewLine]", 
+              "]"}], "\[IndentingNewLine]", "\[IndentingNewLine]", 
+             RowBox[{"(*", " ", 
+              RowBox[{"Lista", " ", "de", " ", "flujo"}], " ", "*)"}], 
+             "\[IndentingNewLine]", 
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{
+                RowBox[{"ca", "[", 
+                 RowBox[{"[", "i", "]"}], "]"}], " ", ">", " ", "0"}], ",", 
+               "\[IndentingNewLine]", 
+               RowBox[{"Do", "[", 
+                RowBox[{
+                 RowBox[{"If", "[", 
+                  RowBox[{
+                   RowBox[{"j", "<=", " ", "size"}], ",", 
+                   "\[IndentingNewLine]", 
+                   RowBox[{
+                    RowBox[{"flow", "[", 
+                    RowBox[{"[", "j", "]"}], "]"}], "=", " ", "FLOW"}], ",", 
+                   "\[IndentingNewLine]", 
+                   RowBox[{
+                    RowBox[{"flow", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"j", "-", "size"}], "]"}], "]"}], " ", "=", " ", 
+                    "FLOW"}]}], "\[IndentingNewLine]", "]"}], ",", 
+                 RowBox[{"{", 
+                  RowBox[{"j", ",", "i", ",", 
+                   RowBox[{"i", "+", 
+                    RowBox[{"ca", "[", 
+                    RowBox[{"[", "i", "]"}], "]"}]}]}], "}"}]}], 
+                "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+              "]"}]}]}]}], "\[IndentingNewLine]", "]"}], 
+         "\[IndentingNewLine]", ",", 
+         RowBox[{"{", 
+          RowBox[{"i", ",", "1", ",", 
+           RowBox[{"Length", "[", "ca", "]"}]}], "}"}]}], 
+        "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"ca", " ", "=", " ", "tmpca"}], ";"}]}], "\[IndentingNewLine]",
+      "]"}]}], "\[IndentingNewLine]", "\[IndentingNewLine]", 
+   RowBox[{"(*", " ", 
+    RowBox[{
+    "Evoluciona", " ", "el", " ", "sistema", " ", "un", " ", "n\[UAcute]mero",
+      " ", "dado", " ", "de", " ", "iteraciones"}], " ", "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Evolve", "[", "iterations_", "]"}], " ", ":=", " ", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", "}"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"Do", "[", "\[IndentingNewLine]", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"Step", "[", "]"}], ";", "\[IndentingNewLine]", 
+         RowBox[{"Move", "[", "]"}], ";", "\[IndentingNewLine]", 
+         RowBox[{"AppendTo", "[", 
+          RowBox[{"camap", ",", " ", "ca"}], "]"}], ";", 
+         "\[IndentingNewLine]", 
+         RowBox[{"AppendTo", "[", 
+          RowBox[{"flowmap", ",", " ", "flow"}], "]"}], ";"}], 
+        "\[IndentingNewLine]", ",", 
+        RowBox[{"{", "iterations", "}"}]}], "\[IndentingNewLine]", "]"}]}], 
+     "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", " ", 
+    RowBox[{
+    "Funci\[OAcute]n", " ", "para", " ", "medir", " ", "el", " ", "flujo", 
+     " ", "de", " ", "veh\[IAcute]culos"}], " ", "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"MeasureFlow", "[", "]"}], " ", ":=", " ", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"height", ",", " ", "width", ",", " ", "sum"}], "}"}], ",", 
+      "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"height", " ", "=", " ", 
+        RowBox[{"Length", "[", "flowmap", "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"width", " ", "=", " ", 
+        RowBox[{"Length", "[", 
+         RowBox[{"flowmap", "[", 
+          RowBox[{"[", "1", "]"}], "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"sum", " ", "=", " ", "0"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Do", "[", "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"Do", "[", "\[IndentingNewLine]", 
+          RowBox[{
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"flowmap", "[", 
+                  RowBox[{"[", "j", "]"}], "]"}], "[", 
+                 RowBox[{"[", "i", "]"}], "]"}], " ", "\[NotEqual]", " ", 
+                "NOFLOW"}], ")"}], " ", "&&", " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"flowmap", "[", 
+                  RowBox[{"[", "j", "]"}], "]"}], "[", 
+                 RowBox[{"[", 
+                  RowBox[{"i", "+", "1"}], "]"}], "]"}], " ", "\[NotEqual]", 
+                " ", "NOFLOW"}], ")"}]}], ",", "\[IndentingNewLine]", 
+             RowBox[{
+              RowBox[{"sum", "++"}], ";"}]}], "\[IndentingNewLine]", "]"}], 
+           "\[IndentingNewLine]", ",", 
+           RowBox[{"{", 
+            RowBox[{"j", ",", " ", "1", ",", " ", "height"}], "}"}]}], 
+          "\[IndentingNewLine]", "]"}], "\[IndentingNewLine]", ",", 
+         RowBox[{"{", 
+          RowBox[{"i", ",", "1", ",", " ", 
+           RowBox[{"width", "-", "1"}]}], "}"}]}], "\[IndentingNewLine]", 
+        "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Return", "[", 
+        RowBox[{"sum", "/", 
+         RowBox[{"(", 
+          RowBox[{"height", "*", "width"}], ")"}]}], "]"}], ";"}]}], 
+     "\[IndentingNewLine]", "]"}]}]}]}]], "Input",
+ CellChangeTimes->{{3.659839775034068*^9, 3.6598398035838003`*^9}, {
+   3.6598398350868073`*^9, 3.659839929790213*^9}, {3.659839998068274*^9, 
+   3.659840037931983*^9}, {3.6598400954108353`*^9, 3.659840174152823*^9}, {
+   3.659840221242461*^9, 3.65984026600797*^9}, {3.6598403429528313`*^9, 
+   3.659840403158448*^9}, {3.659840447230606*^9, 3.659840477339327*^9}, {
+   3.659840567931973*^9, 3.6598406152572527`*^9}, {3.659840662488289*^9, 
+   3.659840662832728*^9}, {3.65984069429626*^9, 3.6598407126390038`*^9}, {
+   3.659840996584766*^9, 3.659841014667281*^9}, {3.659841050128285*^9, 
+   3.659841182630561*^9}, {3.6598412138824368`*^9, 3.6598412623937683`*^9}, {
+   3.659841365003463*^9, 3.659841444086337*^9}, {3.659841540740115*^9, 
+   3.6598416287732964`*^9}, {3.6598416727138853`*^9, 3.659841882284803*^9}, {
+   3.6598419836176853`*^9, 3.659842116208819*^9}, {3.6598421554417877`*^9, 
+   3.659842264835622*^9}, 3.659842295375443*^9, {3.659842372277081*^9, 
+   3.659842402656489*^9}, {3.659842481817278*^9, 3.659842491798417*^9}, {
+   3.659842671008465*^9, 3.659842853279685*^9}, {3.659843065640761*^9, 
+   3.659843141718624*^9}, {3.659843492664953*^9, 3.659843502072567*^9}, {
+   3.659843776345624*^9, 3.659843776472539*^9}, {3.659843812881641*^9, 
+   3.659843953938019*^9}, {3.65984628441964*^9, 3.6598463120105753`*^9}, {
+   3.65984651992446*^9, 3.659846525941265*^9}, {3.659846612589073*^9, 
+   3.65984662294252*^9}, {3.659846663749597*^9, 3.659846701920277*^9}, {
+   3.659846787919401*^9, 3.6598468386508217`*^9}, {3.6598471059876842`*^9, 
+   3.659847142557176*^9}, {3.659847178660707*^9, 3.659847188237771*^9}, {
+   3.65984755054639*^9, 3.659847592178829*^9}, {3.659847674169558*^9, 
+   3.659847705385562*^9}, {3.659847763521297*^9, 3.6598479991167192`*^9}, {
+   3.659848151969796*^9, 3.659848179289554*^9}, {3.659848222477215*^9, 
+   3.6598482956954803`*^9}, {3.659848901479974*^9, 3.659848917190419*^9}, {
+   3.6598491717191*^9, 3.659849186464671*^9}, {3.65984923505969*^9, 
+   3.659849380826144*^9}}],
+
+Cell["\<\
+Al ejecutar la regla del aut\[OAcute]mata celular se pueden observar las \
+ondas de tr\[AAcute]fico que se generan.\
+\>", "Text",
+ CellChangeTimes->{{3.659849430718207*^9, 3.6598494552220793`*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"Initialize", "[", 
+   RowBox[{"200", ",", " ", "0.5", ",", " ", "5", ",", " ", "0.2"}], "]"}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Evolve", "[", "200", "]"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"ArrayPlot", "[", 
+   RowBox[{"camap", ",", 
+    RowBox[{"ColorFunction", "\[Rule]", "\"\<BlueGreenYellow\>\""}], ",", 
+    RowBox[{"FrameTicks", "\[Rule]", "Automatic"}], ",", 
+    RowBox[{"PlotLegends", "\[Rule]", "Automatic"}], ",", " ", 
+    RowBox[{"PlotLabel", "\[Rule]", "\"\<Mapa del AC\>\""}], ",", " ", 
+    RowBox[{"FrameLabel", "\[Rule]", 
+     RowBox[{"{", 
+      RowBox[{"\"\<Iteraci\[OAcute]n\>\"", ",", "\"\<Posici\[OAcute]n\>\""}], 
+      "}"}]}]}], "]"}], "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{"ArrayPlot", "[", 
+  RowBox[{"flowmap", ",", 
+   RowBox[{"FrameTicks", "\[Rule]", "Automatic"}], ",", 
+   RowBox[{"PlotLegends", "\[Rule]", "Automatic"}], ",", " ", 
+   RowBox[{"PlotLabel", "\[Rule]", 
+    RowBox[{
+    "\"\<Mapa del flujo del AC.\\n\>\"", "<>", "\"\<Flujo: \>\"", " ", "<>", 
+     " ", 
+     RowBox[{"ToString", "[", 
+      RowBox[{"N", "[", 
+       RowBox[{"MeasureFlow", "[", "]"}], "]"}], "]"}]}]}], ",", " ", 
+   RowBox[{"FrameLabel", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"\"\<Iteraci\[OAcute]n\>\"", ",", "\"\<Posici\[OAcute]n\>\""}], 
+     "}"}]}]}], "]"}]}], "Input",
+ CellChangeTimes->{{3.659843156960622*^9, 3.659843174204523*^9}, {
+   3.659844274594592*^9, 3.6598443670502462`*^9}, {3.659844409987949*^9, 
+   3.659844410186886*^9}, {3.65984615679237*^9, 3.659846185696628*^9}, {
+   3.6598462187548*^9, 3.659846221216579*^9}, {3.6598471509977922`*^9, 
+   3.659847165884794*^9}, {3.659847324897265*^9, 3.6598473252066813`*^9}, {
+   3.659848201497032*^9, 3.659848201673829*^9}, {3.659848304647441*^9, 
+   3.659848396857534*^9}, 3.659848738417081*^9, {3.659848852522937*^9, 
+   3.6598488761859083`*^9}, {3.659849447789115*^9, 3.659849447843131*^9}}],
+
+Cell[TextData[{
+ "Si se mide el flujo ",
+ StyleBox["q",
+  FontSlant->"Italic"],
+ " respecto a la densidad de veh\[IAcute]culos se observa que el sistema \
+tiene una capacidad de carga donde ocurre la mayor cantidad de flujo, y este \
+decae al sobrepasar la cantidad de carga del sistema."
+}], "Text",
+ CellChangeTimes->{{3.659849462765852*^9, 3.659849520308971*^9}, {
+  3.6598498281548357`*^9, 3.659849828250437*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"data", "=", 
+   RowBox[{"{", "}"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"Do", "[", "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"Initialize", "[", 
+     RowBox[{"200", ",", " ", "\[Rho]", ",", " ", "5", ",", " ", "0.2"}], 
+     "]"}], ";", "\[IndentingNewLine]", 
+    RowBox[{"Evolve", "[", "200", "]"}], ";", "\[IndentingNewLine]", 
+    RowBox[{"AppendTo", "[", 
+     RowBox[{"data", ",", 
+      RowBox[{"{", 
+       RowBox[{"\[Rho]", ",", 
+        RowBox[{"MeasureFlow", "[", "]"}]}], "}"}]}], "]"}], ";"}], 
+   "\[IndentingNewLine]", ",", 
+   RowBox[{"{", 
+    RowBox[{"\[Rho]", ",", "0", ",", "1", ",", "0.025"}], "}"}]}], 
+  "\[IndentingNewLine]", "]"}], "\[IndentingNewLine]", 
+ RowBox[{"ListLinePlot", "[", 
+  RowBox[{"data", ",", 
+   RowBox[{"PlotTheme", "\[Rule]", "\"\<Scientific\>\""}], ",", " ", 
+   RowBox[{"FrameLabel", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"\"\<\[Rho]\>\"", ",", " ", "\"\<q\>\""}], "}"}]}], ",", " ", 
+   RowBox[{"GridLines", "\[Rule]", "Automatic"}], ",", " ", 
+   RowBox[{"PlotLabel", "\[Rule]", "\"\<Flujo respecto a densidad\>\""}]}], 
+  "]"}]}], "Input",
+ CellChangeTimes->{{3.659848410233238*^9, 3.659848473007372*^9}, {
+  3.659848694326054*^9, 3.659848705915159*^9}, {3.6598497913357573`*^9, 
+  3.659849822006682*^9}, {3.6598499227341003`*^9, 3.659850048726441*^9}}]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{1920, 1016},
+WindowMargins->{{429, Automatic}, {0, 34}},
+FrontEndVersion->"11.0 for Linux x86 (64-bit) (July 28, 2016)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 171, 2, 93, "Title"],
+Cell[CellGroupData[{
+Cell[776, 28, 105, 1, 66, "Chapter"],
+Cell[884, 31, 1102, 18, 111, "Text"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2023, 54, 93, 1, 66, "Chapter"],
+Cell[2119, 57, 732, 14, 51, "Text"],
+Cell[2854, 73, 1308, 39, 72, "Input"],
+Cell[4165, 114, 133, 1, 31, "Text"],
+Cell[4301, 117, 871, 20, 52, "Input"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5209, 142, 101, 1, 66, "Chapter"],
+Cell[5313, 145, 1073, 19, 151, "Text"],
+Cell[CellGroupData[{
+Cell[6411, 168, 482, 13, 30, "ItemNumbered"],
+Cell[6896, 183, 532, 19, 30, "ItemNumbered"],
+Cell[7431, 204, 427, 14, 30, "ItemNumbered"],
+Cell[7861, 220, 263, 7, 30, "ItemNumbered"]
+}, Open  ]],
+Cell[8139, 230, 159, 2, 31, "Text"],
+Cell[8301, 234, 18259, 427, 2383, "Input"],
+Cell[26563, 663, 207, 4, 31, "Text"],
+Cell[26773, 669, 1975, 40, 111, "Input"],
+Cell[28751, 711, 417, 9, 31, "Text"],
+Cell[29171, 722, 1367, 31, 172, "Input"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
