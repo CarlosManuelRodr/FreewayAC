@@ -2,16 +2,167 @@
 #include <string>
 #include <chrono>
 #include "CellularAutomata.h"
-#include "optionparser.h"
 #include "Experiments.h"
 
-#if defined(_WIN32)
-#include <windows.h>
+#if defined (MATHEMATICA)
+    #include "mathlink.h"
+#else
+    #include "optionparser.h"
+    #if defined(_WIN32)
+        #include <windows.h>
+    #endif
 #endif
 
 using namespace std;
 
 
+#if defined(MATHEMATICA)
+
+CellularAutomata* ca = nullptr;
+CircularCA* circularca = nullptr;
+OpenCA* openca = nullptr;
+AutonomousCA* smartca = nullptr;
+AutonomousNoRandCA* smartnorandca = nullptr;
+AutonomousInstanteneousOnlyCA* smartinstonlyca = nullptr;
+
+void create_circular_ca(int size, int vmax, double density, double rand_prob, int init_vel)
+{
+    ca = circularca = new CircularCA(size, density, vmax, rand_prob, init_vel);
+    MLPutString(stdlink, "CA Circular creado");
+}
+void create_open_ca(int size, int vmax, double density, double rand_prob, int init_vel)
+{
+    ca = circularca = new CircularCA(size, density, vmax, rand_prob, init_vel);
+    MLPutString(stdlink, "CA Circular creado");
+}
+void create_circular_ca(int size, int vmax, double density, double rand_prob, int init_vel)
+{
+    ca = circularca = new CircularCA(size, density, vmax, rand_prob, init_vel);
+    MLPutString(stdlink, "CA Circular creado");
+}
+void create_circular_ca(int size, int vmax, double density, double rand_prob, int init_vel)
+{
+    ca = circularca = new CircularCA(size, density, vmax, rand_prob, init_vel);
+    MLPutString(stdlink, "CA Circular creado");
+}
+void create_circular_ca(int size, int vmax, double density, double rand_prob, int init_vel)
+{
+    ca = circularca = new CircularCA(size, density, vmax, rand_prob, init_vel);
+    MLPutString(stdlink, "CA Circular creado");
+}
+
+void delete_ca()
+{
+    if (circularca)
+        delete circularca;
+    if (openca)
+        delete openca;
+    if (smartca)
+        delete smartca;
+    if (smartnorandca)
+        delete smartnorandca;
+    if (smartinstonlyca)
+        delete smartinstonlyca;
+    
+    circularca = nullptr;
+    openca = nullptr;
+    smartca = nullptr;
+    smartnorandca = nullptr;
+    smartinstonlyca = nullptr;
+    ca = nullptr;
+    //MLPutSymbol(stdlink, "Null");
+    MLPutString(stdlink, "CA borrado");
+}
+void ca_step()
+{
+    ca->Step();
+    MLPutSymbol(stdlink, "Null");
+}
+void ca_evolve(int iterations)
+{
+    ca->Evolve(iterations);
+    MLPutSymbol(stdlink, "Null");
+}
+int ca_count_cars()
+{
+    return ca->CountCars();
+}
+void ca_calculate_ocupancy()
+{
+    vector<double> ocupancy = ca->CalculateOcupancy();
+    MLPutReal64List(stdlink, &ocupancy[0], ocupancy.size());
+}
+void ca_calculate_flow()
+{
+    vector<double> flow = ca->CalculateFlow();
+    MLPutReal64List(stdlink, &flow[0], flow.size());
+}
+
+
+//void traffic_map(int size, int iterations, int vmax, double density, double rand_prob, int init_vel, string ca_type)
+
+void traffic_map(int i, int j)
+{
+    vector<double> v_out = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0};
+        
+    const int dimensions[2] = {(int)v_out.size()/4, 4};
+    const char* heads[2] = {"List", "List"};
+    long depth = 2;
+    double *out = new double[v_out.size()];
+    
+    for (int k=0; k < v_out.size(); k++)
+    {
+        out[k] = v_out[k];
+    }
+    
+    //CaHandler ca(ca_type, size, 1, density, vmax, rand_prob, init_vel, )
+    
+    MLPutReal64Array(stdlink, out, dimensions, heads, depth);
+}
+
+/*void traffic_map(int i, int j)
+{
+    //ExParam param;
+    
+    vector<double> v_out = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0};
+        
+    const int dimensions[2] = {(int)v_out.size()/4, 4};
+    const char* heads[2] = {"List", "List"};
+    long depth = 2;
+    double *out = new double[v_out.size()];
+    
+    for (int k=0; k < v_out.size(); k++)
+    {
+        out[k] = v_out[k];
+    }
+    
+    MLPutReal64Array(stdlink, out, dimensions, heads, depth);
+}*/
+    
+
+#if defined(WIN32)
+
+int __stdcall WinMain(HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszCmdLine, int nCmdShow)
+{
+    char  buff[512];
+    char FAR * buff_start = buff;
+    char FAR * argv[32];
+    char FAR * FAR * argv_end = argv + 32;
+
+    if (!MLInitializeIcon(hinstCurrent, nCmdShow)) return 1;
+    MLScanString(argv, &argv_end, &lpszCmdLine, &buff_start);
+    return MLMain(argv_end - argv, argv);
+}
+
+#else
+int main(int argc, char* argv[])
+{
+    return MLMain(argc, argv);
+}
+
+#endif
+
+#else
 /****************************
 *                           *
 *   Parser de argumentos    *
@@ -64,7 +215,7 @@ const option::Descriptor usage[] =
     {VMAX,  0,"v", "vmax", Arg::Required, "  -v <arg>, \t--vmax=<arg>  \tVelocidad maxima de auto." },
     {DENSITY,  0,"d", "density", Arg::Required, "  -d <arg>, \t--density=<arg>  \tDensidad de autos." },
     {RAND_PROB,  0,"r", "rand_prob", Arg::Required, "  -r <arg>, \t--rand_prob=<arg>  \tProbabilidad de descenso de velocidad." },
-	{INIT_VEL, 0, "i", "init_vel", Arg::Required, "  -i <arg>, \t--init_vel=<arg>  \tVelocidad inicial de los autos." },
+    {INIT_VEL, 0, "i", "init_vel", Arg::Required, "  -i <arg>, \t--init_vel=<arg>  \tVelocidad inicial de los autos." },
 
     {PLOT_TRAFFIC,  0,"p","plot_traffic", Arg::None,
     "  -p , \t--plot_traffic  \tCrea mapa de posicion de autos vs tiempo." },
@@ -824,3 +975,5 @@ int main(int argc, char* argv[])
 
     return 0;
 }
+
+#endif

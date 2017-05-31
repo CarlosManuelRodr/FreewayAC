@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     31725,        799]
-NotebookOptionsPosition[     30566,        757]
-NotebookOutlinePosition[     30895,        772]
-CellTagsIndexPosition[     30852,        769]
+NotebookDataLength[     33078,        822]
+NotebookOptionsPosition[     30673,        760]
+NotebookOutlinePosition[     31008,        775]
+CellTagsIndexPosition[     30965,        772]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -144,7 +144,7 @@ Cell["Modelo Kai-Nagel", "Chapter",
  CellChangeTimes->{{3.659845624767465*^9, 3.659845631863266*^9}}],
 
 Cell[TextData[{
- "Un modelo m\[AAcute]s realista que nos permite simular las peque\[NTilde]as \
+ "Un modelo m\[AAcute]s simple que nos permite simular las peque\[NTilde]as \
 variaciones de velocidad aleatorias que ocurren en el tr\[AAcute]fico, y que \
 adem\[AAcute]s permite un mayor rango de velocidades permitidas de cada auto \
 que pertenece al aut\[OAcute]mata celular es el propuesto por Kai Nagel y \
@@ -162,7 +162,10 @@ velocidad entera que se encuentra entre [0,",
 aut\[OAcute]mata se encuentra siguiendo los siguientes pasos, en paralelo \
 para cada auto:"
 }], "Text",
- CellChangeTimes->{{3.6598456448950644`*^9, 3.6598457288966007`*^9}}],
+ CellChangeTimes->{{3.6598456448950644`*^9, 3.6598457288966007`*^9}, {
+  3.705256278048524*^9, 
+  3.705256279327037*^9}},ExpressionUUID->"bae5ee22-a289-4018-9f4a-\
+1e6dc8bf3907"],
 
 Cell[CellGroupData[{
 
@@ -756,8 +759,8 @@ Cell[BoxData[{
 }, Open  ]]
 },
 WindowSize->{1920, 1016},
-WindowMargins->{{429, Automatic}, {0, 34}},
-FrontEndVersion->"11.0 for Linux x86 (64-bit) (July 28, 2016)",
+WindowMargins->{{0, Automatic}, {0, Automatic}},
+FrontEndVersion->"11.1 for Linux x86 (64-bit) (April 18, 2017)",
 StyleDefinitions->"Default.nb"
 ]
 (* End of Notebook Content *)
@@ -772,33 +775,53 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[580, 22, 171, 2, 93, "Title"],
+Cell[580, 22, 171, 2, 93, "Title", "ExpressionUUID" -> \
+"2f24032a-e837-4ba3-b098-6d2b2a3da490"],
 Cell[CellGroupData[{
-Cell[776, 28, 105, 1, 66, "Chapter"],
-Cell[884, 31, 1102, 18, 111, "Text"]
+Cell[776, 28, 105, 1, 66, "Chapter", "ExpressionUUID" -> \
+"1c6e27c0-1528-4791-9f26-7d25ad426b43"],
+Cell[884, 31, 1102, 18, 111, "Text", "ExpressionUUID" -> \
+"59fde640-908a-4224-800f-89ff9d69a6e1"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[2023, 54, 93, 1, 66, "Chapter"],
-Cell[2119, 57, 732, 14, 51, "Text"],
-Cell[2854, 73, 1308, 39, 72, "Input"],
-Cell[4165, 114, 133, 1, 31, "Text"],
-Cell[4301, 117, 871, 20, 52, "Input"]
+Cell[2023, 54, 93, 1, 66, "Chapter", "ExpressionUUID" -> \
+"fd8e3f25-3e74-4d42-9f83-55bf217e76a7"],
+Cell[2119, 57, 732, 14, 51, "Text", "ExpressionUUID" -> \
+"727febf3-c8b8-4a2f-9a95-01b2a3db6dab"],
+Cell[2854, 73, 1308, 39, 83, "Input", "ExpressionUUID" -> \
+"d1b851d4-ff26-4b68-aa22-2367471dfac9"],
+Cell[4165, 114, 133, 1, 31, "Text", "ExpressionUUID" -> \
+"cf355878-5769-45d7-8894-f633985af043"],
+Cell[4301, 117, 871, 20, 82, "Input", "ExpressionUUID" -> \
+"56562173-6dac-473d-9aa8-e00e47c27339"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[5209, 142, 101, 1, 66, "Chapter"],
-Cell[5313, 145, 1073, 19, 151, "Text"],
+Cell[5209, 142, 101, 1, 66, "Chapter", "ExpressionUUID" -> \
+"400277f4-f89a-4312-a32f-d4b2c0e6f6c0"],
+Cell[5313, 145, 1180, 22, 151, "Text", "ExpressionUUID" -> \
+"bae5ee22-a289-4018-9f4a-1e6dc8bf3907"],
 Cell[CellGroupData[{
-Cell[6411, 168, 482, 13, 30, "ItemNumbered"],
-Cell[6896, 183, 532, 19, 30, "ItemNumbered"],
-Cell[7431, 204, 427, 14, 30, "ItemNumbered"],
-Cell[7861, 220, 263, 7, 30, "ItemNumbered"]
+Cell[6518, 171, 482, 13, 30, "ItemNumbered", "ExpressionUUID" -> \
+"faa159a9-2cb0-436d-8fe1-6270ef826962"],
+Cell[7003, 186, 532, 19, 30, "ItemNumbered", "ExpressionUUID" -> \
+"f63d9a42-046c-4e7c-b1e8-54d278c08497"],
+Cell[7538, 207, 427, 14, 30, "ItemNumbered", "ExpressionUUID" -> \
+"8f38e412-908e-490b-8d6e-8d8c66ea9a43"],
+Cell[7968, 223, 263, 7, 30, "ItemNumbered", "ExpressionUUID" -> \
+"a50e289e-fe0d-406b-a35d-d79c9b0a1702"]
 }, Open  ]],
-Cell[8139, 230, 159, 2, 31, "Text"],
-Cell[8301, 234, 18259, 427, 2383, "Input"],
-Cell[26563, 663, 207, 4, 31, "Text"],
-Cell[26773, 669, 1975, 40, 111, "Input"],
-Cell[28751, 711, 417, 9, 31, "Text"],
-Cell[29171, 722, 1367, 31, 172, "Input"]
+Cell[8246, 233, 159, 2, 31, "Text", "ExpressionUUID" -> \
+"4b43445d-02b0-44ad-be9b-da1f6d81f3dc"],
+Cell[8408, 237, 18259, 427, 2864, "Input", "ExpressionUUID" -> \
+"de9cc7ae-3123-4d8e-a313-312972fc6366"],
+Cell[26670, 666, 207, 4, 31, "Text", "ExpressionUUID" -> \
+"1f9641e0-ff01-4560-8573-d7a0b75bb392"],
+Cell[26880, 672, 1975, 40, 111, "Input", "ExpressionUUID" -> \
+"2253670b-f180-49c4-89f2-8d6f557270d5"],
+Cell[28858, 714, 417, 9, 31, "Text", "ExpressionUUID" -> \
+"4ddc1010-7829-4dd7-b6d0-142593ffeb9e"],
+Cell[29278, 725, 1367, 31, 172, "Input", "ExpressionUUID" -> \
+"0c7f7e63-c8c0-461c-9db1-43d669df4193"]
 }, Open  ]]
 }, Open  ]]
 }

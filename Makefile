@@ -12,46 +12,66 @@ RESINC =
 LIBDIR = 
 LIB =  
 LDFLAGS = -pthread
-
-INC_RELEASE =  $(INC)
-CFLAGS_RELEASE =  $(CFLAGS) -O2 
-RESINC_RELEASE =  $(RESINC)
-RCFLAGS_RELEASE =  $(RCFLAGS)
-LIBDIR_RELEASE =  $(LIBDIR)
-LIB_RELEASE = $(LIB)
-LDFLAGS_RELEASE = $(LDFLAGS)
-OBJDIR_RELEASE = obj
-DEP_RELEASE = 
-OUT_RELEASE = bin/FreewayAC
+OBJDIR = obj
+BINDIR = bin
 
 
-OBJ_RELEASE := 
-OBJ_RELEASE += \
-$(OBJDIR_RELEASE)/Auxiliar.o \
-$(OBJDIR_RELEASE)/BmpWriter.o \
-$(OBJDIR_RELEASE)/CellularAutomata.o \
-$(OBJDIR_RELEASE)/Experiments.o \
-$(OBJDIR_RELEASE)/Export.o \
-$(OBJDIR_RELEASE)/main.o \
+# Shared
 
-
-all: release
-
-clean: clean_release
-
-
-before_release: 
+clean: 
+	@echo "##########################"
+	@echo "#                        #"
+	@echo "#      Cleaning up       #"
+	@echo "#                        #"
+	@echo "##########################"
 	@echo ""
-	@echo "################################"
-	@echo "#                              #"
-	@echo "#     Building FreewayAC       #"
-	@echo "#                              #"
-	@echo "################################"
-	@echo ""
-	@test -d bin/ || mkdir -p bin/
-	@test -d $(OBJDIR_RELEASE) || mkdir -p $(OBJDIR_RELEASE)
+	@rm -rf $(OBJDIR) $(BINDIR)
 
-after_release: 
+
+# Mathematica
+VERSION=10.0
+MLINKDIR = /opt/Mathematica/SystemFiles/Links/MathLink/DeveloperKit/Linux-x86-64
+SYS = Linux-x86-64
+CADDSDIR = ${MLINKDIR}/CompilerAdditions
+DEFINES = MATHEMATICA
+EXTRA_CFLAGS=-m64 -D ${DEFINES} $(CFLAGS_MATH)
+MPREP = ${CADDSDIR}/mprep
+SRCDIR = FreewayAC
+
+INC_MATH =  $(INC) ${CADDSDIR}
+CFLAGS_MATH =  $(CFLAGS) -O2 
+RESINC_MATH =  $(RESINC)
+RCFLAGS_MATH =  $(RCFLAGS)
+LIBDIR_MATH =  $(LIBDIR) ${CADDSDIR}
+LIB_MATH = $(LIB)
+LDFLAGS_MATH = $(LDFLAGS)
+OBJDIR_MATH = $(OBJDIR)/mathematica
+DEP_MATH = 
+OUT_MATH = $(BINDIR)/FreewayAC
+
+
+OBJ_MATH := 
+OBJ_MATH += \
+$(OBJDIR_MATH)/Auxiliar.o \
+$(OBJDIR_MATH)/BmpWriter.o \
+$(OBJDIR_MATH)/CellularAutomata.o \
+$(OBJDIR_MATH)/Experiments.o \
+$(OBJDIR_MATH)/Export.o \
+$(OBJDIR_MATH)/main.o \
+$(OBJDIR_MATH)/maintm.o \
+
+before_mathematica: 
+	@echo ""
+	@echo "########################################"
+	@echo "#                                      #"
+	@echo "# Building PEntropy (for Mathematica)  #"
+	@echo "#                                      #"
+	@echo "########################################"
+	@echo ""
+	@test -d $(BINDIR) || mkdir -p $(BINDIR)
+	@test -d $(OBJDIR_MATH) || mkdir -p $(OBJDIR_MATH)
+
+after_mathematica: 
 	@echo ""
 	@echo "#############################"
 	@echo "#                           #"
@@ -60,41 +80,107 @@ after_release:
 	@echo "#############################"
 	@echo ""
 
-release: before_release out_release after_release
+mathematica : before_mathematica $(BINDIR)/FreewayAC_Mathematica after_mathematica
 
-out_release: $(OBJ_RELEASE) $(DEP_RELEASE)
-	$(LD) $(OBJ_RELEASE) $(LDFLAGS_RELEASE) $(LIBDIR_RELEASE) $(LIB_RELEASE) -o $(OUT_RELEASE)
+$(BINDIR)/FreewayAC_Mathematica : $(OBJ_MATH)
+	${CXX} ${EXTRA_CFLAGS} -I${INC_MATH} $(OBJ_MATH) -L${LIBDIR_MATH} -lML64i4 -lm -lpthread -lrt -lstdc++ -ldl -luuid -o $@
+	
+$(OBJDIR_MATH)/maintm.o : $(OBJDIR_MATH)/maintm.c
+	${CXX} -c ${EXTRA_CFLAGS} -I${INC_MATH} $(OBJDIR_MATH)/maintm.c -o $@
+	
+$(OBJDIR_MATH)/maintm.c : $(SRCDIR)/main.tm
+	${MPREP} $? -o $@
+	
+$(OBJDIR_MATH)/Auxiliar.o: FreewayAC/Auxiliar.cpp
+	$(CXX) $(EXTRA_CFLAGS) -c FreewayAC/Auxiliar.cpp -o $(OBJDIR_MATH)/Auxiliar.o
+
+$(OBJDIR_MATH)/BmpWriter.o: FreewayAC/BmpWriter.cpp
+	$(CXX) $(EXTRA_CFLAGS) -c FreewayAC/BmpWriter.cpp -o $(OBJDIR_MATH)/BmpWriter.o
+
+$(OBJDIR_MATH)/CellularAutomata.o: FreewayAC/CellularAutomata.cpp
+	$(CXX) $(EXTRA_CFLAGS) -c FreewayAC/CellularAutomata.cpp -o $(OBJDIR_MATH)/CellularAutomata.o
+
+$(OBJDIR_MATH)/Experiments.o: FreewayAC/Experiments.cpp
+	$(CXX) $(EXTRA_CFLAGS) -c FreewayAC/Experiments.cpp -o $(OBJDIR_MATH)/Experiments.o
+
+$(OBJDIR_MATH)/Export.o: FreewayAC/Export.cpp
+	$(CXX) $(EXTRA_CFLAGS) -c FreewayAC/Export.cpp -o $(OBJDIR_MATH)/Export.o
+
+$(OBJDIR_MATH)/main.o: FreewayAC/main.cpp
+	$(CXX) $(EXTRA_CFLAGS) -I$(INC_MATH) -c FreewayAC/main.cpp -o $(OBJDIR_MATH)/main.o
 
 
-$(OBJDIR_RELEASE)/Auxiliar.o: FreewayAC/Auxiliar.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c FreewayAC/Auxiliar.cpp -o $(OBJDIR_RELEASE)/Auxiliar.o
 
-$(OBJDIR_RELEASE)/BmpWriter.o: FreewayAC/BmpWriter.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c FreewayAC/BmpWriter.cpp -o $(OBJDIR_RELEASE)/BmpWriter.o
-
-$(OBJDIR_RELEASE)/CellularAutomata.o: FreewayAC/CellularAutomata.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c FreewayAC/CellularAutomata.cpp -o $(OBJDIR_RELEASE)/CellularAutomata.o
-
-$(OBJDIR_RELEASE)/Experiments.o: FreewayAC/Experiments.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c FreewayAC/Experiments.cpp -o $(OBJDIR_RELEASE)/Experiments.o
-
-$(OBJDIR_RELEASE)/Export.o: FreewayAC/Export.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c FreewayAC/Export.cpp -o $(OBJDIR_RELEASE)/Export.o
-
-$(OBJDIR_RELEASE)/main.o: FreewayAC/main.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c FreewayAC/main.cpp -o $(OBJDIR_RELEASE)/main.o
+# CLI
+INC_CLI =  $(INC)
+CFLAGS_CLI =  $(CFLAGS) -O2 
+RESINC_CLI =  $(RESINC)
+RCFLAGS_CLI =  $(RCFLAGS)
+LIBDIR_CLI =  $(LIBDIR)
+LIB_CLI = $(LIB)
+LDFLAGS_CLI = $(LDFLAGS)
+OBJDIR_CLI = $(OBJDIR)/cli
+DEP_CLI = 
+OUT_CLI = $(BINDIR)/FreewayAC
 
 
+OBJ_CLI := 
+OBJ_CLI += \
+$(OBJDIR_CLI)/Auxiliar.o \
+$(OBJDIR_CLI)/BmpWriter.o \
+$(OBJDIR_CLI)/CellularAutomata.o \
+$(OBJDIR_CLI)/Experiments.o \
+$(OBJDIR_CLI)/Export.o \
+$(OBJDIR_CLI)/main.o \
 
 
-clean_release: 
-	@echo "########################################################"
-	@echo "#                                                      #"
-	@echo "#  Cleaning up                                         #"
-	@echo "#                                                      #"
-	@echo "########################################################"
+all: cli
+
+before_cli: 
 	@echo ""
-	@rm -f $(OBJ_RELEASE) $(OUT_RELEASE)
+	@echo "################################"
+	@echo "#                              #"
+	@echo "#     Building FreewayAC       #"
+	@echo "#                              #"
+	@echo "################################"
+	@echo ""
+	@test -d $(BINDIR) || mkdir -p $(BINDIR)
+	@test -d $(OBJDIR_CLI) || mkdir -p $(OBJDIR_CLI)
+
+after_cli: 
+	@echo ""
+	@echo "#############################"
+	@echo "#                           #"
+	@echo "#            Done.          #"
+	@echo "#                           #"
+	@echo "#############################"
+	@echo ""
+
+cli: before_cli out_cli after_cli
+
+out_cli: $(OBJ_CLI) $(DEP_CLI)
+	$(LD) $(OBJ_CLI) $(LDFLAGS_CLI) $(LIBDIR_CLI) $(LIB_CLI) -o $(OUT_CLI)
 
 
-.PHONY: before_release after_release clean_release
+$(OBJDIR_CLI)/Auxiliar.o: FreewayAC/Auxiliar.cpp
+	$(CXX) $(CFLAGS_CLI) $(INC_CLI) -c FreewayAC/Auxiliar.cpp -o $(OBJDIR_CLI)/Auxiliar.o
+
+$(OBJDIR_CLI)/BmpWriter.o: FreewayAC/BmpWriter.cpp
+	$(CXX) $(CFLAGS_CLI) $(INC_CLI) -c FreewayAC/BmpWriter.cpp -o $(OBJDIR_CLI)/BmpWriter.o
+
+$(OBJDIR_CLI)/CellularAutomata.o: FreewayAC/CellularAutomata.cpp
+	$(CXX) $(CFLAGS_CLI) $(INC_CLI) -c FreewayAC/CellularAutomata.cpp -o $(OBJDIR_CLI)/CellularAutomata.o
+
+$(OBJDIR_CLI)/Experiments.o: FreewayAC/Experiments.cpp
+	$(CXX) $(CFLAGS_CLI) $(INC_CLI) -c FreewayAC/Experiments.cpp -o $(OBJDIR_CLI)/Experiments.o
+
+$(OBJDIR_CLI)/Export.o: FreewayAC/Export.cpp
+	$(CXX) $(CFLAGS_CLI) $(INC_CLI) -c FreewayAC/Export.cpp -o $(OBJDIR_CLI)/Export.o
+
+$(OBJDIR_CLI)/main.o: FreewayAC/main.cpp
+	$(CXX) $(CFLAGS_CLI) $(INC_CLI) -c FreewayAC/main.cpp -o $(OBJDIR_CLI)/main.o
+
+
+.DEFAULT_GOAL := all
+
+.PHONY: before_cli after_cli
