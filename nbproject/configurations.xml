@@ -4,10 +4,8 @@
     <df root="." name="0">
       <df name="FreewayAC">
         <in>Auxiliar.cpp</in>
-        <in>BmpWriter.cpp</in>
         <in>CellularAutomata.cpp</in>
         <in>Experiments.cpp</in>
-        <in>Export.cpp</in>
         <in>main.cpp</in>
       </df>
       <df name="FreewayAC_tests">
@@ -68,19 +66,11 @@
         <ccTool flags="0">
         </ccTool>
       </item>
-      <item path="FreewayAC/BmpWriter.cpp" ex="false" tool="1" flavor2="8">
-        <ccTool flags="0">
-        </ccTool>
-      </item>
       <item path="FreewayAC/CellularAutomata.cpp" ex="false" tool="1" flavor2="8">
         <ccTool flags="0">
         </ccTool>
       </item>
       <item path="FreewayAC/Experiments.cpp" ex="false" tool="1" flavor2="8">
-        <ccTool flags="0">
-        </ccTool>
-      </item>
-      <item path="FreewayAC/Export.cpp" ex="false" tool="1" flavor2="8">
         <ccTool flags="0">
         </ccTool>
       </item>
@@ -120,13 +110,6 @@
           </incDir>
         </ccTool>
       </item>
-      <item path="FreewayAC/BmpWriter.cpp" ex="false" tool="1" flavor2="8">
-        <ccTool flags="0">
-          <incDir>
-            <pElem>.</pElem>
-          </incDir>
-        </ccTool>
-      </item>
       <item path="FreewayAC/CellularAutomata.cpp" ex="false" tool="1" flavor2="8">
         <ccTool flags="0">
           <incDir>
@@ -135,13 +118,6 @@
         </ccTool>
       </item>
       <item path="FreewayAC/Experiments.cpp" ex="false" tool="1" flavor2="8">
-        <ccTool flags="0">
-          <incDir>
-            <pElem>.</pElem>
-          </incDir>
-        </ccTool>
-      </item>
-      <item path="FreewayAC/Export.cpp" ex="false" tool="1" flavor2="8">
         <ccTool flags="0">
           <incDir>
             <pElem>.</pElem>

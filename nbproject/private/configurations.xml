@@ -7,17 +7,10 @@
       <df name="FreewayAC">
         <in>Auxiliar.cpp</in>
         <in>Auxiliar.h</in>
-        <in>BmpWriter.cpp</in>
-        <in>BmpWriter.h</in>
         <in>CellularAutomata.cpp</in>
         <in>CellularAutomata.h</in>
         <in>Experiments.cpp</in>
-        <in>Experiments.h</in>
-        <in>Export.cpp</in>
-        <in>Export.h</in>
-        <in>ThreadPool.h</in>
         <in>main.cpp</in>
-        <in>optionparser.h</in>
       </df>
       <df name="FreewayAC_tests">
         <in>Main.cpp</in>
