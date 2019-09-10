@@ -212,10 +212,10 @@ public:
 ****************************/
 
 /**
- * @class AutonomousCA
+ * @class AutonomousCircularCA
  * @brief AC con autos autónomos y condiciones de frontera periódicas.
  */
-class AutonomousCA : public CircularCA
+class AutonomousCircularCA : public CircularCA
 {
 protected:
     std::vector<int> m_aut_cars;  ///< Lista con posiciones de autos autónomos.
@@ -226,17 +226,32 @@ public:
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
     ///@param aut_density Densidad de autos autónomos respecto a número total de autos.
-    AutonomousCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob,
+    AutonomousCircularCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob,
                  const CaVelocity init_vel, const double aut_density);
 
+    void Move() noexcept;    ///< Mueve los autos con condiciones de frontera periódicas.
+    virtual void Step() noexcept;    ///< Aplica reglas de evolución temporal del AC para autos normales e inteligentes.
+};
+
+
+/**
+ * @class AutonomousOpenCA
+ * @brief AC con autos autónomos y condiciones de frontera periódicas.
+ */
+class AutonomousOpenCA : public OpenCA
+{
+protected:
+    std::vector<int> m_aut_cars;  ///< Lista con posiciones de autos autónomos.
+public:
     ///@brief Constructor.
-    ///@param ca Lista con valores de AC.
-    ///@param aut_cars Lista con posiciones de autos autónomos.
-    ///@param rand_values Valores aleatorios en cada paso.
+    ///@param size Tamaño del AC.
     ///@param density Densidad de autos.
     ///@param vmax Velocidad máxima de los autos.
-    AutonomousCA(const std::vector<int> &ca, std::vector<int> &aut_cars, const std::vector<bool> &rand_values,
-                 const CaVelocity vmax);
+    ///@param rand_prob Probabilidad de descenso de velocidad.
+    ///@param aut_density Densidad de autos autónomos respecto a número total de autos.
+    AutonomousOpenCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob,
+                 const CaVelocity init_vel, const double aut_density, const double new_car_prob, const CaVelocity new_car_speed);
+
 
     void Move() noexcept;    ///< Mueve los autos con condiciones de frontera periódicas.
     virtual void Step() noexcept;    ///< Aplica reglas de evolución temporal del AC para autos normales e inteligentes.

@@ -346,7 +346,8 @@ void OpenCA::Step() noexcept
 *                           *
 ****************************/
 
-AutonomousCA::AutonomousCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob,
+// Frontera circular
+AutonomousCircularCA::AutonomousCircularCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob,
                            const CaVelocity init_vel, const double aut_density)
     : CircularCA(size, density, vmax, rand_prob, init_vel)
 {
@@ -363,13 +364,7 @@ AutonomousCA::AutonomousCA(const CaSize size, const double density, const CaVelo
     for (unsigned i = 0; i < aut_car_positions.size() && i < aut_car_number; ++i)
         m_aut_cars.push_back(aut_car_positions[i]);
 }
-AutonomousCA::AutonomousCA(const vector<int> &ca, vector<int> &aut_cars, const vector<bool> &rand_values,
-                           const CaVelocity vmax)
-                 : CircularCA(ca, rand_values, vmax)
-{
-    m_aut_cars = aut_cars;
-}
-void AutonomousCA::Move() noexcept
+void AutonomousCircularCA::Move() noexcept
 {
     for (unsigned i = 0; i < m_ca.size(); ++i)
     {
@@ -389,7 +384,130 @@ void AutonomousCA::Move() noexcept
     }
     AssignChanges();
 }
-void AutonomousCA::Step() noexcept
+void AutonomousCircularCA::Step() noexcept
+{
+    // Iterar sobre AC hasta encotrar vehiculo.
+    for (unsigned i = 0; i < m_ca.size(); ++i)
+    {
+        if (m_ca[i] != CA_EMPTY)
+        {
+            bool smart = aux_is_in<int>(m_aut_cars, i);
+            if (smart)
+            {
+                // Auto inteligente.
+                int nc = i + NextCarDist(i);
+                nc %= m_size;
+                if ((m_ca[nc] < m_vmax) && (NextCarDist(nc) > (CaSize)(m_ca[nc] + 1)) && (NextCarDist(i) <= (CaSize)m_ca[i]))
+                {
+                    if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (CaSize)(m_ca[i] + 1)))
+                        m_ca[i]++;
+                    else
+                    {
+                        // Frenado.
+                        if (m_ca[i] > 0)
+                        {
+                            int nd = NextCarDist(i);
+                            if (m_ca[nc] >= m_ca[i])
+                            {
+                                if (nd <= m_ca[i]-1)
+                                    m_ca[i] = nd - 1;
+                            }
+                            else
+                            {
+                                if (nd <= m_ca[i])
+                                    m_ca[i] = nd - 1;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // Aceleracion.
+                    if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (CaSize)(m_ca[i] + 1)))
+                        m_ca[i]++;
+                    else
+                    {
+                        // Frenado.
+                        if (m_ca[i] > 0)
+                        {
+                            int nd = NextCarDist(i);
+                            if (nd <= m_ca[i])
+                                m_ca[i] = nd - 1;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Aceleracion.
+                if ((m_ca[i] < m_vmax) && (NextCarDist(i) > (CaSize)(m_ca[i] + 1)))
+                    m_ca[i]++;
+                else
+                {
+                    // Frenado.
+                    if (m_ca[i] > 0)
+                    {
+                        int nd = NextCarDist(i);
+                        if (nd <= m_ca[i])
+                            m_ca[i] = nd - 1;
+                    }
+                }
+            }
+
+            // Aleatoriedad.
+            if (!smart)
+            {
+                bool rnd = Randomization();
+                if ((m_ca[i] > 0) && rnd)
+                    m_ca[i]--;
+            }
+        }
+    }
+
+    // Aplicar cambios.
+    Move();
+    m_ca_history.push_back(m_ca);
+}
+
+// Frontera abierta
+AutonomousOpenCA::AutonomousOpenCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob,
+                           const CaVelocity init_vel, const double aut_density, const double new_car_prob, const CaVelocity new_car_speed)
+    : OpenCA(size, density, vmax, rand_prob, init_vel, new_car_prob, new_car_speed)
+{
+    // Selecciona autos inteligentes.
+    unsigned aut_car_number = (unsigned)(((double)size*density)*aut_density);
+    vector<int> aut_car_positions;
+    for (unsigned i = 0; i < m_size; ++i)
+    {
+        if (m_ca[i] != CA_EMPTY)
+            aut_car_positions.push_back(i);
+    }
+
+    random_shuffle(aut_car_positions.begin(), aut_car_positions.end(), RandomGen::GetInt);
+    for (unsigned i = 0; i < aut_car_positions.size() && i < aut_car_number; ++i)
+        m_aut_cars.push_back(aut_car_positions[i]);
+}
+void AutonomousOpenCA::Move() noexcept
+{
+    for (unsigned i = 0; i < m_ca.size(); ++i)
+    {
+        if (m_ca[i] != CA_EMPTY)
+        {
+            int pos = aux_find_pos<int>(m_aut_cars, i);
+            if (pos != -1)
+                m_aut_cars[pos] = (i + m_ca[i]) % m_size;
+
+            // Cambia las posiciones de los autos en AC.
+            AtTemp(i + m_ca[i]) = m_ca[i];
+
+            // Marca las casillas donde hay flujo de autos.
+            for (unsigned j = i; j < i + m_ca[i]; ++j)
+                AtFlowTemp(j) = IS_FLOW;
+        }
+    }
+    AssignChanges();
+}
+void AutonomousOpenCA::Step() noexcept
 {
     // Iterar sobre AC hasta encotrar vehiculo.
     for (unsigned i = 0; i < m_ca.size(); ++i)

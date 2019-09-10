@@ -9,7 +9,7 @@ using namespace std;
 CellularAutomata* ca = nullptr;
 CircularCA* circularca = nullptr;
 OpenCA* openca = nullptr;
-AutonomousCA* smartca = nullptr;
+AutonomousCircularCA* smartca = nullptr;
 
 void create_circular_ca(int size, int vmax, double density, double rand_prob, int init_vel)
 {
@@ -23,7 +23,7 @@ void create_open_ca(int size, int vmax, double density, double rand_prob, int in
 }
 void create_autonomous_ca(int size, int vmax, double density, double rand_prob, int init_vel, double aut_density)
 {
-    ca = smartca = new AutonomousCA(size, density, vmax, rand_prob, init_vel, aut_density);
+    ca = smartca = new AutonomousCircularCA(size, density, vmax, rand_prob, init_vel, aut_density);
     MLPutSymbol(stdlink, "Null");
 }
 

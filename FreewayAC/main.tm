@@ -16,7 +16,7 @@
 
 :Begin:
 :Function:       create_autonomous_ca
-:Pattern:        CreateCircularCA[size_Integer, vmax_Integer, density_Real, randp_Real, initVel_Integer, autDensity_Real]
+:Pattern:        CreateAutonomousCA[size_Integer, vmax_Integer, density_Real, randp_Real, initVel_Integer, autDensity_Real]
 :Arguments:      { size, vmax, density, randp, initVel, autDensity }
 :ArgumentTypes:  { Integer, Integer, Real, Real, Integer, Real }
 :ReturnType:     Manual
