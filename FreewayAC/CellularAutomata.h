@@ -13,7 +13,13 @@
 #include <cstdlib>
 #include <fstream>
 #include <algorithm>
+
 #include "Auxiliar.h"
+
+enum CA_TYPE
+{
+    CIRCULAR_CA, OPEN_CA, AUTONOMOUS_CIRCULAR_CA
+};
 
 
 /****************************
@@ -82,6 +88,16 @@ public:
     CellularAutomata(const std::vector<int> &ca, const std::vector<bool> &rand_values, const CaVelocity vmax);
 
     virtual ~CellularAutomata();
+
+    ///@brief Dibuja mapa histórico del AC en formato BMP.
+	///@param path Ruta del archivo.
+	///@param out_file_name Nombre del archivo de salida.
+	virtual void DrawHistory(std::string path = "", std::string out_file_name = "") const;
+
+	///@brief Dibuja mapa histórico del flujo de AC en formato BMP.
+	///@param path Ruta del archivo.
+	///@param out_file_name Nombre del archivo de salida.
+	virtual void DrawFlowHistory(std::string path = "", std::string out_file_name = "") const;
 
     ///@brief Evoluciona (itera) el AC.
     ///@param iter Número de iteraciones.

@@ -1,17 +1,11 @@
+#include "CellularAutomata.h"
+#include "BmpWriter.h"
+
 #include <limits>
 #include <algorithm>
 #include <cctype>
 #include <vector>
-#include "CellularAutomata.h"
 using namespace std;
-
-
-////////////////////////////////////
-//                                //
-//        Autómatas celulares     //
-//        de carril único.        //
-//                                //
-////////////////////////////////////
 
 
 /****************************
@@ -64,6 +58,66 @@ CellularAutomata::CellularAutomata(const vector<int> &ca, const vector<bool> &ra
     m_init_vel = 1;
 }
 CellularAutomata::~CellularAutomata() {}
+void CellularAutomata::DrawHistory(string path, string out_file_name) const
+{
+    if (out_file_name == "")
+        out_file_name = path + "ca.bmp";
+    else
+        out_file_name = path + out_file_name;
+
+    unsigned height = m_ca_history.size();
+    unsigned width = m_size;
+    BMPWriter writer(out_file_name.c_str(), width, height);
+    if (writer.IsOpen())
+    {
+        BMPPixel* bmpData = new BMPPixel[width];
+        for (int i = height-1; i >= 0; --i)     // Los archivos BMP se escriben de abajo a arriba.
+        {
+            for (unsigned j = 0; j < width; ++j)
+            {
+                BMPPixel color;
+                if (m_ca_history[i][j] == CA_EMPTY)
+                    color = BMPPixel((char)255, (char)255, (char)255);
+                else
+                    color = BMPPixel(0, 0, (char)(255.0*(double)m_ca_history[i][j]/(double)m_vmax));
+                bmpData[j] = color;
+            }
+            writer.WriteLine(bmpData);
+        }
+        writer.CloseBMP();
+        delete[] bmpData;
+    }
+}
+void CellularAutomata::DrawFlowHistory(string path, string out_file_name) const
+{
+    if (out_file_name == "")
+        out_file_name = path + "ca_flow.bmp";
+    else
+        out_file_name = path + out_file_name;
+
+    unsigned height = m_ca_flow_history.size();
+    unsigned width = m_size;
+    BMPWriter writer(out_file_name.c_str(), width, height);
+    if (writer.IsOpen())
+    {
+        BMPPixel* bmpData = new BMPPixel[width];
+        for (int i = height-1; i >= 0; --i)
+        {
+            for (unsigned j=0; j<width; ++j)
+            {
+                BMPPixel color;
+                if (m_ca_flow_history[i][j] == 0)
+                    color = BMPPixel((char)255, (char)255, (char)255);
+                else
+                    color = BMPPixel(0, 0, (char)(255.0*(double)m_ca_flow_history[i][j]/(double)m_vmax));
+                bmpData[j] = color;
+            }
+            writer.WriteLine(bmpData);
+        }
+        writer.CloseBMP();
+        delete[] bmpData;
+    }
+}
 inline void CellularAutomata::Step() noexcept
 {
     // Iterar sobre AC hasta encotrar vehiculo.

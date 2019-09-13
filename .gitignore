@@ -84,3 +84,6 @@ build/
 /scripts/SimpleJunction/
 /scripts/Stop/
 /scripts/MultilaneCircular/
+/cmake-build-debug/
+/cmake-build-release/
+/.idea/

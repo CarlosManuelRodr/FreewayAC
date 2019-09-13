@@ -1,8 +1,9 @@
+#include "Auxiliar.h"
+
 #include <chrono>
 #include <random>
 #include <iostream>
 #include <algorithm>
-#include "Auxiliar.h"
 using namespace std;
 
 

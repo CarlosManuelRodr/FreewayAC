@@ -82,6 +82,17 @@ template <class N> double aux_mean(std::vector<N> v)
     return (double)std::accumulate(v.begin(), v.end(), 0.0)/(double)v.size();
 }
 
+/**
+* @brief Convierte cadena de texto a número.
+*/
+template <class N> N aux_string_to_num(const std::string &s)
+{
+    std::istringstream i(s);
+    N x;
+    if (!(i >> x))
+        return 0;
+    return static_cast<N>(x);
+}
 
 /****************************
 *                           *
