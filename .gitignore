@@ -87,3 +87,4 @@ build/
 /cmake-build-debug/
 /cmake-build-release/
 /.idea/
+/MathematicaLink/obj/maintm.c
