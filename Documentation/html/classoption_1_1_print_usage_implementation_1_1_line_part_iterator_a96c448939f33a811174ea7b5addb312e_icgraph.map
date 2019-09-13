@@ -1,0 +1,7 @@
+<map id="option::PrintUsageImplementation::LinePartIterator::restartRow" name="option::PrintUsageImplementation::LinePartIterator::restartRow">
+<area shape="rect" id="node1" title="Reset iteration to the beginning of the current row." alt="" coords="888,35,1135,76"/>
+<area shape="rect" id="node2" href="$classoption_1_1_print_usage_implementation_1_1_line_part_iterator.html#a55d5c3e50f9c1d8cd48f518899a5a48c" title="Moves iteration to the next row (if any). Has to be called once after each call to nextTable() to mov..." alt="" coords="593,5,840,47"/>
+<area shape="rect" id="node3" href="$structoption_1_1_print_usage_implementation.html#ab38c4198c5cccea2ccd992c8e014df70" title=" " alt="" coords="299,35,545,76"/>
+<area shape="rect" id="node4" href="$namespaceoption.html#afc8bb7e040a98a0b33ff1ce9da1be0d1" title="Outputs a nicely formatted usage string with support for multi&#45;column formatting and line&#45;wrapping." alt="" coords="108,42,251,69"/>
+<area shape="rect" id="node5" href="$_c_l_i_2main_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97" title=" " alt="" coords="5,42,60,69"/>
+</map>

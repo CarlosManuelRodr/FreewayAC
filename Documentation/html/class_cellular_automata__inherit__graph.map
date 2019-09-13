@@ -1,0 +1,7 @@
+<map id="CellularAutomata" name="CellularAutomata">
+<area shape="rect" id="node1" title="Clase base para autómata celular. Esta clase implementa los métodos básicos que todos los autómatas c..." alt="" coords="117,5,253,32"/>
+<area shape="rect" id="node2" href="$class_circular_c_a.html" title="AC con condiciones de frontera periódicas." alt="" coords="66,80,157,107"/>
+<area shape="rect" id="node4" href="$class_open_c_a.html" title="AC con condiciones de frontera abiertas." alt="" coords="221,80,295,107"/>
+<area shape="rect" id="node3" href="$class_autonomous_circular_c_a.html" title="AC con autos autónomos y condiciones de frontera periódicas." alt="" coords="5,155,177,181"/>
+<area shape="rect" id="node5" href="$class_autonomous_open_c_a.html" title="AC con autos autónomos y condiciones de frontera abiertas." alt="" coords="201,155,357,181"/>
+</map>

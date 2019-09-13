@@ -1,0 +1,4 @@
+<map id="option::PrintUsageImplementation::LinePartIterator::next" name="option::PrintUsageImplementation::LinePartIterator::next">
+<area shape="rect" id="node1" title="Moves iteration to the next part (if any). Has to be called once after each call to nextRow() to move..." alt="" coords="5,5,252,47"/>
+<area shape="rect" id="node2" href="$structoption_1_1_print_usage_implementation.html#a0680dd84366df82398e30e4ccbd27ac0" title=" " alt="" coords="300,5,547,47"/>
+</map>

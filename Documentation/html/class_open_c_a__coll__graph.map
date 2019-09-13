@@ -1,0 +1,4 @@
+<map id="OpenCA" name="OpenCA">
+<area shape="rect" id="node1" title="AC con condiciones de frontera abiertas." alt="" coords="36,80,111,107"/>
+<area shape="rect" id="node2" href="$class_cellular_automata.html" title="Clase base para autómata celular. Esta clase implementa los métodos básicos que todos los autómatas c..." alt="" coords="5,5,141,32"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="option::Option::isLast" name="option::Option::isLast">
+<area shape="rect" id="node1" title="Returns true iff this is the last element of the linked list." alt="" coords="315,31,475,57"/>
+<area shape="rect" id="node2" href="$classoption_1_1_option.html#a8a632dcd89af60fe0806deb756c08f14" title="Returns the number of times this Option (or others with the same Descriptor::index) occurs in the arg..." alt="" coords="108,5,267,32"/>
+<area shape="rect" id="node3" href="$classoption_1_1_option.html#a59ae9aed505f4d410633bb36478a32be" title="Returns a pointer to the next element of the linked list or NULL if called on last()." alt="" coords="112,56,263,83"/>
+<area shape="rect" id="node4" href="$_c_l_i_2main_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97" title=" " alt="" coords="5,56,60,83"/>
+</map>

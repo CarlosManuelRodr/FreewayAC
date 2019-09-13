@@ -1,0 +1,5 @@
+<map id="CircularCA" name="CircularCA">
+<area shape="rect" id="node1" title="AC con condiciones de frontera periódicas." alt="" coords="46,80,137,107"/>
+<area shape="rect" id="node3" href="$class_autonomous_circular_c_a.html" title="AC con autos autónomos y condiciones de frontera periódicas." alt="" coords="5,155,177,181"/>
+<area shape="rect" id="node2" href="$class_cellular_automata.html" title="Clase base para autómata celular. Esta clase implementa los métodos básicos que todos los autómatas c..." alt="" coords="23,5,159,32"/>
+</map>

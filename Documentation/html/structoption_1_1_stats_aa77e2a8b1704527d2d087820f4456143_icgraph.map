@@ -1,0 +1,5 @@
+<map id="option::Stats::add" name="option::Stats::add">
+<area shape="rect" id="node1" title="Updates this Stats object for the given usage and argument vector. You may pass 0 for argc and/or arg..." alt="" coords="199,31,335,57"/>
+<area shape="rect" id="node2" href="$structoption_1_1_stats.html#a2aa7bc64a85dcd9c59576f6a11c2b747" title="add() with non&#45;const argv." alt="" coords="10,5,146,32"/>
+<area shape="rect" id="node3" href="$structoption_1_1_stats.html#a71373ec2b28842f45593e4405f7bc8ec" title="Creates a new Stats object and immediately updates it for the given usage and argument vector...." alt="" coords="5,56,151,83"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$class_cellular_automata.html" title="Clase base para autómata celular. Esta clase implementa los métodos básicos que todos los autómatas c..." alt="" coords="5,31,141,57"/>
+<area shape="rect" id="node2" href="$class_circular_c_a.html" title="AC con condiciones de frontera periódicas." alt="" coords="189,5,280,32"/>
+<area shape="rect" id="node4" href="$class_open_c_a.html" title="AC con condiciones de frontera abiertas." alt="" coords="197,56,272,83"/>
+<area shape="rect" id="node3" href="$class_autonomous_circular_c_a.html" title="AC con autos autónomos y condiciones de frontera periódicas." alt="" coords="328,5,500,32"/>
+<area shape="rect" id="node5" href="$class_autonomous_open_c_a.html" title="AC con autos autónomos y condiciones de frontera abiertas." alt="" coords="336,56,492,83"/>
+</map>
