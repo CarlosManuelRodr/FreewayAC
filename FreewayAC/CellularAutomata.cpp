@@ -1,9 +1,7 @@
 #include "CellularAutomata.h"
 #include "BmpWriter.h"
 
-#include <limits>
 #include <algorithm>
-#include <cctype>
 #include <vector>
 using namespace std;
 
@@ -563,7 +561,7 @@ void AutonomousOpenCA::Move() noexcept
 }
 void AutonomousOpenCA::Step() noexcept
 {
-    // Iterar sobre AC hasta encotrar vehiculo.
+    // Iterar sobre AC hasta encontrar vehiculo.
     for (unsigned i = 0; i < m_ca.size(); ++i)
     {
         if (m_ca[i] != CA_EMPTY)
@@ -640,6 +638,10 @@ void AutonomousOpenCA::Step() noexcept
             }
         }
     }
+
+    // Añade coche con probabilidad aleatoria.
+    if (m_ca[0] == CA_EMPTY && Randomization(m_new_car_prob))
+        m_ca[0] = m_new_car_speed;
 
     // Aplicar cambios.
     Move();

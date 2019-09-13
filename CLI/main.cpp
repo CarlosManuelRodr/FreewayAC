@@ -39,7 +39,7 @@ struct Arg: public option::Arg
 
 enum  OptionIndex { UNKNOWN, FWSIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL,
                     PLOT_TRAFFIC, PLOT_FLOW,
-                    CA_CIRCULAR, CA_OPEN, CA_AUTONOMOUS_CIRCULAR,
+                    CA_CIRCULAR, CA_OPEN, CA_AUTONOMOUS_CIRCULAR, CA_AUTONOMOUS_OPEN,
 					NEW_CAR_PROB, NEW_CAR_SPEED, AUT_DENSITY,
 					OUT_FILE_NAME, PATH, HELP };
 
@@ -60,7 +60,8 @@ const option::Descriptor usage[] =
 
     {CA_CIRCULAR,  0,"","ca_circular", Arg::None, "  \t--ca_circular  \tAutomata celular circular." },
     {CA_OPEN,  0,"","ca_open", Arg::None, "  \t--ca_open  \tAutomata celular con frontera abierta." },
-    {CA_AUTONOMOUS_CIRCULAR,  0,"","ca_autonomous_circular", Arg::None, "  \t--ca_autonomous_circular  \tAutomata celular con vehiculos autonomos." },
+    {CA_AUTONOMOUS_CIRCULAR,  0,"","ca_autonomous_circular", Arg::None, "  \t--ca_autonomous_circular  \tAutomata celular circular con vehiculos autonomos." },
+    {CA_AUTONOMOUS_OPEN,  0,"","ca_autonomous_open", Arg::None, "  \t--ca_autonomous_open  \tAutomata celular abierto con vehiculos autonomos." },
 
 	{NEW_CAR_PROB,  0,"","new_car_prob", Arg::Required, "  \t--new_car_prob  \tProbabilidad de que se aparezca nuevo auto en frontera abierta." },
 	{NEW_CAR_SPEED, 0, "", "new_car_speed", Arg::Required, "  \t--new_car_speed  \tVelocidad que entre a AC abierto." },
@@ -84,6 +85,8 @@ void describe_experiments()
         "                          Parametros relevantes: NEW_CAR_PROB, NEW_CAR_SPEED.\n"
         "CA_AUTONOMOUS_CIRCULAR -> Descripcion: Automata celular circular con vehiculos autonomos.\n"
         "                          Parametros relevantes: AUT_DENSITY.\n"
+        "CA_AUTONOMOUS_OPEN     -> Descripcion: Automata celular abierto con vehiculos autonomos.\n"
+        "                          Parametros relevantes: NEW_CAR_PROB, NEW_CAR_SPEED, AUT_DENSITY.\n"
         "\n=== Experimentos ===\n"
         "PLOT_TRAFFIC           -> Descripcion: Evoluciona automata celular y grafica su representacion.\n"
         "PLOT_FLOW              -> Descripcion: Evoluciona automata celular y grafica su flujo.\n";
@@ -170,6 +173,10 @@ int main(int argc, char* argv[])
             ca_type = AUTONOMOUS_CIRCULAR_CA;
             break;
 
+            case CA_AUTONOMOUS_OPEN:
+            ca_type = AUTONOMOUS_OPEN_CA;
+            break;
+
             case NEW_CAR_PROB:
             new_car_prob = aux_string_to_num<double>(opt.arg);
             break;
@@ -198,7 +205,7 @@ int main(int argc, char* argv[])
 
     // Inicio de simulación
     RandomGen::SetAlgorithm(MT19937);
-    //RandomGen::Seed();
+    RandomGen::Seed();
     CellularAutomata *cellularAutomata;
 
     switch (ca_type)
@@ -212,8 +219,12 @@ int main(int argc, char* argv[])
             cellularAutomata = new OpenCA(size, density, vmax, rand_prob, init_vel, new_car_prob, new_car_speed);
             break;
         case AUTONOMOUS_CIRCULAR_CA:
-            cout << "Creating autonomous CA" << endl;
+            cout << "Creating autonomous circular CA" << endl;
             cellularAutomata = new AutonomousCircularCA(size, density, vmax, rand_prob, init_vel, aut_density);
+            break;
+        case AUTONOMOUS_OPEN_CA:
+            cout << "Creating autonomous open CA" << endl;
+            cellularAutomata = new AutonomousOpenCA(size, density, vmax, rand_prob, init_vel, aut_density, new_car_prob, new_car_speed);
             break;
     }
 
