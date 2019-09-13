@@ -1,6 +1,5 @@
 #include <sstream>
 #include <string>
-#include <chrono>
 
 #include "optionparser.h"
 #include "../FreewayAC/Auxiliar.h"
@@ -75,21 +74,19 @@ const option::Descriptor usage[] =
 
 void describe_experiments()
 {
-    const char *text = "A continuacion se enumera la lista de experimentos y AC disponibles y sus parametros.\n"
+    const char *text = "A continuacion se enumera la lista de AC disponibles y sus parametros.\n"
         "Todas las opciones se representan en mayusculas.\n\n"
         "=== Tipos de automatas celulares ===\n"
         "CA_CIRCULAR            -> Descripcion: Automata celular con fronteras periodicas. Pista circular.\n"
         "                          Parametros relevantes: Ninguno.\n"
         "CA_OPEN                -> Descripcion: Automata celular con fronteras abiertas. Entran autos en\n"
         "                                       la primera pos del AC.\n"
-        "                          Parametros relevantes: NEW_CAR_PROB, NEW_CAR_SPEED, LANES.\n"
+        "                          Parametros relevantes: NEW_CAR_PROB, NEW_CAR_SPEED.\n"
         "CA_AUTONOMOUS_CIRCULAR -> Descripcion: Automata celular circular con vehiculos autonomos.\n"
         "                          Parametros relevantes: AUT_DENSITY.\n"
         "\n=== Experimentos ===\n"
         "PLOT_TRAFFIC           -> Descripcion: Evoluciona automata celular y grafica su representacion.\n"
-        "                          Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL.\n"
-        "PLOT_FLOW              -> Descripcion: Evoluciona automata celular y grafica su flujo.\n"
-        "                          Parametros relevantes: SIZE, ITERATIONS, VMAX, DENSITY, RAND_PROB, INIT_VEL.\n";
+        "PLOT_FLOW              -> Descripcion: Evoluciona automata celular y grafica su flujo.\n";
     cout << text << endl;
 }
 
@@ -181,6 +178,10 @@ int main(int argc, char* argv[])
             new_car_speed = aux_string_to_num<int>(opt.arg);
             break;
 
+            case AUT_DENSITY:
+            aut_density = aux_string_to_num<double>(opt.arg);
+            break;
+
             case OUT_FILE_NAME:
             out_file_name = opt.arg;
             break;
@@ -195,7 +196,9 @@ int main(int argc, char* argv[])
     delete[] buffer;
 
 
+    // Inicio de simulación
     RandomGen::SetAlgorithm(MT19937);
+    //RandomGen::Seed();
     CellularAutomata *cellularAutomata;
 
     switch (ca_type)
