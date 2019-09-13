@@ -208,6 +208,7 @@ int main(int argc, char* argv[])
     RandomGen::Seed();
     CellularAutomata *cellularAutomata;
 
+    // Carga el autómata celular
     switch (ca_type)
     {
         case CIRCULAR_CA:
@@ -228,8 +229,10 @@ int main(int argc, char* argv[])
             break;
     }
 
+    // Itera
     cellularAutomata->Evolve(iterations);
 
+    // Genera resultados
     if (!plot_traffic && !plot_flow)
         plot_traffic = true;
 

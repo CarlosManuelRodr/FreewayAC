@@ -12,28 +12,7 @@ OpenCA* openca = nullptr;
 AutonomousCircularCA* smartcircularca = nullptr;    
 AutonomousOpenCA* smartopenca = nullptr;
 
-void create_circular_ca(int size, int vmax, double density, double rand_prob, int init_vel)
-{
-    ca = circularca = new CircularCA(size, density, vmax, rand_prob, init_vel);
-    MLPutSymbol(stdlink, "Null");
-}
-void create_open_ca(int size, int vmax, double density, double rand_prob, int init_vel, double new_car_prob, int new_car_speed)
-{
-    ca = openca = new OpenCA(size, density, vmax, rand_prob, init_vel, new_car_prob, new_car_speed);
-    MLPutSymbol(stdlink, "Null");
-}
-void create_autonomous_circular_ca(int size, int vmax, double density, double rand_prob, int init_vel, double aut_density)
-{
-    ca = smartcircularca = new AutonomousCircularCA(size, density, vmax, rand_prob, init_vel, aut_density);
-    MLPutSymbol(stdlink, "Null");
-}
-void create_autonomous_open_ca(int size, int vmax, double density, double rand_prob, int init_vel, double aut_density, double new_car_prob, int new_car_speed)
-{
-    ca = smartopenca = new AutonomousOpenCA(size, density, vmax, rand_prob, init_vel, aut_density, new_car_prob, new_car_speed);
-    MLPutSymbol(stdlink, "Null");
-}
-
-void delete_ca()
+void clear()
 {
     if (circularca)
         delete circularca;
@@ -49,6 +28,36 @@ void delete_ca()
     smartcircularca = nullptr;
     smartopenca = nullptr;
     ca = nullptr;
+}
+
+void create_circular_ca(int size, int vmax, double density, double rand_prob, int init_vel)
+{
+    clear();
+    ca = circularca = new CircularCA(size, density, vmax, rand_prob, init_vel);
+    MLPutSymbol(stdlink, "Null");
+}
+void create_open_ca(int size, int vmax, double density, double rand_prob, int init_vel, double new_car_prob, int new_car_speed)
+{
+    clear();
+    ca = openca = new OpenCA(size, density, vmax, rand_prob, init_vel, new_car_prob, new_car_speed);
+    MLPutSymbol(stdlink, "Null");
+}
+void create_autonomous_circular_ca(int size, int vmax, double density, double rand_prob, int init_vel, double aut_density)
+{
+    clear();
+    ca = smartcircularca = new AutonomousCircularCA(size, density, vmax, rand_prob, init_vel, aut_density);
+    MLPutSymbol(stdlink, "Null");
+}
+void create_autonomous_open_ca(int size, int vmax, double density, double rand_prob, int init_vel, double aut_density, double new_car_prob, int new_car_speed)
+{
+    clear();
+    ca = smartopenca = new AutonomousOpenCA(size, density, vmax, rand_prob, init_vel, aut_density, new_car_prob, new_car_speed);
+    MLPutSymbol(stdlink, "Null");
+}
+
+void delete_ca()
+{
+    clear();
     MLPutSymbol(stdlink, "Null");
 }
 void ca_step()

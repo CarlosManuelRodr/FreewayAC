@@ -252,7 +252,7 @@ public:
 
 /**
  * @class AutonomousOpenCA
- * @brief AC con autos autónomos y condiciones de frontera periódicas.
+ * @brief AC con autos autónomos y condiciones de frontera abiertas.
  */
 class AutonomousOpenCA : public OpenCA
 {
@@ -265,6 +265,8 @@ public:
     ///@param vmax Velocidad máxima de los autos.
     ///@param rand_prob Probabilidad de descenso de velocidad.
     ///@param aut_density Densidad de autos autónomos respecto a número total de autos.
+    ///@param new_car_prob Probabilidad de que aparezca un nuevo auto en la posición 0 del AC en la siguiente iteración.
+    ///@param new_car_speed Velocidad de nuevo auto cuando ingresa a la pista.
     AutonomousOpenCA(const CaSize size, const double density, const CaVelocity vmax, const double rand_prob,
                  const CaVelocity init_vel, const double aut_density, const double new_car_prob, const CaVelocity new_car_speed);
 
