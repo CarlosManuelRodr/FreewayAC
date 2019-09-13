@@ -1,7 +1,7 @@
 #include <sstream>
 #include <string>
 #include <chrono>
-#include "CellularAutomata.h"
+#include "../FreewayAC/CellularAutomata.h"
 #include "mathlink.h"
 using namespace std;
 
@@ -9,7 +9,8 @@ using namespace std;
 CellularAutomata* ca = nullptr;
 CircularCA* circularca = nullptr;
 OpenCA* openca = nullptr;
-AutonomousCircularCA* smartca = nullptr;
+AutonomousCircularCA* smartcircularca = nullptr;    
+AutonomousOpenCA* smartopenca = nullptr;
 
 void create_circular_ca(int size, int vmax, double density, double rand_prob, int init_vel)
 {
@@ -21,9 +22,14 @@ void create_open_ca(int size, int vmax, double density, double rand_prob, int in
     ca = openca = new OpenCA(size, density, vmax, rand_prob, init_vel, new_car_prob, new_car_speed);
     MLPutSymbol(stdlink, "Null");
 }
-void create_autonomous_ca(int size, int vmax, double density, double rand_prob, int init_vel, double aut_density)
+void create_autonomous_circular_ca(int size, int vmax, double density, double rand_prob, int init_vel, double aut_density)
 {
-    ca = smartca = new AutonomousCircularCA(size, density, vmax, rand_prob, init_vel, aut_density);
+    ca = smartcircularca = new AutonomousCircularCA(size, density, vmax, rand_prob, init_vel, aut_density);
+    MLPutSymbol(stdlink, "Null");
+}
+void create_autonomous_open_ca(int size, int vmax, double density, double rand_prob, int init_vel, double aut_density, double new_car_prob, int new_car_speed)
+{
+    ca = smartopenca = new AutonomousOpenCA(size, density, vmax, rand_prob, init_vel, aut_density, new_car_prob, new_car_speed);
     MLPutSymbol(stdlink, "Null");
 }
 
@@ -33,12 +39,15 @@ void delete_ca()
         delete circularca;
     if (openca)
         delete openca;
-    if (smartca)
-        delete smartca;
+    if (smartcircularca)
+        delete smartcircularca;
+    if (smartopenca)
+        delete smartopenca;
     
     circularca = nullptr;
     openca = nullptr;
-    smartca = nullptr;
+    smartcircularca = nullptr;
+    smartopenca = nullptr;
     ca = nullptr;
     MLPutSymbol(stdlink, "Null");
 }

@@ -8,17 +8,25 @@
 
 :Begin:
 :Function:       create_open_ca
-:Pattern:        CreateOpenCA[size_Integer, vmax_Integer, density_Real, randp_Real, initVel_Integer, newCarProb_Real, newCarSpeed]
+:Pattern:        CreateOpenCA[size_Integer, vmax_Integer, density_Real, randp_Real, initVel_Integer, newCarProb_Real, newCarSpeed_Integer]
 :Arguments:      { size, vmax, density, randp, initVel, newCarProb, newCarSpeed }
 :ArgumentTypes:  { Integer, Integer, Real, Real, Integer, Real, Integer }
 :ReturnType:     Manual
 :End:
 
 :Begin:
-:Function:       create_autonomous_ca
-:Pattern:        CreateAutonomousCA[size_Integer, vmax_Integer, density_Real, randp_Real, initVel_Integer, autDensity_Real]
+:Function:       create_autonomous_circular_ca
+:Pattern:        CreateAutonomousCircularCA[size_Integer, vmax_Integer, density_Real, randp_Real, initVel_Integer, autDensity_Real]
 :Arguments:      { size, vmax, density, randp, initVel, autDensity }
 :ArgumentTypes:  { Integer, Integer, Real, Real, Integer, Real }
+:ReturnType:     Manual
+:End:
+
+:Begin:
+:Function:       create_autonomous_open_ca
+:Pattern:        CreateAutonomousOpenCA[size_Integer, vmax_Integer, density_Real, randp_Real, initVel_Integer, autDensity_Real, newCarProb_Real, newCarSpeed_Integer]
+:Arguments:      { size, vmax, density, randp, initVel, autDensity, newCarProb, newCarSpeed }
+:ArgumentTypes:  { Integer, Integer, Real, Real, Integer, Real, Real, Integer }
 :ReturnType:     Manual
 :End:
 
