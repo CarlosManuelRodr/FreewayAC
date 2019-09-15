@@ -66,6 +66,7 @@ build/
 
 #  Application files #
 ######################
+/.vs/
 /Release/
 /obj/
 /tmp/
