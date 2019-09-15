@@ -36,9 +36,6 @@ CellularAutomata::CellularAutomata(const CaSize size, const double density, cons
     random_shuffle(car_positions.begin(), car_positions.end(), RandomGen::GetInt);
     for (unsigned i = 0; i < vehicles; ++i)
         m_ca[car_positions[i]] = m_init_vel;
-
-    m_ca_history.push_back(m_ca);
-    m_ca_flow_history.push_back(m_ca_flow_temp);
 }
 CellularAutomata::CellularAutomata(const vector<int> &ca, const vector<bool> &rand_values, const CaVelocity vmax)
 {
@@ -145,8 +142,8 @@ inline void CellularAutomata::Step() noexcept
     }
 
     // Aplicar cambios.
-    Move();
     m_ca_history.push_back(m_ca);
+    Move();
 }
 inline void CellularAutomata::Move() noexcept
 {
@@ -381,14 +378,14 @@ void OpenCA::Step() noexcept
         }
     }
 
+    m_ca_history.push_back(m_ca);
+
     // Aplicar cambios.
     Move();
 
     // Añade coche con probabilidad aleatoria.
     if (m_ca[0] == CA_EMPTY && Randomization(m_new_car_prob))
         m_ca[0] = m_new_car_speed;
-
-    m_ca_history.push_back(m_ca);
 }
 
 
@@ -517,8 +514,8 @@ void AutonomousCircularCA::Step() noexcept
     }
 
     // Aplicar cambios.
-    Move();
     m_ca_history.push_back(m_ca);
+    Move();
 }
 
 // Frontera abierta
@@ -644,6 +641,6 @@ void AutonomousOpenCA::Step() noexcept
         m_ca[0] = m_new_car_speed;
 
     // Aplicar cambios.
-    Move();
     m_ca_history.push_back(m_ca);
+    Move();
 }
