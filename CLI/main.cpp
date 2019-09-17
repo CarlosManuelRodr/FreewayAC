@@ -1,5 +1,6 @@
 #include <sstream>
 #include <string>
+#include <iostream>
 
 #include "optionparser.h"
 #include "../FreewayAC/Auxiliar.h"
@@ -22,9 +23,11 @@ struct Arg: public option::Arg
 {
     static void PrintError(const char* msg1, const option::Option& opt, const char* msg2)
     {
+#if defined(_WIN32)
         fprintf(stderr, "%s", msg1);
         fwrite(opt.name, opt.namelen, 1, stderr);
         fprintf(stderr, "%s", msg2);
+#endif
     }
 
     static option::ArgStatus Required(const option::Option& option, bool msg)
@@ -226,6 +229,10 @@ int main(int argc, char* argv[])
         case AUTONOMOUS_OPEN_CA:
             cout << "Creating autonomous open CA" << endl;
             cellularAutomata = new AutonomousOpenCA(size, density, vmax, rand_prob, init_vel, aut_density, new_car_prob, new_car_speed);
+            break;
+        default:
+            cout << "Creating circular CA" << endl;
+            cellularAutomata = new CircularCA(size, density, vmax, rand_prob, init_vel);
             break;
     }
 
